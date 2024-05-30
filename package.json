@@ -1,0 +1,25 @@
+{
+  "name": "jsm",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "rollup -c \"rollup_config.js\" -w",
+    "start": "serve"
+  },
+  "author": "Mugen87",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.18.0",
+    "serve": "^14.2.3"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
+    "dat.gui": "^0.7.9",
+    "stats-js": "^1.0.1",
+    "three": "^0.164.1"
+  }
+}
