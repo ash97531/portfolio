@@ -10,6 +10,7 @@
   "license": "MIT",
   "type": "module",
   "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^4.18.0",
@@ -20,6 +21,7 @@
     "cannon-es-debugger": "^1.0.0",
     "dat.gui": "^0.7.9",
     "stats-js": "^1.0.1",
-    "three": "^0.164.1"
+    "three": "^0.164.1",
+    "three-nebula": "^10.0.0"
   }
 }

@@ -18,7 +18,7 @@ class PlaceTrees {
     this.objectLoaded = await this.gltfLoader.loadAsync(
       `assets/tree3texture.glb`
     );
-    this.placeTreeMesh(0, 0, 0, 0.1, 0.1, 0.1, 0, 90, 0);
+    this.placeTreeMesh(0, 0, 0, 0.1, 0.1, 0.1, 0, 0, 0);
   }
 
   createTreePolyhedron(child) {

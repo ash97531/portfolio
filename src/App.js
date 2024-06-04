@@ -8,6 +8,9 @@ import { GUI } from 'dat.gui';
 
 import PlaceTrees from './placeTrees';
 import PlaceContactLinks from './placeContactLinks';
+import PlaceNameAndBackWall from './placeNameAndBackWall';
+import PlaceProjects from './placeProjects';
+import Compass from './compass';
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -24,6 +27,8 @@ let speed = 0,
   maxSpeed = 0.5,
   maxAngularSpeed = 2,
   acceleration = 0.05;
+let buttonArray = [];
+let nebula;
 const gui = new GUI();
 class App {
   async init() {
@@ -34,115 +39,34 @@ class App {
     // addBackground();
     this.setupPhysicsWorld();
     // scene.add(await this.placeGLBMesh('gmail2', 0, 0, 0, 1, 0.4, 0.8));
-    this.placeName();
-    this.placeBackWall();
-    this.placeNameLights();
+    // this.placeName();
+    // this.placeBackWall();
+    // this.placeNameLights();
 
-    this.placeStaticObjects();
-
-    // this.createBox('brick', 3, 0, 1);
-    // this.createBox('brick', 4, 0, 1);
-    // this.createBox('brick', 4, 0, 2);
-    // this.createBox('brick', 5, 0, 1);
-    // this.createBox('brick', 5, 0, 2);
-    // this.createBox('brick', 5, 0, 3);
+    // const check = new CANNON.Body({
+    //   mass: 0.1,
+    //   shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1.5)),
+    // });
+    // check.position.set(0, 0, 1.5);
+    // check.allowSleep = true;
+    // check.addEventListener('sleep', () => {
+    //   console.log('sleeping');
+    // });
+    // check.addEventListener('wakeup', () => {
+    //   console.log('waking');
+    // });
+    // world.addBody(check);
+    this.placeScenes();
     this.createGround();
     this.player();
-
     animate();
   }
 
-  placeStaticObjects() {
+  placeScenes() {
     // new PlaceTrees(scene, world);
-    new PlaceContactLinks(scene, world);
-  }
-
-  placeNameLights() {
-    const spotLight = new THREE.SpotLight(0xffff, 100);
-    spotLight.position.set(-5.6, 0, 0.5);
-    spotLight.target.position.set(-5.6, 13, 0.5);
-    spotLight.angle = 0.6;
-    spotLight.castShadow = true;
-    scene.add(spotLight);
-    scene.add(spotLight.target);
-
-    const spotLight2 = new THREE.SpotLight(0xffff, 100);
-    spotLight2.position.set(0.8, 0, 0.5);
-    spotLight2.target.position.set(0.8, 13, 0.5);
-    spotLight2.angle = 0.6;
-
-    spotLight2.castShadow = true;
-    scene.add(spotLight2);
-    scene.add(spotLight2.target);
-  }
-
-  async placeName() {
-    let meshArr = [],
-      bodyArr = [];
-    const xoffset = -12,
-      yoffset = 10;
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('s', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('h', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('w', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('n', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('i', 0, 0, 0, 0.05, 0.05, 0.05));
-    // write mesh for word 'kumar'
-    meshArr.push(await this.placeGLBMesh('k', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('u', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('m', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05));
-
-    bodyArr.push(this.placeGlbToCannonBody(meshArr[0], xoffset, yoffset, 0));
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[1], xoffset + 1.55, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[2], xoffset + 3.05, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[3], xoffset + 5, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[4], xoffset + 7, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[5], xoffset + 8.7, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[6], xoffset + 10, yoffset, 0)
-    );
-
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[7], xoffset + 12, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[8], xoffset + 13.7, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[9], xoffset + 15.6, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[10], xoffset + 17.6, yoffset, 0)
-    );
-    bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[11], xoffset + 19.4, yoffset, 0)
-    );
-
-    for (let i = 0; i < meshArr.length; i++) {
-      scene.add(meshArr[i]);
-      world.addBody(bodyArr[i]);
-      meshes.push(meshArr[i]);
-      bodies.push(bodyArr[i]);
-    }
-    // body = this.placeGlbToCannonBody(mesh, 0, 0, 0);
-    // scene.add(meshArr[0]);
-    // world.addBody(bodyArr[0]);
-
-    // meshes.push(mesh);
-    // bodies.push(body);
+    new PlaceContactLinks(scene, world, buttonArray);
+    new PlaceNameAndBackWall(scene, world, meshes, bodies);
+    // new PlaceProjects(scene, world);
   }
 
   async placeGLBMesh(
@@ -169,39 +93,7 @@ class App {
     return objectMesh;
   }
 
-  async placeBackWall() {
-    const brickMesh = await this.placeGLBMesh(
-      'brick',
-      0,
-      0,
-      0,
-      0.5,
-      0.25,
-      0.25,
-      0,
-      0,
-      0,
-      true
-    );
-    for (let j = 0; j < 5; j++) {
-      for (let i = 0; i < 23; i++) {
-        const brick = brickMesh.clone();
-        const brickBody = this.placeGlbToCannonBody(
-          brick,
-          i - 14 + (j % 2 != 0 ? 0.5 : 0),
-          13,
-          j - 0.5 - j * 0.5
-        );
-        scene.add(brick);
-        world.addBody(brickBody);
-        meshes.push(brick);
-        bodies.push(brickBody);
-        // this.createBox('brick', i, j, 0);
-      }
-    }
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0) {
+  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
     const box = new THREE.Box3().setFromObject(mesh);
     const size = new THREE.Vector3();
     box.getSize(size);
@@ -216,6 +108,7 @@ class App {
     cannonBody.sleepTimeLimit = 0.5;
     cannonBody.addShape(boxShape);
     cannonBody.position.set(x, y, z);
+    cannonBody.quaternion.setFromEuler(rx, ry, rz);
     return cannonBody;
   }
 
@@ -224,11 +117,14 @@ class App {
       70,
       window.innerWidth / window.innerHeight,
       0.01,
-      5000
+      2000
     );
-    camera.position.set(15.3, -3.5, 5.7);
-    camera.lookAt(new THREE.Vector3(15.3, -7.5, 7.7));
-    camera.rotation.set(0.61, 0.65, 0.82);
+    camera.position.set(0, -10, 5);
+    // camera.position.set(15.3, -3.5, 5.7);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // camera.lookAt(new THREE.Vector3(15.3, -7.5, 7.7));
+    // camera.rotation.set(0.61, 0.65, 0.82);
+
     // camera.rotation.set(0, 0, 90);
     // console.log(camera);
     // camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
@@ -250,16 +146,17 @@ class App {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    const helper = new THREE.AxesHelper(20);
+    // const helper = new THREE.AxesHelper(20);
 
-    scene.add(helper);
+    // scene.add(helper);
 
     // cannonhelper = new CANNON.CannonHelper(scene);
     // cannonhelper.addLights(renderer);
 
-    // orbit = new OrbitControls(camera, renderer.domElement);
+    orbit = new OrbitControls(camera, renderer.domElement);
     // orbit.mouseButtons = {
     //   LEFT: THREE.MOUSE.PAN,
     //   MIDDLE: THREE.MOUSE.DOLLY,
@@ -271,7 +168,8 @@ class App {
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    // const directionalLight = new THREE.DirectionalLight(0x5151b0, 3);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true;
@@ -285,7 +183,7 @@ class App {
     directionalLight.shadow.camera.top = 100;
     directionalLight.shadow.camera.bottom = -100;
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.5);
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
     scene.add(directionalLight2);
@@ -304,8 +202,9 @@ class App {
 
   createGround() {
     const planeGeo = new THREE.BoxGeometry(100, 100, 0.5);
+    //E7A752
     const planeMat = new THREE.MeshStandardMaterial({
-      color: 'rgb(255, 216, 186)',
+      color: 0x70ac29,
       side: THREE.DoubleSide,
     });
     const planeMesh = new THREE.Mesh(planeGeo, planeMat);
@@ -407,29 +306,16 @@ class App {
     );
     // ufobody.addShape(cy);
     world.addBody(ufobody);
-    /*
-    gltfLoader.load('assets/ufo5.glb', (gltf) => {
-      // gltf.scene.castShadow = true;
-      gltf.scene.traverse((child) => {
-        child.position.set(0, 0, 0);
-        child.scale.set(0.003, 0.003, 0.003);
-        child.quaternion.setFromAxisAngle(
-          new CANNON.Vec3(1, 0, 0),
-          (Math.PI / 180) * 0
-        );
-        child.castShadow = true;
-      });
-      scene.add(gltf.scene);
-      meshes.push(gltf.scene);
-      bodies.push(ufobody);
-    });
-    */
+
     // const gltfLoader = new GLTFLoader();
     const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2light.glb');
     ufomesh = ufoLoaded.scene.children[0];
     ufomesh.scale.set(0.003, 0.003, 0.003);
     ufomesh.position.set(0, 0, 0);
     ufomesh.castShadow = true;
+    ufomesh.children.map((child) => {
+      child.castShadow = true;
+    });
     // console.log(ufomesh.position, ufobody.position);
 
     scene.add(ufomesh);
@@ -447,6 +333,41 @@ function onWindowResize() {
 }
 
 const timestep = 1 / 60;
+
+function checkButtonTriggered() {
+  //gmail
+  // if (buttonArray.length === 0) return;
+  // const but1 = buttonArray[0].button;
+  // const txt1 = buttonArray[0].text;
+  for (let i = 0; i < buttonArray.length; i++) {
+    const button = buttonArray[i].button;
+    const text = buttonArray[i].text;
+    if (
+      Math.sqrt(
+        Math.pow(button.position.x - ufomesh.position.x, 2) +
+          Math.pow(button.position.y - ufomesh.position.y, 2)
+      ) < 1.1
+    ) {
+      text.material.opacity = Math.min(text.material.opacity + 0.05, 1);
+      button.position.z = Math.max(button.position.z - 0.05, -1.2);
+    } else {
+      text.material.opacity = Math.max(text.material.opacity - 0.05, 0);
+      button.position.z = Math.min(button.position.z + 0.05, -1);
+    }
+  }
+  // console.log(buttonArray);
+  // if (
+  //   Math.sqrt(
+  //     Math.pow(but1.position.x - ufomesh.position.x, 2) +
+  //       Math.pow(but1.position.y - ufomesh.position.y, 2)
+  //   ) < 1
+  // ) {
+  //   txt1.material.opacity = Math.min(txt1.material.opacity + 0.05, 1);
+  // } else {
+  //   txt1.material.opacity = Math.max(txt1.material.opacity - 0.05, 0);
+  // }
+}
+
 function animate() {
   stats.begin();
 
@@ -458,10 +379,12 @@ function animate() {
 
   moveUfo();
   floatUfo();
-  followCamera();
+  checkButtonTriggered();
+  // followCamera();
   // camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), (Math.PI * 0.5) / 180);
 
   // cannondebugger.update();
+  // nebula.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
@@ -481,7 +404,7 @@ function floatUfo() {
   const intersects = raycaster.intersectObjects(scene.children, false);
   if (intersects.length >= 2) {
     const force = intersects[1].distance;
-    const mult = 20;
+    const mult = 30;
     ufobody.applyForce(new CANNON.Vec3(0, 0, (1 / force) * mult));
   }
 
@@ -489,7 +412,7 @@ function floatUfo() {
   ufobody.quaternion.toEuler(ufoquat);
   // floating mechanics
   const maxTorqueAngle = (10 / 180) * Math.PI;
-  const torqueVal = 4;
+  const torqueVal = 5;
   if (ufobody.angularVelocity.almostZero(0.5)) {
     // if (!dir.left && !dir.right && !dir.forward && !dir.back) {
     if (ufobody.quaternion.x > maxTorqueAngle) {
