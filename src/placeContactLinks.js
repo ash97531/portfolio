@@ -22,7 +22,7 @@ class PlaceContactLinks {
   }
 
   async placeModelsPosition() {
-    let xoff = 15,
+    let xoff = 17,
       yoff = -8;
     this.objectLoaded = await this.gltfLoader.loadAsync(`assets/gmail.glb`);
     this.loadModels(xoff, yoff + 3, 0, 1, 0.4, 0.8);
@@ -77,8 +77,18 @@ class PlaceContactLinks {
     this.placeGlbToCannonBody(fence2);
 
     bush = bush.clone();
-    bush.position.set(xoff + 6, yoff - 6, -0.5);
+    bush.position.set(xoff + 10.2, yoff - 6, -0.4);
+    bush.scale.set(1.2, 1.2, 1.2);
     this.scene.add(bush);
+
+    bushDark = bushDark.clone();
+    bushDark.position.set(xoff + 11.2, yoff - 7, -0.4);
+    bushDark.scale.set(1.4, 1.4, 1.4);
+    this.scene.add(bushDark);
+
+    bushDark = bushDark.clone();
+    bushDark.position.set(xoff + 11.2, yoff - 5.4, -0.4);
+    this.scene.add(bushDark);
 
     const stone = await this.placeGLBMesh(
       'stone combined 1',
@@ -118,8 +128,20 @@ class PlaceContactLinks {
   guicheck(mesh) {
     const gui = new GUI();
     const folder = gui.addFolder('position');
-    folder.add(mesh.position, 'x', 15 + 8 - 3, 15 + 8 + 3, 0.1);
-    folder.add(mesh.position, 'y', -8 + 3 - 3, -8 + 3 + 3, 0.1);
+    folder.add(
+      mesh.position,
+      'x',
+      mesh.position.x - 10,
+      mesh.position.x + 10,
+      0.1
+    );
+    folder.add(
+      mesh.position,
+      'y',
+      mesh.position.y - 10,
+      mesh.position.y + 10,
+      0.1
+    );
     folder.add(mesh.position, 'z', -2, 2, 0.1);
     folder.open();
     const folder2 = gui.addFolder('rotation');

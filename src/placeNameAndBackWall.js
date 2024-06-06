@@ -198,6 +198,7 @@ class PlaceNameAndBackWall {
       this.scene.add(pave);
     }
 
+    // center circle
     (xoff = -2), (yoff = -10);
     const arr = [
       [1, 1],
@@ -234,18 +235,53 @@ class PlaceNameAndBackWall {
       }
     }
 
+    // information side pavement
     for (let i = 0; i < 7; i++) {
       const pave = pavementBrick.clone();
       pave.rotation.z = Math.PI / 2;
       pave.position.set(
-        xoff + 6.5 + i + Math.random() * 0.9 - 0.4,
+        xoff + 8.5 + i + Math.random() * 0.9 - 0.4,
         yoff + (i % 2 == 0 ? 0 : 1) + Math.random() * 0.5 - 0.25,
         -0.9
       );
       this.scene.add(pave);
     }
 
-    // this.guicheck(pave);
+    // project side pavement
+    let slope = -0.35;
+    for (let i = 0; i < 7; i++) {
+      const pave = pavementBrick.clone();
+      pave.rotation.z = Math.PI / 2;
+      pave.position.set(
+        xoff - 8.5 - i - Math.random() * 0.9 + 0.4,
+        yoff -
+          1.5 +
+          (i % 2 == 0 ? 0 : 1) +
+          i * slope +
+          Math.random() * 0.5 -
+          0.25,
+        -0.9
+      );
+      this.scene.add(pave);
+    }
+
+    //project 2 pavement
+    slope = -0.8;
+    for (let i = 0; i < 7; i++) {
+      const pave = pavementBrick.clone();
+      pave.rotation.z = Math.PI / 2;
+      pave.position.set(
+        xoff - 17.5 - i - Math.random() * 0.9 + 0.4,
+        yoff -
+          9 +
+          (i % 2 == 0 ? 0 : 1) +
+          i * slope +
+          Math.random() * 0.5 -
+          0.25,
+        -0.9
+      );
+      this.scene.add(pave);
+    }
   }
 
   async placeStones() {
