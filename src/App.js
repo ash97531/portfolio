@@ -6,19 +6,26 @@ import CannonDebugger from 'cannon-es-debugger';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { GUI } from 'dat.gui';
 
-import PlaceTrees from './placeTrees';
 import PlaceContactLinks from './placeContactLinks';
 import PlaceNameAndBackWall from './placeNameAndBackWall';
 import PlaceProjects from './placeProjects';
 import Compass from './compass';
+import Loading from './Loading';
 
 const stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
-let camera, scene, renderer, world, orbit;
 let meshesWhileLoading = [],
   bodiesWhileLoading = [];
+let progress = [0];
+let assets = {};
+let loadingSceneClass;
+const totalAssets = 17;
+
+let placeProjectsClass;
+
+let camera, scene, renderer, world, orbit;
 let meshes = [],
   bodies = [];
 let ufobody, ufomesh;
@@ -44,40 +51,30 @@ class App {
     this.createGround();
     await this.player();
 
-    this.loadingScene();
-    loadingAnimation();
+    await this.loadingScene();
+    // loadingAnimation();
 
-    // this.placeScenes();
-    // animate();
+    this.placeScenes();
+    animate();
   }
 
-  loadingScene() {
-    for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < 6; j++) {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-
-        const shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-        const body = new CANNON.Body({
-          type: CANNON.Body.KINEMATIC,
-        });
-        body.addShape(shape);
-        body.position.set(i, j, 0);
-        world.addBody(body);
-
-        meshesWhileLoading.push(cube);
-        bodiesWhileLoading.push(body);
-      }
-    }
+  async loadingScene() {
+    loadingSceneClass = new Loading(
+      scene,
+      world,
+      meshesWhileLoading,
+      bodiesWhileLoading,
+      assets,
+      progress
+    );
+    await loadingSceneClass.loadModels();
   }
 
   placeScenes() {
     // new PlaceTrees(scene, world);
-    new PlaceContactLinks(scene, world, buttonArray);
-    new PlaceNameAndBackWall(scene, world, meshes, bodies);
-    new PlaceProjects(scene, world);
+    new PlaceContactLinks(scene, world, buttonArray, assets);
+    new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
+    placeProjectsClass = new PlaceProjects(scene, world, assets, ufobody, dir);
   }
 
   async placeGLBMesh(
@@ -209,7 +206,7 @@ class App {
     world.solver.iterations = 10; // Set solver iterations for stability
 
     world.allowSleep = true;
-    cannondebugger = new CannonDebugger(scene, world);
+    // cannondebugger = new CannonDebugger(scene, world);
   }
 
   createGround() {
@@ -226,7 +223,7 @@ class App {
     const planePhysMat = new CANNON.Material();
     const planeBody = new CANNON.Body({
       type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(50, 50, 0.25)),
+      shape: new CANNON.Box(new CANNON.Vec3(500, 500, 0.25)),
       material: planePhysMat,
     });
     planeBody.position.set(0, 0, -1);
@@ -260,42 +257,6 @@ class App {
 
     meshes.push(objectMesh);
     bodies.push(cbody);
-  }
-
-  createJenga() {
-    const size = 0.5;
-    const mass = 1;
-    const gap = 0.02;
-
-    // Layers
-    for (let i = 0; i < 5; i++) {
-      for (let j = 0; j < 3; j++) {
-        const body = new CANNON.Body({ mass });
-
-        let halfExtents;
-        let dx;
-        let dz;
-        if (i % 2 === 0) {
-          halfExtents = new CANNON.Vec3(size, size * 3, size);
-          dx = 1;
-          dz = 0;
-        } else {
-          halfExtents = new CANNON.Vec3(size * 3, size, size);
-          dx = 0;
-          dz = 1;
-        }
-
-        const shape = new CANNON.Box(halfExtents);
-        body.addShape(shape);
-        body.position.set(
-          2 * (size + gap) * (j - 1) * dx,
-          2 * (size + gap) * (j - 1) * dz,
-          2 * (size + gap) * (i + 1)
-        );
-
-        world.addBody(body);
-      }
-    }
   }
 
   async player() {
@@ -394,8 +355,9 @@ function animate() {
   // checkButtonTriggered();
   // followCamera();
 
-  cannondebugger.update();
-  // nebula.update();
+  placeProjectsClass.update();
+
+  // cannondebugger.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
@@ -484,14 +446,7 @@ function keydown(event) {
     ufobody.applyForce(new CANNON.Vec3(0, 0, 500));
   }
   if (key === 'r') {
-    const result = new CANNON.RaycastResult();
-    world.raycastClosest(
-      ufobody.position.vadd(new CANNON.Vec3(0, 0, -0.6)),
-      ufobody.position.vadd(new CANNON.Vec3(0, 0, -50)),
-      {},
-      result
-    );
-    console.log(result);
+    console.log(meshes, bodies);
   }
 }
 
@@ -555,7 +510,6 @@ function followCamera() {
   // camera.lookAt(ufobody.position);
   // orbit.update();
 }
-let count = 0;
 function loadingAnimation() {
   stats.begin();
 
@@ -589,6 +543,16 @@ function loadingAnimation() {
   moveUfo();
   floatUfo();
   // followCamera();
+
+  if (totalAssets == progress[0]) {
+    loadingSceneClass.removeModels();
+    meshesWhileLoading = [];
+    bodiesWhileLoading = [];
+
+    new App().placeScenes();
+    animate();
+    return;
+  }
 
   cannondebugger.update();
   renderer.render(scene, camera);

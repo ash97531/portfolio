@@ -10,13 +10,15 @@ class PlaceNameAndBackWall {
   objectLoaded;
   meshses = [];
   bodies = [];
+  assets;
 
-  constructor(scene, world, meshes, bodies) {
+  constructor(scene, world, meshes, bodies, assets) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
     this.meshes = meshes;
     this.bodies = bodies;
+    this.assets = assets;
 
     this.placeModelsPosition();
   }

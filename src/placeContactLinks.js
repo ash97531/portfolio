@@ -11,12 +11,15 @@ class PlaceContactLinks {
   gltfLoader;
   objectLoaded;
   buttonArray;
+  assets;
 
-  constructor(scene, world, buttonArray) {
+  constructor(scene, world, buttonArray, assets) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
     this.buttonArray = buttonArray;
+    this.assets = assets;
+
     this.placeModelsPosition();
     // this.placeButtons();
   }
@@ -24,14 +27,73 @@ class PlaceContactLinks {
   async placeModelsPosition() {
     let xoff = 17,
       yoff = -8;
-    this.objectLoaded = await this.gltfLoader.loadAsync(`assets/gmail.glb`);
-    this.loadModels(xoff, yoff + 3, 0, 1, 0.4, 0.8);
-    this.objectLoaded = await this.gltfLoader.loadAsync(`assets/github.glb`);
-    this.loadModels(xoff + 6, yoff + 3, 0.2, 0.015, 0.015, 0.015);
-    this.objectLoaded = await this.gltfLoader.loadAsync(`assets/linkedin.glb`);
-    this.loadModels(xoff, yoff - 3, 0, 0.12, 0.1, 0.4);
-    this.objectLoaded = await this.gltfLoader.loadAsync(`assets/playstore.glb`);
-    this.loadModels(xoff + 6, yoff - 3, 0, 1, 0.2, 0.8);
+    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/gmail.glb`);
+    // this.loadModels(xoff, yoff + 3, 0, 1, 0.4, 0.8);
+    const gmail = await this.placeGLBMesh(
+      'gmail',
+      xoff,
+      yoff + 3,
+      0,
+      1,
+      0.4,
+      0.8
+    );
+    gmail.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(gmail);
+    this.scene.add(gmail);
+
+    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/github.glb`);
+    // this.loadModels(xoff + 6, yoff + 3, 0.2, 0.015, 0.015, 0.015);
+    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/linkedin.glb`);
+    // this.loadModels(xoff, yoff - 3, 0, 0.12, 0.1, 0.4);
+    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/playstore.glb`);
+    // this.loadModels(xoff + 6, yoff - 3, 0, 1, 0.2, 0.8);
+    const github = await this.placeGLBMesh(
+      'github',
+      xoff + 6,
+      yoff + 3,
+      0.2,
+      0.015,
+      0.015,
+      0.015
+    );
+    github.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(github);
+    this.scene.add(github);
+
+    const linkedin = await this.placeGLBMesh(
+      'linkedin',
+      xoff,
+      yoff - 3,
+      0,
+      0.12,
+      0.1,
+      0.4
+    );
+    linkedin.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(linkedin);
+    this.scene.add(linkedin);
+
+    const playstore = await this.placeGLBMesh(
+      'playstore',
+      xoff + 6,
+      yoff - 3,
+      0,
+      1,
+      0.2,
+      0.8
+    );
+    playstore.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(playstore);
+    this.scene.add(playstore);
 
     const treeMesh = await this.placeGLBMesh(
       'tree4ashoka',
@@ -254,8 +316,9 @@ class PlaceContactLinks {
     rz = 0,
     shadow = true
   ) {
-    const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
-    let objectMesh = objectLoaded.scene.children[0];
+    // const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
+    // let objectMesh = objectLoaded.scene.children[0];
+    const objectMesh = this.assets[path].clone();
     objectMesh.position.set(x, y, z);
     objectMesh.scale.set(sx, sy, sz);
     objectMesh.castShadow = true;

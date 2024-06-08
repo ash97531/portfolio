@@ -24,8 +24,6 @@ class Player {
     this.bodies = bodies;
     this.dir = dir;
     this.gltfLoader = new GLTFLoader();
-
-    this.initPlayer();
   }
 
   async initPlayer() {
