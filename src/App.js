@@ -25,12 +25,18 @@ const totalAssets = 17;
 
 let placeProjectsClass;
 
-let camera, scene, renderer, world, orbit;
+let camera, scene, renderer, world, labelRenderer, orbit;
 let meshes = [],
   bodies = [];
 let ufobody, ufomesh;
 let cannondebugger;
-let dir = { right: false, left: false, forward: false, back: false };
+let dir = {
+  right: false,
+  left: false,
+  forward: false,
+  back: false,
+  move: true,
+};
 const gltfLoader = new GLTFLoader();
 let speed = 0,
   maxSpeed = 0.5,
@@ -72,9 +78,16 @@ class App {
 
   placeScenes() {
     // new PlaceTrees(scene, world);
-    new PlaceContactLinks(scene, world, buttonArray, assets);
-    new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
-    placeProjectsClass = new PlaceProjects(scene, world, assets, ufobody, dir);
+    // new PlaceContactLinks(scene, world, buttonArray, assets);
+    // new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
+    placeProjectsClass = new PlaceProjects(
+      scene,
+      world,
+      assets,
+      ufobody,
+      ufomesh,
+      dir
+    );
   }
 
   async placeGLBMesh(
@@ -133,21 +146,6 @@ class App {
     // camera.lookAt(new THREE.Vector3(15.3, -7.5, 7.7));
     // camera.rotation.set(0.61, 0.65, 0.82);
 
-    // camera.rotation.set(0, 0, 90);
-    // console.log(camera);
-    // camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-    // camera.rotateZ(90);
-    // const cubeRotation = gui.addFolder('Cube');
-    // cubeRotation.add(camera.rotation, 'x', 0, Math.PI);
-    // cubeRotation.add(camera.rotation, 'y', 0, Math.PI);
-    // cubeRotation.add(camera.rotation, 'z', 0, Math.PI);
-    // cubeRotation.open();
-    // const cubePosition = gui.addFolder('Pos');
-    // cubePosition.add(camera.position, 'x', -15, 25);
-    // cubePosition.add(camera.position, 'y', -15, 15);
-    // cubePosition.add(camera.position, 'z', -15, 15);
-    // cubePosition.open();
-
     scene = new THREE.Scene();
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.018);
 
@@ -158,35 +156,16 @@ class App {
     renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    // const helper = new THREE.AxesHelper(20);
-
-    // scene.add(helper);
-
-    // cannonhelper = new CANNON.CannonHelper(scene);
-    // cannonhelper.addLights(renderer);
-
     orbit = new OrbitControls(camera, renderer.domElement);
-    // orbit.mouseButtons = {
-    //   LEFT: THREE.MOUSE.PAN,
-    //   MIDDLE: THREE.MOUSE.DOLLY,
-    //   RIGHT: THREE.MOUSE.ROTATE,
-    // };
-    // orbit.enableRotate = false;
-    // orbit.update();
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     scene.add(ambientLight);
 
-    // const directionalLight = new THREE.DirectionalLight(0x5151b0, 3);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true;
     scene.add(directionalLight);
-    // directionalLight.shadow.bias = -0.001;
-    // directionalLight.shadow.radius = 4;
-    // directionalLight.shadow.camera.near = 0.5;
-    // directionalLight.shadow.camera.far = 500.0;
     directionalLight.shadow.camera.left = 100;
     directionalLight.shadow.camera.right = -100;
     directionalLight.shadow.camera.top = 100;
@@ -196,8 +175,6 @@ class App {
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
     scene.add(directionalLight2);
-
-    // this.placeObject('ufo5', 4, 0, 4);
   }
 
   setupPhysicsWorld() {
@@ -206,7 +183,7 @@ class App {
     world.solver.iterations = 10; // Set solver iterations for stability
 
     world.allowSleep = true;
-    // cannondebugger = new CannonDebugger(scene, world);
+    cannondebugger = new CannonDebugger(scene, world);
   }
 
   createGround() {
@@ -269,10 +246,6 @@ class App {
     ufobody.position.set(0, -4, 2);
 
     ufobody.addShape(
-      new CANNON.Box(new CANNON.Vec3(0.05, 0.05, 0.05)),
-      new CANNON.Vec3(0, 0.6, 0)
-    );
-    ufobody.addShape(
       new CANNON.Cylinder(0.5, 0.5, 0.25, 8),
       new CANNON.Vec3(),
       new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0)
@@ -283,7 +256,7 @@ class App {
     // const gltfLoader = new GLTFLoader();
     const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2light.glb');
     ufomesh = ufoLoaded.scene.children[0];
-    ufomesh.scale.set(0.003, 0.003, 0.003);
+    // ufomesh.scale.set(0.003, 0.003, 0.003);
     ufomesh.position.set(0, 0, 0);
     ufomesh.castShadow = true;
     ufomesh.children.map((child) => {
@@ -302,6 +275,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -357,7 +331,7 @@ function animate() {
 
   placeProjectsClass.update();
 
-  // cannondebugger.update();
+  cannondebugger.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
@@ -483,24 +457,26 @@ function applyLocalVelocity(body, localVelocity) {
 }
 
 function moveUfo() {
-  let ufoquat = new CANNON.Vec3();
-  ufobody.quaternion.toEuler(ufoquat);
-  if (dir.forward) {
-    if (speed > maxSpeed) speed = maxSpeed;
-    applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
-  }
+  if (dir.move) {
+    let ufoquat = new CANNON.Vec3();
+    ufobody.quaternion.toEuler(ufoquat);
+    if (dir.forward) {
+      if (speed > maxSpeed) speed = maxSpeed;
+      applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
+    }
 
-  if (dir.back) {
-    if (speed < -maxSpeed) speed = -maxSpeed;
-    applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
-  }
+    if (dir.back) {
+      if (speed < -maxSpeed) speed = -maxSpeed;
+      applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
+    }
 
-  if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.left) {
-    ufobody.angularVelocity.z += 0.5;
-  }
+    if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.left) {
+      ufobody.angularVelocity.z += 0.5;
+    }
 
-  if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.right) {
-    ufobody.angularVelocity.z -= 0.5;
+    if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.right) {
+      ufobody.angularVelocity.z -= 0.5;
+    }
   }
 }
 
@@ -544,17 +520,17 @@ function loadingAnimation() {
   floatUfo();
   // followCamera();
 
-  if (totalAssets == progress[0]) {
-    loadingSceneClass.removeModels();
-    meshesWhileLoading = [];
-    bodiesWhileLoading = [];
+  // if (totalAssets == progress[0]) {
+  //   loadingSceneClass.removeModels();
+  //   meshesWhileLoading = [];
+  //   bodiesWhileLoading = [];
 
-    new App().placeScenes();
-    animate();
-    return;
-  }
+  //   new App().placeScenes();
+  //   animate();
+  //   return;
+  // }
 
-  cannondebugger.update();
+  // cannondebugger.update();
   renderer.render(scene, camera);
   requestAnimationFrame(loadingAnimation);
 

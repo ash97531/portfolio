@@ -2,7 +2,11 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { GUI } from 'dat.gui';
-import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
+import {
+  CSS2DObject,
+  FontLoader,
+  TextGeometry,
+} from 'three/examples/jsm/Addons.js';
 
 class PlaceProjects {
   scene;
@@ -10,7 +14,10 @@ class PlaceProjects {
   gltfLoader;
   assets;
   ufobody;
+  ufomesh;
   dir;
+  mountainArray = [];
+  onMountain = -1;
 
   project1Mountain;
   project1MountainBody;
@@ -31,15 +38,59 @@ class PlaceProjects {
   meshes = [];
   bodies = [];
 
-  constructor(scene, world, assets, ufobody, dir) {
+  constructor(scene, world, assets, ufobody, ufomesh, dir) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
     this.assets = assets;
     this.ufobody = ufobody;
+    this.ufomesh = ufomesh;
     this.dir = dir;
 
     this.placeModelsPosition();
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (this.onMountain != -1) {
+          const project = this.mountainArray[this.onMountain];
+          if (
+            Math.sqrt(
+              Math.pow(project.position.x + 2.15 - this.ufobody.position.x, 2) +
+                Math.pow(project.position.y - 0.1 - this.ufobody.position.y, 2)
+            ) < 0.9 // radius of teleporter
+          ) {
+            // teleport to project mountain
+            this.dir.move = false;
+            this.teleportUfo();
+          } else {
+            // teleport to project link
+            window.open(
+              'https://pmndrs.github.io/cannon-es/docs/classes/Body.html#sleepyEvent',
+              '_blank'
+            );
+          }
+        }
+      }
+    });
+  }
+
+  teleportUfo() {
+    if (this.ufomesh.scale.x > 0.1) {
+      this.ufomesh.scale.x -= 0.01;
+      this.ufomesh.scale.y -= 0.01;
+      this.ufomesh.scale.z -= 0.01;
+    } else {
+      this.onMountain = (this.onMountain + 1) % this.mountainArray.length;
+      this.ufobody.position.x = this.mountainArray[this.onMountain].position.x;
+      this.ufobody.position.y = this.mountainArray[this.onMountain].position.y;
+      this.ufobody.position.z = 3;
+      this.ufomesh.scale.set(1, 1, 1);
+      this.dir.move = true;
+
+      return;
+    }
+
+    requestAnimationFrame(() => this.teleportUfo());
   }
 
   async placeModelsPosition() {
@@ -94,8 +145,8 @@ class PlaceProjects {
 
     this.project1Mountain = this.placeGLBMesh(
       'project landscape2',
-      xoff - 15.6,
-      yoff - 0.5,
+      4, //xoff - 15.6,
+      4, //yoff - 0.5,
       0.55,
       3,
       3,
@@ -112,8 +163,8 @@ class PlaceProjects {
 
     this.project2Mountain = this.placeGLBMesh(
       'project landscape2',
-      xoff - 26.5, // 4
-      yoff - 12.3, // 4
+      20, //xoff - 26.5,
+      4, //yoff - 12.3,
       0.55,
       3,
       3,
@@ -292,11 +343,46 @@ class PlaceProjects {
   }
 
   addMountain(mountainMesh) {
+    /*
+    const btnArr = [];
+    btnArr.push(mountainMesh);
+
+    const linkButtonGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 16);
+    const linkButtonMat = new THREE.MeshBasicMaterial({ color: 0xffbd03 });
+    const linkButton = new THREE.Mesh(linkButtonGeo, linkButtonMat);
+    linkButton.position.set(0.5, -0.5, 0.37);
+    linkButton.rotateX(Math.PI / 2);
+    mountainMesh.add(linkButton);
+    btnArr.push(linkButton);
+
+    const rightButtonGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.4, 3);
+    const rightButtonMat = new THREE.MeshBasicMaterial({ color: 0xff0021 });
+    const rightButton = new THREE.Mesh(rightButtonGeo, rightButtonMat);
+    rightButton.position.set(0.85, 0.18, 0.37); //0.3
+    rightButton.rotation.set(Math.PI / 2, -0.73, 0);
+    mountainMesh.add(rightButton);
+    btnArr.push(rightButton);
+
+    const leftButtonGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.4, 3);
+    const leftButtonMat = new THREE.MeshBasicMaterial({ color: 0xff0021 });
+    const leftButton = new THREE.Mesh(leftButtonGeo, leftButtonMat);
+    leftButton.position.set(0.45, 0.25, 0.4);
+    leftButton.rotation.set(Math.PI / 2, -0.73 + Math.PI, 0);
+    mountainMesh.add(leftButton);
+    btnArr.push(leftButton);
+
+    this.buttonArray.push(btnArr);
+    console.log(this.buttonArray);
+    */
+    const teleporter = this.placeGLBMesh('teleporter', 0.7, 0.2, 0.5, 1.1, 1.1);
+    mountainMesh.add(teleporter);
+
     mountainMesh.children.map((child) => {
       child.castShadow = true;
       child.receiveShadow = true;
     });
     this.scene.add(mountainMesh);
+    this.mountainArray.push(mountainMesh);
 
     const box = new THREE.Box3().setFromObject(mountainMesh);
     const size = new THREE.Vector3();
@@ -331,11 +417,7 @@ class PlaceProjects {
       new CANNON.Vec3(-2.1, 1.8, -2.5),
       new CANNON.Quaternion().setFromEuler(0, (-50 * Math.PI) / 180, 0)
     );
-    // mountainBody.addShape(
-    //   new CANNON.Box(new CANNON.Vec3(-0.2, 0.8, 1.2)),
-    //   new CANNON.Vec3(3.8, 1.6, -0.5),
-    //   new CANNON.Quaternion().setFromEuler(0, (+5 * Math.PI) / 180, 0)
-    // );
+
     this.world.addBody(mountainBody);
     return mountainBody;
   }
@@ -447,6 +529,20 @@ class PlaceProjects {
     this.world.addBody(cannonBody);
   }
 
+  checkTeleporter() {
+    const project = this.mountainArray[this.onMountain];
+    if (
+      Math.sqrt(
+        Math.pow(project.position.x + 2.15 - this.ufobody.position.x, 2) +
+          Math.pow(project.position.y - 0.1 - this.ufobody.position.y, 2)
+      ) < 0.9 // radius of teleporter
+    ) {
+      //switch on teleporter light
+    } else {
+      //switch off teleporter light
+    }
+  }
+
   update() {
     if (
       Math.sqrt(
@@ -458,44 +554,62 @@ class PlaceProjects {
             this.project1Mountain.position.y - this.ufobody.position.y,
             2
           )
-      ) < 4.73 // top radius of mountain
+      ) < 4.83 // on mountain check
     ) {
-      if (this.dir.forward) {
-        //cursor
-        this.project1Mountain.children[14].position.z = Math.min(
-          this.project1Mountain.children[14].position.z + 0.01,
-          1.2
-        );
-        if (this.transV > 0.3) {
-          this.transV -= 0.01;
-          this.project1Mountain.children[13].translateX(-0.01);
+      if (
+        Math.sqrt(
+          Math.pow(
+            this.project1Mountain.position.x - this.ufobody.position.x,
+            2
+          ) +
+            Math.pow(
+              this.project1Mountain.position.y - this.ufobody.position.y,
+              2
+            )
+        ) < 4.73 // top radius of mountain
+      ) {
+        this.onMountain = 0;
+        this.checkTeleporter();
+
+        const cursor =
+          this.project1Mountain.children[
+            this.project1Mountain.children.length - 1
+          ];
+        const mouse =
+          this.project1Mountain.children[
+            this.project1Mountain.children.length - 2
+          ];
+        if (this.dir.forward) {
+          //cursor
+          cursor.position.z = Math.min(cursor.position.z + 0.01, 1.2);
+          if (this.transV > 0.3) {
+            this.transV -= 0.01;
+            mouse.translateX(-0.01);
+          }
         }
-      }
-      if (this.dir.back) {
-        this.project1Mountain.children[14].position.z = Math.max(
-          this.project1Mountain.children[14].position.z - 0.01,
-          0.72
-        );
-        if (this.transV < 0.6) {
-          this.transV += 0.01;
-          this.project1Mountain.children[13].translateX(0.01);
+        if (this.dir.back) {
+          cursor.position.z = Math.max(cursor.position.z - 0.01, 0.72);
+          if (this.transV < 0.6) {
+            this.transV += 0.01;
+            mouse.translateX(0.01);
+          }
         }
-      }
-      if (this.dir.left) {
-        if (this.project1Mountain.children[14].position.x > -0.889)
-          this.project1Mountain.children[14].translateY(-0.01);
-        if (this.transH > 0.35) {
-          this.transH -= 0.01;
-          this.project1Mountain.children[13].translateY(-0.01);
+        if (this.dir.left) {
+          if (cursor.position.x > -0.889) cursor.translateY(-0.01);
+          if (this.transH > 0.35) {
+            this.transH -= 0.01;
+            mouse.translateY(-0.01);
+          }
         }
-      }
-      if (this.dir.right) {
-        if (this.project1Mountain.children[14].position.x < -0.294)
-          this.project1Mountain.children[14].translateY(0.01);
-        if (this.transH < 0.7) {
-          this.transH += 0.01;
-          this.project1Mountain.children[13].translateY(0.01);
+        if (this.dir.right) {
+          if (cursor.position.x < -0.294) cursor.translateY(0.01);
+          if (this.transH < 0.7) {
+            this.transH += 0.01;
+            mouse.translateY(0.01);
+          }
         }
+      } else {
+        this.onMountain = -1;
       }
     }
 
@@ -509,18 +623,35 @@ class PlaceProjects {
             this.project2Mountain.position.y - this.ufobody.position.y,
             2
           )
-      ) < 4.73 // top radius of mountain
+      ) < 4.83 // top radius of mountain
     ) {
-      this.coinAtTopOfShop.rotateZ(0.05);
-      this.fireCoinCannon();
-      this.shakeObject(this.shop);
+      if (
+        Math.sqrt(
+          Math.pow(
+            this.project2Mountain.position.x - this.ufobody.position.x,
+            2
+          ) +
+            Math.pow(
+              this.project2Mountain.position.y - this.ufobody.position.y,
+              2
+            )
+        ) < 4.73 // top radius of mountain
+      ) {
+        this.onMountain = 1;
+        this.checkTeleporter();
 
-      for (let i = 0; i < this.meshes.length; i++) {
-        this.meshes[i].position.copy(this.bodies[i].position);
-        this.meshes[i].quaternion.copy(this.bodies[i].quaternion);
+        this.coinAtTopOfShop.rotateZ(0.05);
+        this.fireCoinCannon();
+        this.shakeObject(this.shop);
+
+        for (let i = 0; i < this.meshes.length; i++) {
+          this.meshes[i].position.copy(this.bodies[i].position);
+          this.meshes[i].quaternion.copy(this.bodies[i].quaternion);
+        }
+      } else {
+        this.onMountain = -1;
+        this.shakeTime = 0.5;
       }
-    } else {
-      this.shakeTime = 0.5;
     }
   }
 }

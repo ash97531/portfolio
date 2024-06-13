@@ -150,6 +150,10 @@ class Loading {
     model = await this.gltfLoader.loadAsync(`assets/cannon.glb`);
     this.assets['cannon'] = model.scene.children[0];
     this.progress[0]++;
+
+    model = await this.gltfLoader.loadAsync(`assets/teleporter.glb`);
+    this.assets['teleporter'] = model.scene.children[0];
+    this.progress[0]++;
   }
 }
 
