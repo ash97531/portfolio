@@ -18,7 +18,7 @@ document.body.appendChild(stats.dom);
 
 let meshesWhileLoading = [],
   bodiesWhileLoading = [];
-let progress = [0];
+let progress = [0, false]; // first index for progress, second for pause loading
 let assets = {};
 let loadingSceneClass;
 const totalAssets = 17;
@@ -43,6 +43,16 @@ let speed = 0,
   maxAngularSpeed = 2,
   acceleration = 0.05;
 let buttonArray = [];
+const colorsArr = [
+  new THREE.Color(0xffffff), // White
+  new THREE.Color(0xff0000), // Red
+  new THREE.Color(0xffff00), // Yellow
+  new THREE.Color(0x00ff00), // Green
+  new THREE.Color(0x0000ff), // Blue
+  new THREE.Color(0xff00ff), // Magenta
+  new THREE.Color(0x00ffff), // Cyan
+  new THREE.Color(0x000000), // Black
+];
 let nebula;
 const gui = new GUI();
 class App {
@@ -57,14 +67,14 @@ class App {
     this.createGround();
     await this.player();
 
-    await this.loadingScene();
-    // loadingAnimation();
+    this.loadingScene();
+    loadingAnimation();
 
-    this.placeScenes();
-    animate();
+    // this.placeScenes();
+    // animate();
   }
 
-  async loadingScene() {
+  loadingScene() {
     loadingSceneClass = new Loading(
       scene,
       world,
@@ -73,7 +83,6 @@ class App {
       assets,
       progress
     );
-    await loadingSceneClass.loadModels();
   }
 
   placeScenes() {
@@ -488,30 +497,44 @@ function followCamera() {
 }
 function loadingAnimation() {
   stats.begin();
-
   world.step(timestep);
-  for (let i = 0; i < bodiesWhileLoading.length; i++) {
-    const result = new CANNON.RaycastResult();
-    world.raycastClosest(
-      bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 0.6)),
-      bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 50)),
-      {},
-      result
-    );
 
-    const threshold = -0.5;
-    if (result.hasHit) {
-      if (bodiesWhileLoading[i].position.z > threshold) {
-        bodiesWhileLoading[i].position.z -= 0.05;
+  if (!progress[1]) {
+    // if not pause loading animation
+    for (let i = 0; i < bodiesWhileLoading.length; i++) {
+      const result = new CANNON.RaycastResult();
+      world.raycastClosest(
+        bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 0.6)),
+        bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 50)),
+        {},
+        result
+      );
+
+      const threshold = -0.5;
+      if (result.hasHit) {
+        if (bodiesWhileLoading[i].position.z > threshold) {
+          bodiesWhileLoading[i].position.z -= 0.05;
+        }
+        if (
+          colorsArr.find((e) => e.equals(meshesWhileLoading[i].material.color))
+        ) {
+          meshesWhileLoading[i].material.color.lerp(
+            colorsArr[Math.floor(Math.random() * 8)],
+            Math.random()
+          );
+        }
+      } else {
+        if (bodiesWhileLoading[i].position.z < 0) {
+          bodiesWhileLoading[i].position.z += 0.05;
+        }
       }
-    } else {
-      if (bodiesWhileLoading[i].position.z < 0) {
-        bodiesWhileLoading[i].position.z += 0.05;
-      }
+
+      meshesWhileLoading[i].position.copy(bodiesWhileLoading[i].position);
     }
-
-    meshesWhileLoading[i].position.copy(bodiesWhileLoading[i].position);
-    // meshesWhileLoading[i].quaternion.copy(bodiesWhileLoading[i].quaternion);
+  } else {
+    for (let i = 0; i < bodiesWhileLoading.length; i++) {
+      meshesWhileLoading[i].position.copy(bodiesWhileLoading[i].position);
+    }
   }
 
   ufomesh.position.copy(ufobody.position);
