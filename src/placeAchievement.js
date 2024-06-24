@@ -25,7 +25,7 @@ class PlaceAchievements {
 
     const trophy = await this.placeGLBMesh(
       'trophy',
-      xoff + 3.5,
+      xoff + 4,
       yoff,
       0.5,
       0.65,
@@ -40,7 +40,7 @@ class PlaceAchievements {
 
     const treeMesh = await this.placeGLBMesh(
       'tree4ashoka',
-      xoff - 3.5,
+      xoff - 4,
       yoff,
       0.9,
       0.2,
