@@ -111,42 +111,45 @@ class PlaceProjects {
     projectSignPost.children.map((child) => {
       child.castShadow = true;
     });
-    loader.load('./fonts/Noto Sans SemiCondensed_Regular.json', (font) => {
-      const geometry = new TextGeometry('Projects', {
-        font: font,
-        size: 0.2,
-        depth: 0.05,
-        curveSegments: 10,
-        bevelEnabled: false,
-      });
-      const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const textMesh = new THREE.Mesh(geometry, material);
-      textMesh.position.set(0.1, -0.45, 0.65);
-      textMesh.rotation.set(Math.PI / 2, Math.PI / 2, 0);
 
-      projectSignPost.add(textMesh);
-      this.scene.add(projectSignPost);
-      this.placeGlbToCannonBody(projectSignPost);
-    });
+    const projectTextMesh = this.getTextMesh('Projects', 0.2, 0.05);
+    projectTextMesh.position.set(0.1, -0.35, 0.65);
+    projectTextMesh.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+
+    projectSignPost.add(projectTextMesh);
+    this.scene.add(projectSignPost);
+    this.placeGlbToCannonBody(projectSignPost);
 
     const androidIcon = this.placeGLBMesh(
       'android icon',
-      xoff - 6,
-      yoff - 5.3,
+      xoff - 8,
+      yoff - 8,
       0.2,
       0.6,
       0.6,
-      0.7
+      0.7,
+      0,
+      0,
+      -Math.PI / 4
     );
     androidIcon.children.map((child) => {
       child.castShadow = true;
     });
+
+    const PCMouseControllerText = this.getTextMesh(
+      'PC Mouse Controller',
+      1,
+      0.2
+    );
+    PCMouseControllerText.position.set(1.6, -3.6, -1.31);
+    PCMouseControllerText.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+    androidIcon.add(PCMouseControllerText);
     this.scene.add(androidIcon);
 
     this.project1Mountain = this.placeGLBMesh(
       'project landscape2',
-      4, //xoff - 15.6,
-      4, //yoff - 0.5,
+      xoff - 15.6, //4,
+      yoff - 0.5, //4,
       0.55,
       3,
       3,
@@ -163,8 +166,8 @@ class PlaceProjects {
 
     this.project2Mountain = this.placeGLBMesh(
       'project landscape2',
-      20, //xoff - 26.5,
-      4, //yoff - 12.3,
+      xoff - 26.5, //20,
+      yoff - 12.3, //4,
       0.55,
       3,
       3,
@@ -184,6 +187,20 @@ class PlaceProjects {
     // rectLight.position.set(-17, 3, 4);
     // rectLight.lookAt(-20, 0, 0.3);
     // this.scene.add(rectLight);
+  }
+
+  getTextMesh(text, size, depth) {
+    const geometry = new TextGeometry(text, {
+      font: this.assets['Gudea_Regular'],
+      size: size,
+      depth: depth,
+      curveSegments: 10,
+      bevelEnabled: false,
+    });
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const textMesh = new THREE.Mesh(geometry, material);
+    textMesh.castShadow = true;
+    return textMesh;
   }
 
   eShopProject(mountain, mountainBody) {
@@ -377,6 +394,11 @@ class PlaceProjects {
     const teleporter = this.placeGLBMesh('teleporter', 0.7, 0.2, 0.5, 1.1, 1.1);
     mountainMesh.add(teleporter);
 
+    const teleporterLight = new THREE.PointLight(0x69e2f6, 0.5, 4);
+    teleporterLight.position.set(0.7, 0.2, 0.65);
+    teleporterLight.name = 'teleporterLight';
+    mountainMesh.add(teleporterLight);
+
     mountainMesh.children.map((child) => {
       child.castShadow = true;
       child.receiveShadow = true;
@@ -458,6 +480,7 @@ class PlaceProjects {
     folder3.add(mesh.scale, 'z', 0, 5, 0.001);
     folder3.open();
   }
+
   guicannoncheck(mesh) {
     const gui = new GUI();
     const folder = gui.addFolder('position');
@@ -538,7 +561,11 @@ class PlaceProjects {
       ) < 0.9 // radius of teleporter
     ) {
       //switch on teleporter light
+      project.children[13].intensity = 4;
+      document.getElementById('modal-img').data = 'images/teleporter.png';
     } else {
+      project.children[13].intensity = 0.5;
+      document.getElementById('modal-img').data = 'images/ufo.png';
       //switch off teleporter light
     }
   }
@@ -570,6 +597,9 @@ class PlaceProjects {
       ) {
         this.onMountain = 0;
         this.checkTeleporter();
+
+        document.getElementById('modal-container').classList.add('six');
+        document.getElementById('modal-container').classList.remove('out');
 
         const cursor =
           this.project1Mountain.children[
@@ -610,6 +640,7 @@ class PlaceProjects {
         }
       } else {
         this.onMountain = -1;
+        document.getElementById('modal-container').classList.add('out');
       }
     }
 

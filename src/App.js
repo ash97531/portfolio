@@ -11,6 +11,7 @@ import PlaceNameAndBackWall from './placeNameAndBackWall';
 import PlaceProjects from './placeProjects';
 import Compass from './compass';
 import Loading from './Loading';
+import PlaceAchievements from './placeAchievement';
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -21,7 +22,7 @@ let meshesWhileLoading = [],
 let progress = [0, false]; // first index for progress, second for pause loading
 let assets = {};
 let loadingSceneClass;
-const totalAssets = 17;
+const totalAssets = 23;
 
 let placeProjectsClass;
 
@@ -44,6 +45,7 @@ let speed = 0,
   acceleration = 0.05;
 let buttonArray = [];
 const colorsArr = [
+  new THREE.Color(0xffffe0), // Initial cube color
   new THREE.Color(0xffffff), // White
   new THREE.Color(0xff0000), // Red
   new THREE.Color(0xffff00), // Yellow
@@ -55,6 +57,8 @@ const colorsArr = [
 ];
 let nebula;
 const gui = new GUI();
+
+let enterKeyPressed = false;
 class App {
   async init() {
     window.addEventListener('resize', onWindowResize, false);
@@ -86,9 +90,8 @@ class App {
   }
 
   placeScenes() {
-    // new PlaceTrees(scene, world);
     // new PlaceContactLinks(scene, world, buttonArray, assets);
-    // new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
+    new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
     placeProjectsClass = new PlaceProjects(
       scene,
       world,
@@ -97,6 +100,7 @@ class App {
       ufomesh,
       dir
     );
+    new PlaceAchievements(scene, world, assets);
   }
 
   async placeGLBMesh(
@@ -149,11 +153,10 @@ class App {
       0.01,
       2000
     );
-    camera.position.set(0, -10, 5);
+    camera.position.set(11.5, -14.5, 12.5 + 10);
     // camera.position.set(15.3, -3.5, 5.7);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-    // camera.lookAt(new THREE.Vector3(15.3, -7.5, 7.7));
-    // camera.rotation.set(0.61, 0.65, 0.82);
+    // camera.lookAt(new THREE.Vector3(0, 0, 0));
+    camera.rotation.set(0.74, 2.71, -2.511);
 
     scene = new THREE.Scene();
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.018);
@@ -166,6 +169,8 @@ class App {
     document.body.appendChild(renderer.domElement);
 
     orbit = new OrbitControls(camera, renderer.domElement);
+    orbit.target.set(11.5, -7.8, 3.42 + 10);
+    orbit.update();
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     scene.add(ambientLight);
@@ -252,7 +257,7 @@ class App {
       angularDamping: 0.7,
     });
     // ufobody.addShape(cy);
-    ufobody.position.set(0, -4, 2);
+    ufobody.position.set(0, -4, 12);
 
     ufobody.addShape(
       new CANNON.Cylinder(0.5, 0.5, 0.25, 8),
@@ -340,7 +345,7 @@ function animate() {
 
   placeProjectsClass.update();
 
-  cannondebugger.update();
+  // cannondebugger.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
@@ -429,7 +434,8 @@ function keydown(event) {
     ufobody.applyForce(new CANNON.Vec3(0, 0, 500));
   }
   if (key === 'r') {
-    console.log(meshes, bodies);
+    console.log(camera.position, camera.rotation);
+    console.log(orbit.target);
   }
 }
 
@@ -490,14 +496,17 @@ function moveUfo() {
 }
 
 function followCamera() {
-  // orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
-  camera.position.set(ufobody.position.x + 5, ufobody.position.y - 5, 6);
+  orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
+  camera.position.set(ufobody.position.x, ufobody.position.y - 7, 9);
   // camera.lookAt(ufobody.position);
-  // orbit.update();
+  orbit.update();
 }
+
 function loadingAnimation() {
   stats.begin();
   world.step(timestep);
+
+  if (enterKeyPressed) return;
 
   if (!progress[1]) {
     // if not pause loading animation
@@ -510,7 +519,7 @@ function loadingAnimation() {
         result
       );
 
-      const threshold = -0.5;
+      const threshold = -0.5 + 10;
       if (result.hasHit) {
         if (bodiesWhileLoading[i].position.z > threshold) {
           bodiesWhileLoading[i].position.z -= 0.05;
@@ -524,8 +533,8 @@ function loadingAnimation() {
           );
         }
       } else {
-        if (bodiesWhileLoading[i].position.z < 0) {
-          bodiesWhileLoading[i].position.z += 0.05;
+        if (bodiesWhileLoading[i].position.z < 0 + 10) {
+          bodiesWhileLoading[i].position.z += 0.01;
         }
       }
 
@@ -543,15 +552,23 @@ function loadingAnimation() {
   floatUfo();
   // followCamera();
 
-  // if (totalAssets == progress[0]) {
-  //   loadingSceneClass.removeModels();
-  //   meshesWhileLoading = [];
-  //   bodiesWhileLoading = [];
+  if (totalAssets == progress[0]) {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !enterKeyPressed) {
+        enterKeyPressed = true;
+        loadingSceneClass.removeModels(true);
+        ufobody.position.set(-2, 0, 12);
 
-  //   new App().placeScenes();
-  //   animate();
-  //   return;
-  // }
+        // temporary
+        camera.position.set(0, -14.5, 12.5);
+        orbit.target.set(0, -7.8, 3.42);
+        orbit.update();
+
+        animate();
+        return;
+      }
+    });
+  }
 
   // cannondebugger.update();
   renderer.render(scene, camera);

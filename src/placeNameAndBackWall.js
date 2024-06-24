@@ -202,6 +202,21 @@ class PlaceNameAndBackWall {
 
     // center circle
     (xoff = -2), (yoff = -10);
+
+    const indiaMap = await this.placeGLBMesh(
+      'india map',
+      xoff,
+      yoff + 1,
+      0.1,
+      1.2,
+      1.2,
+      1.2
+    );
+    indiaMap.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.scene.add(indiaMap);
+
     const arr = [
       [1, 1],
       [1, -1],
@@ -212,8 +227,8 @@ class PlaceNameAndBackWall {
       for (let j = 0; j < 4; j++) {
         const pave = pavementBrick.clone();
         pave.position.set(
-          xoff + arr[i][0] * 3.5 + arr[j][0] * 0.7 + Math.random() * 0.8 - 0.4,
-          yoff + arr[i][1] * 3.5 + arr[j][1] * 0.7 + Math.random() * 0.8 - 0.4,
+          xoff + arr[i][0] * 4 + arr[j][0] * 0.7 + Math.random() * 0.8 - 0.4,
+          yoff + arr[i][1] * 4 + arr[j][1] * 0.7 + Math.random() * 0.8 - 0.4,
           -0.9
         );
         this.scene.add(pave);
@@ -221,12 +236,12 @@ class PlaceNameAndBackWall {
           const pave = pavementBrick.clone();
           pave.position.set(
             xoff +
-              arr[i][0] * 3.5 * (i % 2 == 0 ? 0 : 1) +
+              arr[i][0] * 5 * (i % 2 == 0 ? 0 : 1) +
               arr[j][0] * 0.7 +
               Math.random() * 0.8 -
               0.4,
             yoff +
-              arr[i][1] * 3.5 * (i % 2 == 0 ? -1 : 0) +
+              arr[i][1] * 5 * (i % 2 == 0 ? -1 : 0) +
               arr[j][1] * 0.7 +
               Math.random() * 0.8 -
               0.4,
@@ -235,6 +250,17 @@ class PlaceNameAndBackWall {
           this.scene.add(pave);
         }
       }
+    }
+
+    // Skill and achievement side pavement
+    for (let i = 0; i < 5; i++) {
+      const pave = pavementBrick.clone();
+      pave.position.set(
+        xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
+        yoff - 7 - 0.9 * i + Math.random() * 0.8 - 0.4,
+        -0.9
+      );
+      this.scene.add(pave);
     }
 
     // information side pavement
@@ -284,6 +310,37 @@ class PlaceNameAndBackWall {
       );
       this.scene.add(pave);
     }
+  }
+
+  guicheck(mesh) {
+    const gui = new GUI();
+    const folder = gui.addFolder('position');
+    folder.add(
+      mesh.position,
+      'x',
+      mesh.position.x - 10,
+      mesh.position.x + 10,
+      0.1
+    );
+    folder.add(
+      mesh.position,
+      'y',
+      mesh.position.y - 10,
+      mesh.position.y + 10,
+      0.1
+    );
+    folder.add(mesh.position, 'z', -2, 2, 0.1);
+    folder.open();
+    const folder2 = gui.addFolder('rotation');
+    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, 1);
+    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, 1);
+    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, 1);
+    folder2.open();
+    const folder3 = gui.addFolder('scale');
+    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
+    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
+    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
+    folder3.open();
   }
 
   async placeStones() {
