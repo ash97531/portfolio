@@ -12,6 +12,7 @@ import PlaceProjects from './placeProjects';
 import Compass from './compass';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
+import PlaceExperience from './placeExperience';
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -24,7 +25,7 @@ let assets = {};
 let loadingSceneClass;
 const totalAssets = 23;
 
-let placeProjectsClass;
+let placeProjectsClass, placeExperienceClass;
 
 let camera, scene, renderer, world, labelRenderer, orbit;
 let meshes = [],
@@ -90,7 +91,7 @@ class App {
   }
 
   placeScenes() {
-    // new PlaceContactLinks(scene, world, buttonArray, assets);
+    new PlaceContactLinks(scene, world, buttonArray, assets);
     new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
     placeProjectsClass = new PlaceProjects(
       scene,
@@ -101,6 +102,7 @@ class App {
       dir
     );
     new PlaceAchievements(scene, world, assets);
+    placeExperienceClass = new PlaceExperience(scene, world, assets, ufobody);
   }
 
   async placeGLBMesh(
@@ -344,6 +346,7 @@ function animate() {
   // followCamera();
 
   placeProjectsClass.update();
+  placeExperienceClass.update();
 
   // cannondebugger.update();
   renderer.render(scene, camera);
@@ -534,7 +537,7 @@ function loadingAnimation() {
         }
       } else {
         if (bodiesWhileLoading[i].position.z < 0 + 10) {
-          bodiesWhileLoading[i].position.z += 0.01;
+          bodiesWhileLoading[i].position.z += 0.02;
         }
       }
 

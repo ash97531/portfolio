@@ -76,9 +76,9 @@ class PlaceProjects {
 
   teleportUfo() {
     if (this.ufomesh.scale.x > 0.1) {
-      this.ufomesh.scale.x -= 0.01;
-      this.ufomesh.scale.y -= 0.01;
-      this.ufomesh.scale.z -= 0.01;
+      this.ufomesh.scale.x -= 0.015;
+      this.ufomesh.scale.y -= 0.015;
+      this.ufomesh.scale.z -= 0.015;
     } else {
       this.onMountain = (this.onMountain + 1) % this.mountainArray.length;
       this.ufobody.position.x = this.mountainArray[this.onMountain].position.x;
@@ -122,15 +122,15 @@ class PlaceProjects {
 
     const androidIcon = this.placeGLBMesh(
       'android icon',
-      xoff - 8,
-      yoff - 8,
+      xoff - 10,
+      yoff - 4,
       0.2,
       0.6,
       0.6,
       0.7,
       0,
       0,
-      -Math.PI / 4
+      -Math.PI / 2
     );
     androidIcon.children.map((child) => {
       child.castShadow = true;
@@ -138,25 +138,26 @@ class PlaceProjects {
 
     const PCMouseControllerText = this.getTextMesh(
       'PC Mouse Controller',
-      1,
+      1.4,
       0.2
     );
-    PCMouseControllerText.position.set(1.6, -3.6, -1.31);
-    PCMouseControllerText.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+    PCMouseControllerText.position.set(3.2, -16.4, -1.48);
+    PCMouseControllerText.rotation.set(0, 0, Math.PI / 2);
     androidIcon.add(PCMouseControllerText);
+
     this.scene.add(androidIcon);
 
     this.project1Mountain = this.placeGLBMesh(
       'project landscape2',
-      xoff - 15.6, //4,
-      yoff - 0.5, //4,
+      xoff - 16, //4,
+      yoff + 3.5, //4,
       0.55,
       3,
       3,
       3,
       0,
       0,
-      -Math.PI / 10
+      -0.61
     );
     this.project1MountainBody = this.addMountain(this.project1Mountain);
     this.mouseControllerProject(
@@ -166,15 +167,15 @@ class PlaceProjects {
 
     this.project2Mountain = this.placeGLBMesh(
       'project landscape2',
-      xoff - 26.5, //20,
-      yoff - 12.3, //4,
+      xoff - 46.5, //20,
+      yoff + 2, //4,
       0.55,
       3,
       3,
       3,
       0,
       0,
-      -Math.PI / 10
+      -0.61
     );
     this.project2MountainBody = this.addMountain(this.project2Mountain);
     this.eShopProject(this.project2Mountain, this.project2MountainBody);
@@ -191,7 +192,7 @@ class PlaceProjects {
 
   getTextMesh(text, size, depth) {
     const geometry = new TextGeometry(text, {
-      font: this.assets['Gudea_Regular'],
+      font: this.assets['Chela One_Regular'],
       size: size,
       depth: depth,
       curveSegments: 10,
@@ -360,37 +361,6 @@ class PlaceProjects {
   }
 
   addMountain(mountainMesh) {
-    /*
-    const btnArr = [];
-    btnArr.push(mountainMesh);
-
-    const linkButtonGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 16);
-    const linkButtonMat = new THREE.MeshBasicMaterial({ color: 0xffbd03 });
-    const linkButton = new THREE.Mesh(linkButtonGeo, linkButtonMat);
-    linkButton.position.set(0.5, -0.5, 0.37);
-    linkButton.rotateX(Math.PI / 2);
-    mountainMesh.add(linkButton);
-    btnArr.push(linkButton);
-
-    const rightButtonGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.4, 3);
-    const rightButtonMat = new THREE.MeshBasicMaterial({ color: 0xff0021 });
-    const rightButton = new THREE.Mesh(rightButtonGeo, rightButtonMat);
-    rightButton.position.set(0.85, 0.18, 0.37); //0.3
-    rightButton.rotation.set(Math.PI / 2, -0.73, 0);
-    mountainMesh.add(rightButton);
-    btnArr.push(rightButton);
-
-    const leftButtonGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.4, 3);
-    const leftButtonMat = new THREE.MeshBasicMaterial({ color: 0xff0021 });
-    const leftButton = new THREE.Mesh(leftButtonGeo, leftButtonMat);
-    leftButton.position.set(0.45, 0.25, 0.4);
-    leftButton.rotation.set(Math.PI / 2, -0.73 + Math.PI, 0);
-    mountainMesh.add(leftButton);
-    btnArr.push(leftButton);
-
-    this.buttonArray.push(btnArr);
-    console.log(this.buttonArray);
-    */
     const teleporter = this.placeGLBMesh('teleporter', 0.7, 0.2, 0.5, 1.1, 1.1);
     mountainMesh.add(teleporter);
 

@@ -226,7 +226,7 @@ class Loading {
       );
       const material = new THREE.MeshBasicMaterial({ color: 0xadff2f });
       const instructionText = new THREE.Mesh(geometry, material);
-      instructionText.position.set(0.6 * 5, -0.6 * 12, -1.1 + 10);
+      instructionText.position.set(0.6 * 5, -0.6 * 13, -1.1 + 10);
       instructionText.castShadow = true;
       this.loadingSceneMeshes.push(instructionText);
       this.scene.add(instructionText);
@@ -385,9 +385,14 @@ class Loading {
     await this.modelAndProgressLoading('trophy', xoff, 0);
     await this.modelAndProgressLoading('archery skills', xoff, 0);
     await this.modelAndProgressLoading('india map', xoff, 0);
+    await this.modelAndProgressLoading('experience button', xoff, 0);
 
     this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(
       './fonts/Gudea_Regular.json'
+    );
+
+    this.assets['Chela One_Regular'] = await this.fontLoader.loadAsync(
+      './fonts/Chela One_Regular.json'
     );
 
     new App().placeScenes();
