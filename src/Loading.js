@@ -386,6 +386,8 @@ class Loading {
     await this.modelAndProgressLoading('archery skills', xoff, 0);
     await this.modelAndProgressLoading('india map', xoff, 0);
     await this.modelAndProgressLoading('experience button', xoff, 0);
+    await this.modelAndProgressLoading('ethereum', xoff, 0);
+    await this.modelAndProgressLoading('blockchain', xoff, 0);
 
     this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(
       './fonts/Gudea_Regular.json'

@@ -25,7 +25,7 @@ let assets = {};
 let loadingSceneClass;
 const totalAssets = 23;
 
-let placeProjectsClass, placeExperienceClass;
+let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
 
 let camera, scene, renderer, world, labelRenderer, orbit;
 let meshes = [],
@@ -91,7 +91,12 @@ class App {
   }
 
   placeScenes() {
-    new PlaceContactLinks(scene, world, buttonArray, assets);
+    placeContactLinksClass = new PlaceContactLinks(
+      scene,
+      world,
+      ufomesh,
+      assets
+    );
     new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
     placeProjectsClass = new PlaceProjects(
       scene,
@@ -187,7 +192,7 @@ class App {
     directionalLight.shadow.camera.top = 100;
     directionalLight.shadow.camera.bottom = -100;
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.5);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.3);
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
     scene.add(directionalLight2);
@@ -297,40 +302,6 @@ function onWindowResize() {
 
 const timestep = 1 / 60;
 
-function checkButtonTriggered() {
-  //gmail
-  // if (buttonArray.length === 0) return;
-  // const but1 = buttonArray[0].button;
-  // const txt1 = buttonArray[0].text;
-  for (let i = 0; i < buttonArray.length; i++) {
-    const button = buttonArray[i].button;
-    const text = buttonArray[i].text;
-    if (
-      Math.sqrt(
-        Math.pow(button.position.x - ufomesh.position.x, 2) +
-          Math.pow(button.position.y - ufomesh.position.y, 2)
-      ) < 1.1
-    ) {
-      text.material.opacity = Math.min(text.material.opacity + 0.05, 1);
-      button.position.z = Math.max(button.position.z - 0.05, -1.2);
-    } else {
-      text.material.opacity = Math.max(text.material.opacity - 0.05, 0);
-      button.position.z = Math.min(button.position.z + 0.05, -1);
-    }
-  }
-  // console.log(buttonArray);
-  // if (
-  //   Math.sqrt(
-  //     Math.pow(but1.position.x - ufomesh.position.x, 2) +
-  //       Math.pow(but1.position.y - ufomesh.position.y, 2)
-  //   ) < 1
-  // ) {
-  //   txt1.material.opacity = Math.min(txt1.material.opacity + 0.05, 1);
-  // } else {
-  //   txt1.material.opacity = Math.max(txt1.material.opacity - 0.05, 0);
-  // }
-}
-
 function animate() {
   stats.begin();
 
@@ -342,9 +313,9 @@ function animate() {
 
   moveUfo();
   floatUfo();
-  // checkButtonTriggered();
   // followCamera();
 
+  placeContactLinksClass.update();
   placeProjectsClass.update();
   placeExperienceClass.update();
 
@@ -435,10 +406,6 @@ function keydown(event) {
     // let ufoquat = new CANNON.Vec3();
     // ufobody.quaternion.toEuler(ufoquat);
     ufobody.applyForce(new CANNON.Vec3(0, 0, 500));
-  }
-  if (key === 'r') {
-    console.log(camera.position, camera.rotation);
-    console.log(orbit.target);
   }
 }
 

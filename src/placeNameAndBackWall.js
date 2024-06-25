@@ -447,7 +447,7 @@ class PlaceNameAndBackWall {
     );
     this.world.addBody(flashLightBody);
 
-    const spotLight = new THREE.SpotLight(0xffff, 200);
+    const spotLight = new THREE.SpotLight(0xffff, 325);
     spotLight.position.set(0, 1, 0);
     spotLight.target.position.set(0, 13, 0);
     spotLight.angle = 0.6;
@@ -466,7 +466,7 @@ class PlaceNameAndBackWall {
     );
     this.world.addBody(flashLightBody2);
 
-    const spotLight2 = new THREE.SpotLight(0xffff, 200);
+    const spotLight2 = new THREE.SpotLight(0xffff, 325);
     spotLight2.position.set(0, 1, 0);
     spotLight2.target.position.set(0, 13, 0);
     spotLight2.angle = 0.6;
@@ -486,19 +486,43 @@ class PlaceNameAndBackWall {
       bodyArr = [];
     const xoffset = -12,
       yoffset = 10;
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('s', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('h', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('w', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('n', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('i', 0, 0, 0, 0.05, 0.05, 0.05));
+    meshArr.push(
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('s', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('h', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('w', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('n', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('i', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
     // write mesh for word 'kumar'
-    meshArr.push(await this.placeGLBMesh('k', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('u', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('m', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05));
-    meshArr.push(await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05));
+    meshArr.push(
+      await this.placeGLBMesh('k', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('u', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('m', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
+    meshArr.push(
+      await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+    );
 
     bodyArr.push(this.placeGlbToCannonBody(meshArr[0], xoffset, yoffset, 0));
     bodyArr.push(

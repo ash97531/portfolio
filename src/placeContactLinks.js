@@ -10,15 +10,16 @@ class PlaceContactLinks {
   world;
   gltfLoader;
   objectLoaded;
-  buttonArray;
+  ufomesh;
+  buttonArray = [];
   assets;
 
-  constructor(scene, world, buttonArray, assets) {
+  constructor(scene, world, ufomesh, assets) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
-    this.buttonArray = buttonArray;
     this.assets = assets;
+    this.ufomesh = ufomesh;
 
     this.placeModelsPosition();
     // this.placeButtons();
@@ -204,7 +205,13 @@ class PlaceContactLinks {
       mesh.position.y + 10,
       0.1
     );
-    folder.add(mesh.position, 'z', -2, 2, 0.1);
+    folder.add(
+      mesh.position,
+      'z',
+      mesh.position.z - 10,
+      mesh.position.z + 10,
+      0.1
+    );
     folder.open();
     const folder2 = gui.addFolder('rotation');
     folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, 1);
@@ -225,9 +232,15 @@ class PlaceContactLinks {
     cylinder.castShadow = true;
     cylinder.rotateX(Math.PI / 2);
 
+    const gui = new GUI();
+    const p = { col: cylinder.material.color.getHex() };
+    gui.addColor(p, 'col').onChange((val) => {
+      cylinder.material.color.set(val);
+    });
+
     const pressEnterTextGeometry = new TextGeometry('Press \nEnter', {
       font: font,
-      size: 0.35,
+      size: 0.5,
       depth: 0.1,
       curveSegments: 12,
       bevelEnabled: false,
@@ -241,7 +254,7 @@ class PlaceContactLinks {
       pressEnterTextGeometry,
       pressEnterMaterial
     );
-    pressEnterTextMesh.position.set(cx - 0.5, cy, cz + 1);
+    pressEnterTextMesh.position.set(cx - 0.5, cy, cz + 3);
     pressEnterTextMesh.rotateX(Math.PI / 2);
     this.scene.add(pressEnterTextMesh);
 
@@ -301,6 +314,25 @@ class PlaceContactLinks {
     cannonBody.addShape(boxShape);
     cannonBody.position.copy(objectMesh.position);
     this.world.addBody(cannonBody);
+  }
+
+  update() {
+    for (let i = 0; i < this.buttonArray.length; i++) {
+      const button = this.buttonArray[i].button;
+      const text = this.buttonArray[i].text;
+      if (
+        Math.sqrt(
+          Math.pow(button.position.x - this.ufomesh.position.x, 2) +
+            Math.pow(button.position.y - this.ufomesh.position.y, 2)
+        ) < 1.1
+      ) {
+        text.material.opacity = Math.min(text.material.opacity + 0.05, 1);
+        button.position.z = Math.max(button.position.z - 0.05, -1.2);
+      } else {
+        text.material.opacity = Math.max(text.material.opacity - 0.05, 0);
+        button.position.z = Math.min(button.position.z + 0.05, -1);
+      }
+    }
   }
 
   async placeGLBMesh(

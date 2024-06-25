@@ -103,9 +103,9 @@ class PlaceProjects {
       xoff,
       yoff,
       -0.2,
-      1.2,
-      1.2,
-      1.2
+      2,
+      2,
+      2
     );
     projectSignPost.rotation.set(0, 0, -Math.PI / 2);
     projectSignPost.children.map((child) => {
@@ -120,6 +120,7 @@ class PlaceProjects {
     this.scene.add(projectSignPost);
     this.placeGlbToCannonBody(projectSignPost);
 
+    // PC Mouse Controller project
     const androidIcon = this.placeGLBMesh(
       'android icon',
       xoff - 10,
@@ -135,16 +136,16 @@ class PlaceProjects {
     androidIcon.children.map((child) => {
       child.castShadow = true;
     });
+    this.placeGlbToCannonBody(androidIcon);
 
     const PCMouseControllerText = this.getTextMesh(
       'PC Mouse Controller',
-      1.4,
+      1.5,
       0.2
     );
     PCMouseControllerText.position.set(3.2, -16.4, -1.48);
     PCMouseControllerText.rotation.set(0, 0, Math.PI / 2);
     androidIcon.add(PCMouseControllerText);
-
     this.scene.add(androidIcon);
 
     this.project1Mountain = this.placeGLBMesh(
@@ -165,10 +166,45 @@ class PlaceProjects {
       this.project1MountainBody
     );
 
+    // Eshop project
+    const ethereum = this.placeGLBMesh(
+      'ethereum',
+      xoff - 40,
+      yoff - 4.5,
+      0.4,
+      3,
+      4.5,
+      3
+    );
+    this.placeGlbToCannonBody(ethereum);
+    const eshopText = this.getTextMesh('E-shop', 0.4, 0.2);
+    eshopText.position.set(-2.5, -0.5, -0.55);
+    eshopText.scale.y = 0.8;
+    ethereum.add(eshopText);
+    this.scene.add(ethereum);
+
+    const blockchainModel = this.placeGLBMesh(
+      'blockchain',
+      xoff - 40.7,
+      yoff - 6,
+      -0.43,
+      2.5,
+      2.5,
+      2.5,
+      0,
+      0,
+      Math.PI / 4
+    );
+    blockchainModel.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(blockchainModel);
+    this.scene.add(blockchainModel);
+
     this.project2Mountain = this.placeGLBMesh(
       'project landscape2',
       xoff - 46.5, //20,
-      yoff + 2, //4,
+      yoff + 3, //4,
       0.55,
       3,
       3,
@@ -177,6 +213,7 @@ class PlaceProjects {
       0,
       -0.61
     );
+
     this.project2MountainBody = this.addMountain(this.project2Mountain);
     this.eShopProject(this.project2Mountain, this.project2MountainBody);
 
@@ -232,11 +269,11 @@ class PlaceProjects {
       // type: CANNON.Body.KINEMATIC,
       mass: 0,
       shape: new CANNON.Box(new CANNON.Vec3(0.8, 1.3, 1.3)),
-      position: mountainBody.position.vadd(new CANNON.Vec3(-1.2, 1.1, 1.7)),
+      position: mountainBody.position.vadd(new CANNON.Vec3(-0.7, 1.3, 1.5)),
       quaternion: new CANNON.Quaternion().setFromEuler(
         0,
         0,
-        (-50 * Math.PI) / 180
+        (-70 * Math.PI) / 180
       ),
     });
     this.world.addBody(kinematicBody);
@@ -391,6 +428,7 @@ class PlaceProjects {
       ),
       quaternion: new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0),
     });
+    mountainBody.quaternion.setFromEuler(Math.PI / 2, -0.35, 0);
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.5, 0.8, 0.8)),
       new CANNON.Vec3(1.6, 2, -2.8)
@@ -475,11 +513,6 @@ class PlaceProjects {
     folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, Math.PI / 180);
     folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, Math.PI / 180);
     folder2.open();
-    const folder3 = gui.addFolder('scale');
-    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
-    folder3.open();
   }
 
   placeGLBMesh(
