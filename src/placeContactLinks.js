@@ -177,7 +177,7 @@ class PlaceContactLinks {
     const appleTree2 = await this.placeGLBMesh(
       'apple tree',
       xoff - 1,
-      yoff - 20,
+      yoff - 19,
       2.1,
       1.4,
       1.4,
@@ -188,6 +188,40 @@ class PlaceContactLinks {
     });
     this.scene.add(appleTree2);
     this.placeGlbToCannonBody(appleTree2);
+
+    const stoneMesh4 = await this.placeGLBMesh(
+      'stone24',
+      xoff - 5,
+      yoff - 19,
+      -1,
+      1.2,
+      1.2,
+      1.5
+    );
+    this.scene.add(stoneMesh4);
+
+    const stoneMesh5 = await this.placeGLBMesh(
+      'stone24',
+      xoff - 4,
+      yoff - 20.5,
+      -1,
+      1.7,
+      1.2,
+      2.5
+    );
+    this.scene.add(stoneMesh5);
+
+    const stoneMesh6 = await this.placeGLBMesh(
+      'stone24',
+      xoff - 7,
+      yoff - 11,
+      -0.2,
+      4,
+      3,
+      3
+    );
+    this.scene.add(stoneMesh6);
+    this.placeGlbToCannonBody(stoneMesh6);
 
     //75B65A
     let bush = await this.placeGLBMesh('bush', xoff - 7, yoff + 1.7, -0.5);

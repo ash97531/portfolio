@@ -71,6 +71,64 @@ class PlaceExperience {
       -1,
       -2
     );
+
+    (xoff -= 15), (yoff = -12);
+    const bush = this.placeGLBMesh(
+      'bush',
+      xoff + 2,
+      yoff - 12,
+      -0.5,
+      1.2,
+      1.2,
+      1.2
+    );
+    this.scene.add(bush);
+
+    const bush2 = this.placeGLBMesh(
+      'bush',
+      xoff + 3,
+      yoff - 12.5,
+      -0.5,
+      1.4,
+      1.4,
+      1.2
+    );
+    this.scene.add(bush2);
+
+    const bushDark = this.placeGLBMesh(
+      'dark bush',
+      xoff + 1.1,
+      yoff - 11.5,
+      -0.5,
+      1.2,
+      1.2,
+      1.2
+    );
+    bushDark.rotation.set(Math.PI / 4, Math.PI / 2, 0);
+    this.scene.add(bushDark);
+
+    const darkBush2 = this.placeGLBMesh(
+      'dark bush',
+      xoff + 3.1,
+      yoff - 11.5,
+      -0.5,
+      1.4,
+      1.4,
+      1.2
+    );
+    darkBush2.rotation.set(Math.PI / 4, 0, 0);
+    this.scene.add(darkBush2);
+
+    const darkBush3 = this.placeGLBMesh(
+      'dark bush',
+      xoff + 1,
+      yoff - 12.7,
+      -0.5,
+      1.6,
+      1.6,
+      1.6
+    );
+    this.scene.add(darkBush3);
   }
 
   expButtonText(

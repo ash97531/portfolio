@@ -108,7 +108,7 @@ class App {
       ufomesh,
       dir
     );
-    new PlaceAchievements(scene, world, assets);
+    new PlaceAchievements(scene, world, meshes, bodies, assets);
     placeExperienceClass = new PlaceExperience(scene, world, assets, ufobody);
   }
 
