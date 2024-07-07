@@ -363,6 +363,9 @@ class Loading {
     await this.modelAndProgressLoading('apple tree', xoff, 0);
     await this.modelAndProgressLoading('apple tree stone', xoff, 0);
     await this.modelAndProgressLoading('stone1', xoff, 0);
+    await this.modelAndProgressLoading('stone22', xoff, 0);
+    await this.modelAndProgressLoading('stone23', xoff, 0);
+    await this.modelAndProgressLoading('stone24', xoff, 0);
     await this.modelAndProgressLoading('flashlight optimised', xoff, 0);
     await this.modelAndProgressLoading('gmail', xoff, 0);
     await this.modelAndProgressLoading('github', xoff, 0);
@@ -386,7 +389,7 @@ class Loading {
     await this.modelAndProgressLoading('archery skills', xoff, 0);
     await this.modelAndProgressLoading('india map', xoff, 0);
     await this.modelAndProgressLoading('experience button', xoff, 0);
-    await this.modelAndProgressLoading('ethereum', xoff, 0);
+    await this.modelAndProgressLoading('bitcoin', xoff, 0);
     await this.modelAndProgressLoading('blockchain', xoff, 0);
 
     this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(

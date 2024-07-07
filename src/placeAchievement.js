@@ -23,6 +23,90 @@ class PlaceAchievements {
     let xoff = -2,
       yoff = -23;
 
+    const combinedstone = await this.placeGLBMesh(
+      'stone combined 1',
+      xoff - 8,
+      yoff - 14.5,
+      -0.25,
+      0.004,
+      0.004,
+      0.004,
+      0,
+      0,
+      1
+    );
+    combinedstone.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.scene.add(combinedstone);
+    this.placeGlbToCannonBody(combinedstone);
+
+    const bush = await this.placeGLBMesh(
+      'bush',
+      xoff + 2,
+      yoff - 12,
+      -0.5,
+      1.2,
+      1.2,
+      1.2
+    );
+    this.scene.add(bush);
+
+    const bush2 = await this.placeGLBMesh(
+      'bush',
+      xoff + 3,
+      yoff - 12.5,
+      -0.5,
+      1.4,
+      1.4,
+      1.2
+    );
+    this.scene.add(bush2);
+
+    const bush3 = await this.placeGLBMesh(
+      'bush',
+      xoff + 2.5,
+      yoff - 13.5,
+      -0.5
+    );
+    this.scene.add(bush3);
+    bush3.rotation.set(Math.PI / 4, 0, 0);
+
+    const bushDark = await this.placeGLBMesh(
+      'dark bush',
+      xoff + 1.1,
+      yoff - 11.5,
+      -0.5,
+      1.2,
+      1.2,
+      1.2
+    );
+    bushDark.rotation.set(Math.PI / 4, Math.PI / 2, 0);
+    this.scene.add(bushDark);
+
+    const darkBush2 = await this.placeGLBMesh(
+      'dark bush',
+      xoff + 3.1,
+      yoff - 11.5,
+      -0.5,
+      1.4,
+      1.4,
+      1.2
+    );
+    darkBush2.rotation.set(Math.PI / 4, 0, 0);
+    this.scene.add(darkBush2);
+
+    const darkBush3 = await this.placeGLBMesh(
+      'dark bush',
+      xoff + 1,
+      yoff - 12.7,
+      -0.5,
+      1.6,
+      1.6,
+      1.6
+    );
+    this.scene.add(darkBush3);
+
     const trophy = await this.placeGLBMesh(
       'trophy',
       xoff + 4,

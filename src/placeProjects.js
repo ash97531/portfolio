@@ -167,21 +167,21 @@ class PlaceProjects {
     );
 
     // Eshop project
-    const ethereum = this.placeGLBMesh(
-      'ethereum',
-      xoff - 40,
+    const bitcoin = this.placeGLBMesh(
+      'bitcoin',
+      xoff - 39,
       yoff - 4.5,
-      0.4,
-      3,
+      0.5,
+      3.2,
       4.5,
-      3
+      3.2
     );
-    this.placeGlbToCannonBody(ethereum);
+    this.placeGlbToCannonBody(bitcoin);
     const eshopText = this.getTextMesh('E-shop', 0.4, 0.2);
     eshopText.position.set(-2.5, -0.5, -0.55);
     eshopText.scale.y = 0.8;
-    ethereum.add(eshopText);
-    this.scene.add(ethereum);
+    bitcoin.add(eshopText);
+    this.scene.add(bitcoin);
 
     const blockchainModel = this.placeGLBMesh(
       'blockchain',

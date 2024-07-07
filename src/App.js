@@ -23,7 +23,7 @@ let meshesWhileLoading = [],
 let progress = [0, false]; // first index for progress, second for pause loading
 let assets = {};
 let loadingSceneClass;
-const totalAssets = 23;
+const totalAssets = 29;
 
 let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
 
@@ -60,6 +60,8 @@ let nebula;
 const gui = new GUI();
 
 let enterKeyPressed = false;
+
+let ufotoplighthelper;
 class App {
   async init() {
     window.addEventListener('resize', onWindowResize, false);
@@ -182,7 +184,7 @@ class App {
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true;
@@ -261,7 +263,7 @@ class App {
     ufobody = new CANNON.Body({
       mass: 2,
       linearDamping: 0.8,
-      angularDamping: 0.7,
+      angularDamping: 0.97,
     });
     // ufobody.addShape(cy);
     ufobody.position.set(0, -4, 12);
@@ -275,7 +277,7 @@ class App {
     world.addBody(ufobody);
 
     // const gltfLoader = new GLTFLoader();
-    const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2light.glb');
+    const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2glb.glb');
     ufomesh = ufoLoaded.scene.children[0];
     // ufomesh.scale.set(0.003, 0.003, 0.003);
     ufomesh.position.set(0, 0, 0);
@@ -284,6 +286,23 @@ class App {
       child.castShadow = true;
     });
     // console.log(ufomesh.position, ufobody.position);
+
+    /*
+    const ufotoplight = new THREE.SpotLight(0xffffff, 1, 10);
+    ufotoplight.position.set(0, 0, 10);
+    ufotoplight.target.position.set(0, 0, 0);
+    ufomesh.add(ufotoplight);
+    ufomesh.add(ufotoplight.target);
+    ufotoplighthelper = new THREE.SpotLightHelper(ufotoplight);
+    scene.add(ufotoplighthelper);
+
+    gui.add(ufotoplight.position, 'z', -10, 10, 0.01);
+    gui.add(ufotoplight, 'intensity', 0, 2000, 0.01);
+    gui.add(ufotoplight, 'distance', 0, 100, 0.01);
+    gui.add(ufotoplight, 'angle', 0, Math.PI / 2, 0.01);
+    gui.add(ufotoplight, 'penumbra', 0, 1, 0.01);
+    gui.add(ufotoplight, 'decay', 0, 2, 0.01);
+    */
 
     scene.add(ufomesh);
 
@@ -319,7 +338,8 @@ function animate() {
   placeProjectsClass.update();
   placeExperienceClass.update();
 
-  // cannondebugger.update();
+  cannondebugger.update();
+  // ufotoplighthelper.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
@@ -456,11 +476,11 @@ function moveUfo() {
     }
 
     if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.left) {
-      ufobody.angularVelocity.z += 0.5;
+      ufobody.angularVelocity.z += 0.8;
     }
 
     if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.right) {
-      ufobody.angularVelocity.z -= 0.5;
+      ufobody.angularVelocity.z -= 0.8;
     }
   }
 }
@@ -472,6 +492,7 @@ function followCamera() {
   orbit.update();
 }
 
+let animationLoaded = false;
 function loadingAnimation() {
   stats.begin();
   world.step(timestep);
@@ -504,7 +525,7 @@ function loadingAnimation() {
         }
       } else {
         if (bodiesWhileLoading[i].position.z < 0 + 10) {
-          bodiesWhileLoading[i].position.z += 0.02;
+          bodiesWhileLoading[i].position.z += 0.03;
         }
       }
 
@@ -522,7 +543,8 @@ function loadingAnimation() {
   floatUfo();
   // followCamera();
 
-  if (totalAssets == progress[0]) {
+  if (totalAssets >= progress[0] && !animationLoaded) {
+    animationLoaded = true;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !enterKeyPressed) {
         enterKeyPressed = true;

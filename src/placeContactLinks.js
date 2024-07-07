@@ -111,6 +111,84 @@ class PlaceContactLinks {
     });
     this.placeGlbToCannonBody(treeMesh);
 
+    //tree 2
+    const treeMesh2 = await this.placeGLBMesh(
+      'tree4ashoka',
+      xoff - 2,
+      yoff + 15.5,
+      1.8,
+      0.3,
+      0.3,
+      0.3
+    );
+    this.scene.add(treeMesh2);
+    treeMesh2.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.placeGlbToCannonBody(treeMesh2);
+
+    const stoneMesh = await this.placeGLBMesh(
+      'stone24',
+      xoff - 4,
+      yoff + 18.5,
+      -0.3,
+      3,
+      3,
+      3
+    );
+    this.scene.add(stoneMesh);
+    this.placeGlbToCannonBody(stoneMesh);
+
+    const stoneMesh2 = await this.placeGLBMesh(
+      'stone24',
+      xoff - 3,
+      yoff + 13.5,
+      -1,
+      2,
+      2,
+      2
+    );
+    this.scene.add(stoneMesh2);
+
+    const stoneMesh3 = await this.placeGLBMesh(
+      'stone24',
+      xoff - 2,
+      yoff + 13,
+      -1,
+      2.5,
+      2.5,
+      2.5
+    );
+    this.scene.add(stoneMesh3);
+
+    // treescene 3
+    const appleTree = await this.placeGLBMesh(
+      'apple tree',
+      xoff - 4,
+      yoff - 18,
+      2.1
+    );
+    appleTree.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.scene.add(appleTree);
+    this.placeGlbToCannonBody(appleTree);
+
+    const appleTree2 = await this.placeGLBMesh(
+      'apple tree',
+      xoff - 1,
+      yoff - 20,
+      2.1,
+      1.4,
+      1.4,
+      1.4
+    );
+    appleTree2.children.map((child) => {
+      child.castShadow = true;
+    });
+    this.scene.add(appleTree2);
+    this.placeGlbToCannonBody(appleTree2);
+
     //75B65A
     let bush = await this.placeGLBMesh('bush', xoff - 7, yoff + 1.7, -0.5);
     this.scene.add(bush);
@@ -226,17 +304,11 @@ class PlaceContactLinks {
   }
   placeButtons(font, text, cx, cy, cz) {
     const cylindergeometry = new THREE.CylinderGeometry(1, 1, 1, 16);
-    const cylindermaterial = new THREE.MeshBasicMaterial({ color: 0xffac1c });
+    const cylindermaterial = new THREE.MeshBasicMaterial({ color: 0xffb538 });
     const cylinder = new THREE.Mesh(cylindergeometry, cylindermaterial);
     cylinder.position.set(cx, cy, cz);
     cylinder.castShadow = true;
     cylinder.rotateX(Math.PI / 2);
-
-    const gui = new GUI();
-    const p = { col: cylinder.material.color.getHex() };
-    gui.addColor(p, 'col').onChange((val) => {
-      cylinder.material.color.set(val);
-    });
 
     const pressEnterTextGeometry = new TextGeometry('Press \nEnter', {
       font: font,
