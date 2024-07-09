@@ -346,6 +346,24 @@ class PlaceNameAndBackWall {
       );
       this.scene.add(pave);
     }
+
+    // experience 3 button
+    slope = 0.25;
+    for (let i = 0; i < 5; i++) {
+      const pave = pavementBrick.clone();
+      pave.rotation.z = Math.PI / 2;
+      pave.position.set(
+        xoff - 70 - i - Math.random() * 0.9 + 0.4,
+        yoff -
+          7.5 +
+          (i % 2 == 0 ? 0 : 1) +
+          i * slope +
+          Math.random() * 0.5 -
+          0.25,
+        -0.9
+      );
+      this.scene.add(pave);
+    }
   }
 
   guicheck(mesh) {

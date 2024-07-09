@@ -43,7 +43,7 @@ const gltfLoader = new GLTFLoader();
 let speed = 0,
   maxSpeed = 0.5,
   maxAngularSpeed = 2,
-  acceleration = 0.05;
+  acceleration = 0.09;
 let buttonArray = [];
 const colorsArr = [
   new THREE.Color(0xffffe0), // Initial cube color
@@ -338,7 +338,7 @@ function animate() {
   placeProjectsClass.update();
   placeExperienceClass.update();
 
-  cannondebugger.update();
+  // cannondebugger.update();
   // ufotoplighthelper.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -414,11 +414,11 @@ function keydown(event) {
   if (key === 'a') {
     dir.left = true;
   }
-  if (key === 'w') {
+  if (key === 'w' || dir.forward) {
     dir.forward = true;
     speed += acceleration;
   }
-  if (key === 's') {
+  if (key === 's' || dir.back) {
     dir.back = true;
     speed -= acceleration;
   }

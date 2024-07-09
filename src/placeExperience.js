@@ -13,6 +13,9 @@ class PlaceExperience {
 
   expButton1;
   expButton2;
+  expButton3;
+
+  onExpBtn = -1;
 
   constructor(scene, world, assets, ufobody) {
     this.scene = scene;
@@ -22,6 +25,14 @@ class PlaceExperience {
     this.ufobody = ufobody;
 
     this.placeModalsPosition();
+
+    window.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        if (this.onExpBtn != -1) {
+          window.open(this.onExpBtn, '_blank');
+        }
+      }
+    });
   }
 
   placeModalsPosition() {
@@ -67,6 +78,26 @@ class PlaceExperience {
         '-> Built a real-time tournament registration\n    system with integrated payment gateway',
         '-> Enhanced application functionality by adding\n     over 10 features and resolving critical bugs.',
       ],
+      0,
+      -1,
+      -2
+    );
+
+    this.expButton3 = this.placeGLBMesh(
+      'experience button',
+      xoff - 44,
+      yoff + 2,
+      -0.6,
+      0.9,
+      0.9
+    );
+    this.scene.add(this.expButton3);
+    this.expButtonText(
+      this.expButton3,
+      '  Brane Enterprises',
+      '  (ASSOCIATE SOLUTION LEADER)',
+      '- Jul 2024 - Present',
+      ['-> Joined'],
       0,
       -1,
       -2
@@ -264,11 +295,18 @@ class PlaceExperience {
   }
 
   update() {
-    this.enterButtonRange(this.expButton1);
-    this.enterButtonRange(this.expButton2);
+    this.enterButtonRange(
+      this.expButton1,
+      'https://drive.google.com/file/d/18O7Kphq2ZUyFED-QR5JQC1OXDwFsWUq4/view?usp=drive_link'
+    );
+    this.enterButtonRange(
+      this.expButton2,
+      'https://drive.google.com/file/d/1ec37RNmuRhBjHd27UoCFILDGsW1pMBnB/view?usp=drive_link'
+    );
+    this.enterButtonRange(this.expButton3, '');
   }
 
-  enterButtonRange(btn) {
+  enterButtonRange(btn, onBtnLink) {
     if (
       Math.sqrt(
         Math.pow(btn.position.x - this.ufobody.position.x, 2) +
@@ -285,11 +323,13 @@ class PlaceExperience {
           btn.position.z -= 0.01;
           document.getElementById('modal-container').classList.add('six');
           document.getElementById('modal-container').classList.remove('out');
+          this.onExpBtn = onBtnLink;
         }
       } else {
         if (btn.position.z < -0.6) {
           btn.position.z += 0.01;
           document.getElementById('modal-container').classList.add('out');
+          this.onExpBtn = -1;
         }
       }
     }

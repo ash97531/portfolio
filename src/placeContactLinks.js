@@ -14,6 +14,8 @@ class PlaceContactLinks {
   buttonArray = [];
   assets;
 
+  onBtn = -1;
+
   constructor(scene, world, ufomesh, assets) {
     this.scene = scene;
     this.world = world;
@@ -22,7 +24,14 @@ class PlaceContactLinks {
     this.ufomesh = ufomesh;
 
     this.placeModelsPosition();
-    // this.placeButtons();
+
+    window.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        if (this.onBtn != -1) {
+          window.open(this.onBtn, '_blank');
+        }
+      }
+    });
   }
 
   async placeModelsPosition() {
@@ -286,10 +295,34 @@ class PlaceContactLinks {
 
     const loader = new FontLoader();
     loader.load('./fonts/Coffee Spark_Regular.json', (font) => {
-      this.placeButtons(font, 'Gmail', xoff, yoff + 1, -1);
-      this.placeButtons(font, 'Github', xoff + 6, yoff + 1, -1);
-      this.placeButtons(font, 'LinkedIn', xoff, yoff - 5, -1);
-      this.placeButtons(font, 'PlayStore', xoff + 6, yoff - 5, -1);
+      this.placeButtons(
+        font,
+        'mailto: ashwani.97531@gmail.com',
+        xoff,
+        yoff + 1,
+        -1
+      );
+      this.placeButtons(
+        font,
+        'https://github.com/ash97531',
+        xoff + 6,
+        yoff + 1,
+        -1
+      );
+      this.placeButtons(
+        font,
+        'https://www.linkedin.com/in/ashwani-kumar-0406961b9/',
+        xoff,
+        yoff - 5,
+        -1
+      );
+      this.placeButtons(
+        font,
+        'https://play.google.com/store/apps/dev?id=8524140333075623671&hl=en',
+        xoff + 6,
+        yoff - 5,
+        -1
+      );
     });
 
     loader.load('./fonts/Noto Sans SemiCondensed_Regular.json', (font) => {
@@ -336,7 +369,7 @@ class PlaceContactLinks {
     folder3.add(mesh.scale, 'z', 0, 5, 0.001);
     folder3.open();
   }
-  placeButtons(font, text, cx, cy, cz) {
+  placeButtons(font, link, cx, cy, cz) {
     const cylindergeometry = new THREE.CylinderGeometry(1, 1, 1, 16);
     const cylindermaterial = new THREE.MeshBasicMaterial({ color: 0xffb538 });
     const cylinder = new THREE.Mesh(cylindergeometry, cylindermaterial);
@@ -364,7 +397,7 @@ class PlaceContactLinks {
     pressEnterTextMesh.rotateX(Math.PI / 2);
     this.scene.add(pressEnterTextMesh);
 
-    this.buttonArray.push({ button: cylinder, text: pressEnterTextMesh });
+    this.buttonArray.push({ button: cylinder, text: pressEnterTextMesh, link });
     // console.log(cylinder);
 
     this.scene.add(cylinder);
@@ -423,6 +456,7 @@ class PlaceContactLinks {
   }
 
   update() {
+    let isUfoOnButton = false;
     for (let i = 0; i < this.buttonArray.length; i++) {
       const button = this.buttonArray[i].button;
       const text = this.buttonArray[i].text;
@@ -432,12 +466,17 @@ class PlaceContactLinks {
             Math.pow(button.position.y - this.ufomesh.position.y, 2)
         ) < 1.1
       ) {
+        isUfoOnButton = true;
         text.material.opacity = Math.min(text.material.opacity + 0.05, 1);
         button.position.z = Math.max(button.position.z - 0.05, -1.2);
+        this.onBtn = this.buttonArray[i].link;
       } else {
         text.material.opacity = Math.max(text.material.opacity - 0.05, 0);
         button.position.z = Math.min(button.position.z + 0.05, -1);
       }
+    }
+    if (!isUfoOnButton) {
+      this.onBtn = -1;
     }
   }
 

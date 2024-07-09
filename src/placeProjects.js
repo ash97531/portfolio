@@ -64,10 +64,17 @@ class PlaceProjects {
             this.teleportUfo();
           } else {
             // teleport to project link
-            window.open(
-              'https://pmndrs.github.io/cannon-es/docs/classes/Body.html#sleepyEvent',
-              '_blank'
-            );
+            if (this.onMountain == 0) {
+              window.open(
+                'https://play.google.com/store/apps/details?id=com.kridacreations.mouse&hl=en',
+                '_blank'
+              );
+            } else if (this.onMountain == 1) {
+              window.open(
+                'https://www.youtube.com/watch?v=AdNWGHYeAeo',
+                '_blank'
+              );
+            }
           }
         }
       }
@@ -181,6 +188,9 @@ class PlaceProjects {
     eshopText.position.set(-2.5, -0.5, -0.55);
     eshopText.scale.y = 0.8;
     bitcoin.add(eshopText);
+    bitcoin.children.map((child) => {
+      child.castShadow = true;
+    });
     this.scene.add(bitcoin);
 
     const blockchainModel = this.placeGLBMesh(
@@ -421,7 +431,7 @@ class PlaceProjects {
       type: CANNON.Body.STATIC,
       position: mountainMesh.position,
       shape: new CANNON.Cylinder(
-        size.x / 4 - 0.3,
+        size.x / 4 - 0.6,
         size.x / 4 + 2.6,
         size.z / 2 - 0.3,
         16
@@ -674,6 +684,9 @@ class PlaceProjects {
         this.onMountain = 1;
         this.checkTeleporter();
 
+        document.getElementById('modal-container').classList.add('six');
+        document.getElementById('modal-container').classList.remove('out');
+
         this.coinAtTopOfShop.rotateZ(0.05);
         this.fireCoinCannon();
         this.shakeObject(this.shop);
@@ -685,6 +698,7 @@ class PlaceProjects {
       } else {
         this.onMountain = -1;
         this.shakeTime = 0.5;
+        document.getElementById('modal-container').classList.add('out');
       }
     }
   }
