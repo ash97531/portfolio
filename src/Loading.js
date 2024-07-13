@@ -215,7 +215,7 @@ class Loading {
     const loader = new FontLoader();
     loader.load('./fonts/Coffee Spark_Regular.json', (font) => {
       const geometry = new TextGeometry(
-        '- Press  W,A,S,D  for movement\n- Press  SPACE  to jump',
+        '- Press  W,A,S,D  for movement\n- Press  SPACE  to jump\n- Press ENTER to start',
         {
           font: font,
           size: 0.8,
@@ -347,9 +347,9 @@ class Loading {
     const model = await this.gltfLoader.loadAsync(`assets/${asset}.glb`);
     this.assets[asset] = model.scene.children[0];
     this.progress[0]++;
-    for (let i = 0; i < 0.6 * 2; i += 0.6)
+    for (let i = 0; i < 0.6; i += 0.6)
       this.placeLetterCells(
-        xoff + this.progress[0] * 0.6 * 2,
+        xoff + this.progress[0] * 0.6 * 1.5 + 0.6,
         yoff,
         i,
         -0.6 * 9
@@ -363,8 +363,6 @@ class Loading {
     await this.modelAndProgressLoading('apple tree', xoff, 0);
     await this.modelAndProgressLoading('apple tree stone', xoff, 0);
     await this.modelAndProgressLoading('stone1', xoff, 0);
-    await this.modelAndProgressLoading('stone22', xoff, 0);
-    await this.modelAndProgressLoading('stone23', xoff, 0);
     await this.modelAndProgressLoading('stone24', xoff, 0);
     await this.modelAndProgressLoading('flashlight optimised', xoff, 0);
     await this.modelAndProgressLoading('gmail', xoff, 0);

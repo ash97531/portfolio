@@ -30,6 +30,7 @@ let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
 
 let camera, scene, renderer, world, labelRenderer, orbit;
 
+const ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
 let camZoomY = 0,
   camZoomZ = 0,
   repositioned = true;
@@ -75,6 +76,7 @@ class App {
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener('keydown', keydown, false);
     window.addEventListener('keyup', keyup, false);
+    window.addEventListener('keypress', keypress, false);
     window.addEventListener('wheel', cameraZoom, false);
     window.addEventListener('mousedown', onMouseDown, false);
     window.addEventListener('mousemove', onMouseMove, false);
@@ -176,7 +178,7 @@ class App {
       0.01,
       2000
     );
-    camera.position.set(11.5, -14.5, 12.5 + 10);
+    camera.position.set(12.5, -14.5, 12.5 + 10);
     // camera.position.set(15.3, -3.5, 5.7);
     // camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.rotation.set(0.74, 2.71, -2.511);
@@ -192,7 +194,7 @@ class App {
     document.body.appendChild(renderer.domElement);
 
     orbit = new OrbitControls(camera, renderer.domElement);
-    orbit.target.set(11.5, -7.8, 3.42 + 10);
+    orbit.target.set(12.5, -7.8, 3.42 + 10);
     orbit.enableRotate = false;
     orbit.enableZoom = false;
     orbit.enablePan = false;
@@ -308,27 +310,25 @@ class App {
     });
     // console.log(ufomesh.position, ufobody.position);
 
-    /*
-    const ufotoplight = new THREE.SpotLight(0xffffff, 1, 10);
-    ufotoplight.position.set(0, 0, 10);
-    ufotoplight.target.position.set(0, 0, 0);
-    ufomesh.add(ufotoplight);
-    ufomesh.add(ufotoplight.target);
+    ufotoplight.position.set(
+      camera.position.x,
+      camera.position.y,
+      camera.position.z
+    );
+    ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
+    ufotoplight.penumbra = 1;
+    scene.add(ufotoplight);
+    // ufomesh.add(ufotoplight);
+    scene.add(ufotoplight.target);
     ufotoplighthelper = new THREE.SpotLightHelper(ufotoplight);
     scene.add(ufotoplighthelper);
-
-    gui.add(ufotoplight.position, 'z', -10, 10, 0.01);
-    gui.add(ufotoplight, 'intensity', 0, 2000, 0.01);
-    gui.add(ufotoplight, 'distance', 0, 100, 0.01);
-    gui.add(ufotoplight, 'angle', 0, Math.PI / 2, 0.01);
-    gui.add(ufotoplight, 'penumbra', 0, 1, 0.01);
-    gui.add(ufotoplight, 'decay', 0, 2, 0.01);
-    */
 
     scene.add(ufomesh);
 
     meshes.push(ufomesh);
     bodies.push(ufobody);
+    ufobody.applyForce(new CANNON.Vec3(1000, 0, 0));
+    // ufobody.applyTorque(new CANNON.Vec3(0, 0, 0.5));
   }
 }
 
@@ -383,7 +383,7 @@ function animate() {
   placeExperienceClass.update();
 
   // cannondebugger.update();
-  // ufotoplighthelper.update();
+  ufotoplighthelper.update();
   TWEEN.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -392,27 +392,6 @@ function animate() {
 }
 
 function floatUfo() {
-  // ___ Raycasting using three js ___
-  /*
-  const raycaster = new THREE.Raycaster(
-    new THREE.Vector3(
-      ufobody.position.x,
-      ufobody.position.y,
-      ufobody.position.z
-    ),
-    new THREE.Vector3(0, 0, -1)
-  );
-
-  const intersects = raycaster.intersectObjects(scene.children, false);
-  if (intersects.length >= 2) {
-    const force = intersects[1].distance;
-    const mult = 30;
-    ufobody.applyForce(new CANNON.Vec3(0, 0, (1 / force) * mult));
-  }
-  */
-
-  // ___ Raycasting using cannon js ___
-
   const result = new CANNON.RaycastResult();
   world.raycastClosest(
     ufobody.position.vadd(new CANNON.Vec3(0, 0, -0.6)),
@@ -432,7 +411,7 @@ function floatUfo() {
   let ufoquat = new CANNON.Vec3();
   ufobody.quaternion.toEuler(ufoquat);
   // floating mechanics
-  const maxTorqueAngle = (5 / 180) * Math.PI;
+  const maxTorqueAngle = (7 / 180) * Math.PI;
   const torqueVal = 5;
   if (ufobody.angularVelocity.almostZero(0.5)) {
     // if (!dir.left && !dir.right && !dir.forward && !dir.back) {
@@ -460,6 +439,7 @@ function onMouseDown(event) {
 
 function onMouseMove(event) {
   if (!isPanning) return;
+  if (!enterKeyPressed) return;
   if (
     Math.abs(ufobody.velocity.x) >= 0.1 ||
     Math.abs(ufobody.velocity.y) >= 0.1
@@ -477,6 +457,13 @@ function onMouseMove(event) {
 
   startPan.copy(panEnd);
   orbit.update();
+
+  ufotoplight.position.set(
+    camera.position.x,
+    camera.position.y,
+    camera.position.z
+  );
+  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
 }
 
 function onMouseUp(event) {
@@ -487,6 +474,7 @@ function onMouseUp(event) {
 
 function cameraZoom(event) {
   if (!repositioned) return;
+  if (!enterKeyPressed) return;
   const delta = event.deltaY * 0.01;
   camZoomY += delta;
   camZoomZ -= delta;
@@ -507,9 +495,12 @@ function cameraZoom(event) {
   );
   orbit.update();
 
-  // orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
-
-  // orbit.update();
+  ufotoplight.position.set(
+    camera.position.x,
+    camera.position.y,
+    camera.position.z
+  );
+  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
 }
 
 function keydown(event) {
@@ -528,9 +519,6 @@ function keydown(event) {
     dir.back = true;
     speed -= acceleration;
   }
-  if (key === ' ') {
-    if (ufobody.position.z < 8) ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
-  }
 }
 
 function keyup(event) {
@@ -544,6 +532,15 @@ function keyup(event) {
   if (key === 's' || key === 'arrowdown') {
     dir.back = false;
     speed = 0;
+  }
+}
+
+function keypress(event) {
+  const key = event.key.toLowerCase();
+
+  if (key === ' ') {
+    if (ufobody.position.z < camera.position.z - 5)
+      ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
   }
 }
 
@@ -597,6 +594,12 @@ function followCamera() {
     12 + camZoomZ
   );
   orbit.update();
+  ufotoplight.position.set(
+    camera.position.x,
+    camera.position.y,
+    camera.position.z
+  );
+  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
 }
 
 let animationLoaded = false;
@@ -659,10 +662,19 @@ function loadingAnimation() {
         ufobody.position.set(-2, 0, 12);
 
         // temporary
-
         orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
         camera.position.set(ufobody.position.x, ufobody.position.y - 9, 12);
         orbit.update();
+        ufotoplight.position.set(
+          camera.position.x,
+          camera.position.y,
+          camera.position.z
+        );
+        ufotoplight.target.position.set(
+          camera.position.x,
+          camera.position.y,
+          0
+        );
 
         animate();
         return;
