@@ -7,6 +7,7 @@ import {
   FontLoader,
   TextGeometry,
 } from 'three/examples/jsm/Addons.js';
+import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 
 class PlaceProjects {
   scene;
@@ -16,6 +17,8 @@ class PlaceProjects {
   ufobody;
   ufomesh;
   dir;
+  camera;
+  orbit;
   mountainArray = [];
   onMountain = -1;
 
@@ -38,7 +41,7 @@ class PlaceProjects {
   meshes = [];
   bodies = [];
 
-  constructor(scene, world, assets, ufobody, ufomesh, dir) {
+  constructor(scene, world, assets, ufobody, ufomesh, dir, camera, orbit) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
@@ -46,6 +49,8 @@ class PlaceProjects {
     this.ufobody = ufobody;
     this.ufomesh = ufomesh;
     this.dir = dir;
+    this.camera = camera;
+    this.orbit = orbit;
 
     this.placeModelsPosition();
 
@@ -94,10 +99,35 @@ class PlaceProjects {
       this.ufomesh.scale.set(1, 1, 1);
       this.dir.move = true;
 
+      this.moveCamera(
+        {
+          x: this.ufobody.position.x,
+          y: this.ufobody.position.y - 7,
+          z: this.camera.position.z,
+        },
+        {
+          x: this.ufobody.position.x,
+          y: this.ufobody.position.y,
+          z: 0.5,
+        }
+      );
+
       return;
     }
 
     requestAnimationFrame(() => this.teleportUfo());
+  }
+
+  moveCamera(camPos, orbitPos) {
+    new TWEEN.Tween(this.camera.position)
+      .to(camPos, 2000) // Move camera to the target position over 2000ms (2 seconds)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .start();
+
+    new TWEEN.Tween(this.orbit.target)
+      .to(orbitPos, 2000) // Move controls target to the target position over 2000ms (2 seconds)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .start();
   }
 
   async placeModelsPosition() {
@@ -576,9 +606,13 @@ class PlaceProjects {
       //switch on teleporter light
       project.children[13].intensity = 4;
       document.getElementById('modal-img').data = 'images/teleporter.png';
+      document.getElementById('modal-text').textContent =
+        'Press ENTER: Teleport to other project';
     } else {
       project.children[13].intensity = 0.5;
       document.getElementById('modal-img').data = 'images/ufo.png';
+      document.getElementById('modal-text').textContent =
+        'Press ENTER: Fly to project';
       //switch off teleporter light
     }
   }

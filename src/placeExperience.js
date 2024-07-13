@@ -319,6 +319,8 @@ class PlaceExperience {
             Math.pow(btn.position.y - this.ufobody.position.y, 2)
         ) < 6 // on mountain check
       ) {
+        document.getElementById('modal-text').textContent =
+          'Press ENTER: Fly to experience';
         if (btn.position.z > -1) {
           btn.position.z -= 0.01;
           document.getElementById('modal-container').classList.add('six');
@@ -326,6 +328,8 @@ class PlaceExperience {
           this.onExpBtn = onBtnLink;
         }
       } else {
+        document.getElementById('modal-text').textContent =
+          'Press ENTER: Fly to experience';
         if (btn.position.z < -0.6) {
           btn.position.z += 0.01;
           document.getElementById('modal-container').classList.add('out');
