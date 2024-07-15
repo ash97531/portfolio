@@ -28,7 +28,7 @@ const totalAssets = 29;
 
 let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
 
-let camera, scene, renderer, world, labelRenderer, orbit;
+let camera, scene, renderer, world, orbit;
 
 const ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
 let camZoomY = 0,
@@ -48,6 +48,8 @@ let dir = {
   back: false,
   move: true,
 };
+let directionArrow;
+
 const gltfLoader = new GLTFLoader();
 let speed = 0,
   maxSpeed = 0.5,
@@ -286,7 +288,7 @@ class App {
     ufobody = new CANNON.Body({
       mass: 2,
       linearDamping: 0.8,
-      angularDamping: 0.97,
+      angularDamping: 0.99,
     });
     // ufobody.addShape(cy);
     ufobody.position.set(0, -4, 12);
@@ -308,7 +310,13 @@ class App {
     ufomesh.children.map((child) => {
       child.castShadow = true;
     });
-    // console.log(ufomesh.position, ufobody.position);
+
+    directionArrow = await gltfLoader.loadAsync('assets/cursor.glb');
+    directionArrow = directionArrow.scene.children[0];
+    directionArrow.position.set(0, 0, 2);
+    directionArrow.scale.set(12, 6, 6);
+    directionArrow.visible = false;
+    ufomesh.add(directionArrow);
 
     ufotoplight.position.set(
       camera.position.x,
@@ -335,8 +343,6 @@ class App {
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
-  labelRenderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -376,7 +382,8 @@ function animate() {
       followCamera();
     }
   }
-  // followCamera();
+
+  checkIfLost();
 
   placeContactLinksClass.update();
   placeProjectsClass.update();
@@ -389,6 +396,20 @@ function animate() {
   requestAnimationFrame(animate);
 
   stats.end();
+}
+
+function checkIfLost() {
+  if (
+    Math.sqrt(
+      Math.pow(-10 - ufomesh.position.x, 2) +
+        Math.pow(-10 - ufomesh.position.y, 2)
+    ) > 50
+  ) {
+    directionArrow.lookAt(0, 0, 0);
+    directionArrow.visible = true;
+  } else {
+    directionArrow.visible = false;
+  }
 }
 
 function floatUfo() {
@@ -412,7 +433,7 @@ function floatUfo() {
   ufobody.quaternion.toEuler(ufoquat);
   // floating mechanics
   const maxTorqueAngle = (7 / 180) * Math.PI;
-  const torqueVal = 5;
+  const torqueVal = 25 * maxTorqueAngle * 2;
   if (ufobody.angularVelocity.almostZero(0.5)) {
     // if (!dir.left && !dir.right && !dir.forward && !dir.back) {
     if (ufobody.quaternion.x > maxTorqueAngle) {
@@ -511,11 +532,11 @@ function keydown(event) {
   if (key === 'a' || key === 'arrowleft') {
     dir.left = true;
   }
-  if (key === 'w' || key === 'arrowup' || dir.forward) {
+  if (key === 's' || key === 'arrowup' || dir.forward) {
     dir.forward = true;
     speed += acceleration;
   }
-  if (key === 's' || key === 'arrowdown' || dir.back) {
+  if (key === 'w' || key === 'arrowdown' || dir.back) {
     dir.back = true;
     speed -= acceleration;
   }
@@ -525,11 +546,11 @@ function keyup(event) {
   const key = event.key.toLowerCase();
   if (key === 'd' || key === 'arrowright') dir.right = false;
   if (key === 'a' || key === 'arrowleft') dir.left = false;
-  if (key === 'w' || key === 'arrowup') {
+  if (key === 's' || key === 'arrowup') {
     dir.forward = false;
     speed = 0;
   }
-  if (key === 's' || key === 'arrowdown') {
+  if (key === 'w' || key === 'arrowdown') {
     dir.back = false;
     speed = 0;
   }
@@ -577,11 +598,11 @@ function moveUfo() {
     }
 
     if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.left) {
-      ufobody.angularVelocity.z += 0.8;
+      ufobody.angularVelocity.z += 1.5;
     }
 
     if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.right) {
-      ufobody.angularVelocity.z -= 0.8;
+      ufobody.angularVelocity.z -= 1.5;
     }
   }
 }

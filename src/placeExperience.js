@@ -97,7 +97,9 @@ class PlaceExperience {
       '  Brane Enterprises',
       '  (ASSOCIATE SOLUTION LEADER)',
       '- Jul 2024 - Present',
-      ['-> Joined'],
+      [
+        '-> Collaborate with 5+ development team to \n    design, build, and efficient backend REST APIs\n    for various applications',
+      ],
       0,
       -1,
       -2
