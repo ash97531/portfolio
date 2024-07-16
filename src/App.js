@@ -14,7 +14,6 @@ import Compass from './compass';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
-import TouchEvents from './touchEvents';
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -210,7 +209,7 @@ class App {
     );
   }
 
-  placeScenes() {
+  async placeScenes() {
     placeContactLinksClass = new PlaceContactLinks(
       scene,
       world,

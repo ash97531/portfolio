@@ -398,7 +398,7 @@ class Loading {
       './fonts/Chela One_Regular.json'
     );
 
-    new App().placeScenes();
+    await new App().placeScenes();
 
     this.progress[1] = true;
     this.disappearLoading();
