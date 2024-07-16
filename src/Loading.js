@@ -358,6 +358,7 @@ class Loading {
 
   async loadModels() {
     const xoff = -0.6;
+    const app = new App();
 
     await this.modelAndProgressLoading('brick', xoff, 0);
     await this.modelAndProgressLoading('apple tree', xoff, 0);
@@ -365,30 +366,22 @@ class Loading {
     await this.modelAndProgressLoading('stone1', xoff, 0);
     await this.modelAndProgressLoading('stone24', xoff, 0);
     await this.modelAndProgressLoading('flashlight optimised', xoff, 0);
-    await this.modelAndProgressLoading('gmail', xoff, 0);
-    await this.modelAndProgressLoading('github', xoff, 0);
-    await this.modelAndProgressLoading('linkedin', xoff, 0);
-    await this.modelAndProgressLoading('playstore', xoff, 0);
     await this.modelAndProgressLoading('tree4ashoka', xoff, 0);
+    await this.modelAndProgressLoading('india map', xoff, 0);
+
+    app.placeNameAndBackWallFun();
+
     await this.modelAndProgressLoading('bush', xoff, 0);
     await this.modelAndProgressLoading('dark bush', xoff, 0);
     await this.modelAndProgressLoading('fence 4 sticks', xoff, 0);
     await this.modelAndProgressLoading('stone combined 1', xoff, 0);
-    await this.modelAndProgressLoading('left sign post', xoff, 0);
-    await this.modelAndProgressLoading('android icon', xoff, 0);
-    await this.modelAndProgressLoading('project landscape2', xoff, 0);
-    await this.modelAndProgressLoading('screen and keyboard', xoff, 0);
-    await this.modelAndProgressLoading('mouse', xoff, 0);
-    await this.modelAndProgressLoading('cursor', xoff, 0);
-    await this.modelAndProgressLoading('shop', xoff, 0);
-    await this.modelAndProgressLoading('cannon', xoff, 0);
-    await this.modelAndProgressLoading('teleporter', xoff, 0);
-    await this.modelAndProgressLoading('trophy', xoff, 0);
-    await this.modelAndProgressLoading('archery skills', xoff, 0);
-    await this.modelAndProgressLoading('india map', xoff, 0);
-    await this.modelAndProgressLoading('experience button', xoff, 0);
-    await this.modelAndProgressLoading('bitcoin', xoff, 0);
-    await this.modelAndProgressLoading('blockchain', xoff, 0);
+
+    await this.modelAndProgressLoading('gmail', xoff, 0);
+    await this.modelAndProgressLoading('github', xoff, 0);
+    await this.modelAndProgressLoading('linkedin', xoff, 0);
+    await this.modelAndProgressLoading('playstore', xoff, 0);
+
+    app.placeContactLinksFun();
 
     this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(
       './fonts/Gudea_Regular.json'
@@ -398,7 +391,26 @@ class Loading {
       './fonts/Chela One_Regular.json'
     );
 
-    await new App().placeScenes();
+    await this.modelAndProgressLoading('left sign post', xoff, 0);
+    await this.modelAndProgressLoading('android icon', xoff, 0);
+    await this.modelAndProgressLoading('project landscape2', xoff, 0);
+    await this.modelAndProgressLoading('screen and keyboard', xoff, 0);
+    await this.modelAndProgressLoading('mouse', xoff, 0);
+    await this.modelAndProgressLoading('cursor', xoff, 0);
+    await this.modelAndProgressLoading('shop', xoff, 0);
+    await this.modelAndProgressLoading('cannon', xoff, 0);
+    await this.modelAndProgressLoading('teleporter', xoff, 0);
+    await this.modelAndProgressLoading('bitcoin', xoff, 0);
+    await this.modelAndProgressLoading('blockchain', xoff, 0);
+    await this.modelAndProgressLoading('experience button', xoff, 0);
+
+    app.placeProjectsFun();
+    app.placeExperienceFun();
+
+    await this.modelAndProgressLoading('trophy', xoff, 0);
+    await this.modelAndProgressLoading('archery skills', xoff, 0);
+
+    app.placeAchievementsFun();
 
     this.progress[1] = true;
     this.disappearLoading();

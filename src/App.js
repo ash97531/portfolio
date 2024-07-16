@@ -209,14 +209,20 @@ class App {
     );
   }
 
-  async placeScenes() {
+  async placeContactLinksFun() {
     placeContactLinksClass = new PlaceContactLinks(
       scene,
       world,
       ufomesh,
       assets
     );
+  }
+
+  async placeNameAndBackWallFun() {
     new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
+  }
+
+  async placeProjectsFun() {
     placeProjectsClass = new PlaceProjects(
       scene,
       world,
@@ -227,7 +233,13 @@ class App {
       camera,
       orbit
     );
+  }
+
+  async placeAchievementsFun() {
     new PlaceAchievements(scene, world, meshes, bodies, assets);
+  }
+
+  async placeExperienceFun() {
     placeExperienceClass = new PlaceExperience(scene, world, assets, ufobody);
   }
 
