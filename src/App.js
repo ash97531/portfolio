@@ -14,6 +14,7 @@ import Compass from './compass';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
+import TouchEvents from './touchEvents';
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -72,7 +73,7 @@ const gui = new GUI();
 
 let enterKeyPressed = false;
 
-let ufotoplighthelper;
+// let ufotoplighthelper;
 class App {
   async init() {
     window.addEventListener('resize', onWindowResize, false);
@@ -87,6 +88,8 @@ class App {
     this.setUpGraphics();
     this.setupPhysicsWorld();
 
+    this.touchControls();
+
     this.createGround();
     await this.player();
 
@@ -95,6 +98,105 @@ class App {
 
     // this.placeScenes();
     // animate();
+  }
+
+  touchControls() {
+    function isTouchDevice() {
+      return (
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0
+      );
+    }
+
+    if (!isTouchDevice()) {
+      document.getElementById('vertical-controls').style.display = 'none';
+      document.getElementById('controls').style.display = 'none';
+    } else {
+      camera.position.set(13, -23, 39);
+    }
+
+    let ufofront, ufoback;
+
+    document.getElementById('upButton').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      ufofront = setInterval(() => {
+        dir.back = true;
+        speed -= acceleration;
+      }, 1000 / 60);
+    });
+
+    document.getElementById('upButton').addEventListener('touchend', (e) => {
+      e.preventDefault();
+      clearInterval(ufofront);
+      dir.back = false;
+      speed = 0;
+    });
+
+    document
+      .getElementById('downButton')
+      .addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        ufoback = setInterval(() => {
+          dir.forward = true;
+          speed += acceleration;
+        }, 1000 / 60);
+      });
+
+    document.getElementById('downButton').addEventListener('touchend', (e) => {
+      e.preventDefault();
+      clearInterval(ufoback);
+      dir.forward = false;
+      speed = 0;
+    });
+
+    document
+      .getElementById('leftButton')
+      .addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        dir.left = true;
+      });
+
+    document.getElementById('leftButton').addEventListener('touchend', (e) => {
+      e.preventDefault();
+      dir.left = false;
+    });
+
+    document
+      .getElementById('rightButton')
+      .addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        dir.right = true;
+      });
+
+    document.getElementById('rightButton').addEventListener('touchend', (e) => {
+      e.preventDefault();
+      dir.right = false;
+    });
+
+    document
+      .getElementById('jumpButton')
+      .addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (ufobody.position.z < camera.position.z - 5)
+          ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
+      });
+
+    document
+      .getElementById('enterButton')
+      .addEventListener('touchstart', (e) => {
+        e.preventDefault();
+
+        const enterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          keyCode: 13,
+          which: 13,
+          code: 'Enter',
+          bubbles: true,
+          cancelable: true,
+        });
+        document.dispatchEvent(enterEvent);
+      });
   }
 
   loadingScene() {
@@ -181,8 +283,6 @@ class App {
       2000
     );
     camera.position.set(12.5, -14.5, 12.5 + 10);
-    // camera.position.set(15.3, -3.5, 5.7);
-    // camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.rotation.set(0.74, 2.71, -2.511);
 
     scene = new THREE.Scene();
@@ -328,14 +428,15 @@ class App {
     scene.add(ufotoplight);
     // ufomesh.add(ufotoplight);
     scene.add(ufotoplight.target);
-    ufotoplighthelper = new THREE.SpotLightHelper(ufotoplight);
-    scene.add(ufotoplighthelper);
+    // ufotoplighthelper = new THREE.SpotLightHelper(ufotoplight);
+    // scene.add(ufotoplighthelper);
 
     scene.add(ufomesh);
 
     meshes.push(ufomesh);
     bodies.push(ufobody);
-    ufobody.applyForce(new CANNON.Vec3(1000, 0, 0));
+    ufobody.quaternion.setFromEuler(0, 0, Math.PI);
+    ufobody.applyForce(new CANNON.Vec3(2500, 0, 0));
     // ufobody.applyTorque(new CANNON.Vec3(0, 0, 0.5));
   }
 }
@@ -390,7 +491,7 @@ function animate() {
   placeExperienceClass.update();
 
   // cannondebugger.update();
-  ufotoplighthelper.update();
+  // ufotoplighthelper.update();
   TWEEN.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -532,11 +633,11 @@ function keydown(event) {
   if (key === 'a' || key === 'arrowleft') {
     dir.left = true;
   }
-  if (key === 's' || key === 'arrowup' || dir.forward) {
+  if (key === 's' || key === 'arrowdown' || dir.forward) {
     dir.forward = true;
     speed += acceleration;
   }
-  if (key === 'w' || key === 'arrowdown' || dir.back) {
+  if (key === 'w' || key === 'arrowup' || dir.back) {
     dir.back = true;
     speed -= acceleration;
   }
@@ -546,11 +647,11 @@ function keyup(event) {
   const key = event.key.toLowerCase();
   if (key === 'd' || key === 'arrowright') dir.right = false;
   if (key === 'a' || key === 'arrowleft') dir.left = false;
-  if (key === 's' || key === 'arrowup') {
+  if (key === 's' || key === 'arrowdown') {
     dir.forward = false;
     speed = 0;
   }
-  if (key === 'w' || key === 'arrowdown') {
+  if (key === 'w' || key === 'arrowup') {
     dir.back = false;
     speed = 0;
   }
