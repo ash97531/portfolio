@@ -10,6 +10,7 @@ class Loading {
   world;
   gltfLoader;
   fontLoader;
+  audioLoader;
   meshesWhileLoading;
   bodiesWhileLoading;
   assets;
@@ -29,6 +30,7 @@ class Loading {
     this.world = world;
     this.gltfLoader = new GLTFLoader();
     this.fontLoader = new FontLoader();
+    this.audioLoader = new THREE.AudioLoader();
     this.meshesWhileLoading = meshesWhileLoading;
     this.bodiesWhileLoading = bodiesWhileLoading;
     this.assets = assets;
@@ -389,6 +391,13 @@ class Loading {
 
     this.assets['Chela One_Regular'] = await this.fontLoader.loadAsync(
       './fonts/Chela One_Regular.json'
+    );
+
+    this.assets['gamestart'] = await this.audioLoader.loadAsync(
+      'sounds/game start.mp3'
+    );
+    this.assets['backgroundmusic'] = await this.audioLoader.loadAsync(
+      'sounds/background 2.mp3'
     );
 
     await this.modelAndProgressLoading('left sign post', xoff, 0);

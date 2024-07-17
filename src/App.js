@@ -10,14 +10,13 @@ import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 import PlaceContactLinks from './placeContactLinks';
 import PlaceNameAndBackWall from './placeNameAndBackWall';
 import PlaceProjects from './placeProjects';
-import Compass from './compass';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
 
-const stats = new Stats();
-stats.showPanel(0);
-document.body.appendChild(stats.dom);
+// const stats = new Stats();
+// stats.showPanel(0);
+// document.body.appendChild(stats.dom);
 
 let meshesWhileLoading = [],
   bodiesWhileLoading = [];
@@ -28,7 +27,7 @@ const totalAssets = 29;
 
 let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
 
-let camera, scene, renderer, world, orbit;
+let camera, scene, renderer, world, orbit, listener, sound;
 
 const ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
 let camZoomY = 0,
@@ -294,6 +293,11 @@ class App {
     );
     camera.position.set(12.5, -14.5, 12.5 + 10);
     camera.rotation.set(0.74, 2.71, -2.511);
+
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    sound = new THREE.Audio(listener);
 
     scene = new THREE.Scene();
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.018);
@@ -736,7 +740,7 @@ function followCamera() {
 
 let animationLoaded = false;
 function loadingAnimation() {
-  stats.begin();
+  // stats.begin();
   world.step(timestep);
 
   if (enterKeyPressed) return;
@@ -789,8 +793,17 @@ function loadingAnimation() {
     animationLoaded = true;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !enterKeyPressed) {
+        if (listener.context.state === 'suspended') {
+          listener.context.resume().then(() => {
+            playAudio();
+          });
+        } else {
+          playAudio();
+        }
+
         enterKeyPressed = true;
         loadingSceneClass.removeModels(true);
+
         ufobody.position.set(-2, 0, 12);
 
         // temporary
@@ -818,7 +831,22 @@ function loadingAnimation() {
   renderer.render(scene, camera);
   requestAnimationFrame(loadingAnimation);
 
-  stats.end();
+  // stats.end();
+}
+
+function playAudio() {
+  sound.setBuffer(assets['gamestart']);
+  sound.setLoop(false);
+  sound.setVolume(0.8);
+  sound.play();
+
+  setTimeout(() => {
+    sound.stop();
+    sound.setBuffer(assets['backgroundmusic']);
+    sound.setLoop(true);
+    sound.setVolume(0.1);
+    sound.play();
+  }, 1500);
 }
 
 export default App;
