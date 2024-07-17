@@ -26,7 +26,7 @@ class PlaceExperience {
 
     this.placeModalsPosition();
 
-    window.addEventListener('keypress', (e) => {
+    window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (this.onExpBtn != -1) {
           window.open(this.onExpBtn, '_blank');

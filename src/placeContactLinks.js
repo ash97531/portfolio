@@ -25,7 +25,7 @@ class PlaceContactLinks {
 
     this.placeModelsPosition();
 
-    window.addEventListener('keypress', (e) => {
+    window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (this.onBtn != -1) {
           window.open(this.onBtn, '_blank');
