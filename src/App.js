@@ -68,7 +68,6 @@ const colorsArr = [
   new THREE.Color(0x000000), // Black
 ];
 let nebula;
-const gui = new GUI();
 
 let enterKeyPressed = false;
 
@@ -786,7 +785,7 @@ function loadingAnimation() {
   floatUfo();
   // followCamera();
 
-  if (totalAssets >= progress[0] && !animationLoaded) {
+  if (progress[1] && !animationLoaded) {
     animationLoaded = true;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !enterKeyPressed) {

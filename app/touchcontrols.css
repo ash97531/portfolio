@@ -8,13 +8,7 @@ canvas { display: block; }
     display: flex;
     flex-direction: column;
 }
-/* #horizontal-controls {
-    position: absolute;
-    bottom: 2%;
-    right: 2%;
-    display: flex;
-    flex-direction: row;
-} */
+
 #vertical-controls {
     position: absolute;
     bottom: 2%;
@@ -22,28 +16,39 @@ canvas { display: block; }
     display: flex;
     flex-direction: column;
 }
-#jumpButton {
-    transform: rotateX('90');
-}
 .control-button {
     z-index: 5;
     width: 10vw; /* Use relative width */
     height: auto; /* Maintain aspect ratio */
     max-width: 50px;
-    max-height: 40px; /* Reduced height */
+    max-height: 50px; /* Reduced height */
     margin: 5px;
     cursor: pointer;
     border: 2px solid black; /* Square outline */
+    border-radius: 8px;
     box-sizing: border-box; /* Include border in element's total width and height */
 }
 .control-button.clicked {
     background-color: #ddd; /* Change to desired click effect color */
 }
+#jumpButton {
+    padding: 3px;
+    align-self: center;
+}
+
+#enterButton {
+    border: none;
+}
 
 @media (max-width: 600px) {
     .control-button {
         width: 15vw; /* Adjust for smaller screens */
-        max-width: 40px;
-        max-height: 30px; /* Reduced height */
+        max-width: 60px;
+        max-height: 50px; /* Reduced height */
+    }
+
+    #jumpButton {
+        padding: 5px;
+        max-height: 60px;
     }
 }

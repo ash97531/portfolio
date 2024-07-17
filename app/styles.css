@@ -3,6 +3,7 @@
   }
 
   #modal-container {
+    pointer-events: none;
     position: fixed;
     display: table;
     height: 50%;
