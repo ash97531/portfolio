@@ -460,7 +460,7 @@ function onWindowResize() {
 const timestep = 1 / 60;
 
 function animate() {
-  stats.begin();
+  // stats.begin();
 
   world.step(timestep);
   for (let i = 0; i < meshes.length; i++) {
@@ -506,7 +506,7 @@ function animate() {
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 
-  stats.end();
+  // stats.end();
 }
 
 function checkIfLost() {
