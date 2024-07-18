@@ -1,11 +1,9 @@
-# three-jsm
+# Hi buddy, Welcome to my portfolio
 
-Simple project example using the ES6 modules of three.js.
+I am excited to have you here :>
 
----
+Feel free to explore my work and projects by visiting my portfolio [here](https://ash97531.github.io/portfolio/app/).
 
-After downloading the repository, execute `npm install` once in the root directory to install all dependencies.
+If you'd like to connect professionally or learn more about my journey, you can find me on [LinkedIn](https://www.linkedin.com/in/ashwani-kumar-0406961b9/).
 
-You can then start a local server by using `npm start` and open `http://localhost:3000/app/` for testing.
-
-Run `npm run build` for running rollup
+Thank you for visiting, and I look forward to connecting with you!
