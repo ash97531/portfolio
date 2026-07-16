@@ -3,6 +3,62 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
 
+// Assets load group by group (models within a group load in parallel);
+// after each group finishes, its world section is placed via the App hooks.
+const LOADING_SEQUENCE = [
+  {
+    glbs: [
+      'brick',
+      'apple tree',
+      'apple tree stone',
+      'stone1',
+      'stone24',
+      'flashlight optimised',
+      'tree4ashoka',
+      'india map',
+    ],
+    place: (app) => app.placeNameAndBackWallFun(),
+  },
+  {
+    glbs: ['bush', 'dark bush', 'fence 4 sticks', 'stone combined 1'],
+  },
+  {
+    glbs: ['gmail', 'github', 'linkedin', 'playstore'],
+    place: (app) => app.placeContactLinksFun(),
+  },
+  {
+    fonts: ['Gudea_Regular', 'Chela One_Regular'],
+    sounds: {
+      gamestart: 'sounds/game start.mp3',
+      backgroundmusic: 'sounds/background 2.mp3',
+    },
+  },
+  {
+    glbs: [
+      'left sign post',
+      'android icon',
+      'project landscape2',
+      'screen and keyboard',
+      'mouse',
+      'cursor',
+      'shop',
+      'cannon',
+      'teleporter',
+      'bitcoin',
+      'blockchain',
+      'experience button',
+    ],
+    place: (app) => {
+      app.placeProjectsFun();
+      app.placeExperienceFun();
+    },
+  },
+  {
+    glbs: ['trophy', 'archery skills'],
+    place: (app) => app.placeAchievementsFun(),
+  },
+];
+
 class Loading {
   scene;
   world;
@@ -356,66 +412,27 @@ class Loading {
 
   async loadModels() {
     const xoff = -0.6;
-    const app = this.app;
 
-    await this.modelAndProgressLoading('brick', xoff, 0);
-    await this.modelAndProgressLoading('apple tree', xoff, 0);
-    await this.modelAndProgressLoading('apple tree stone', xoff, 0);
-    await this.modelAndProgressLoading('stone1', xoff, 0);
-    await this.modelAndProgressLoading('stone24', xoff, 0);
-    await this.modelAndProgressLoading('flashlight optimised', xoff, 0);
-    await this.modelAndProgressLoading('tree4ashoka', xoff, 0);
-    await this.modelAndProgressLoading('india map', xoff, 0);
-
-    app.placeNameAndBackWallFun();
-
-    await this.modelAndProgressLoading('bush', xoff, 0);
-    await this.modelAndProgressLoading('dark bush', xoff, 0);
-    await this.modelAndProgressLoading('fence 4 sticks', xoff, 0);
-    await this.modelAndProgressLoading('stone combined 1', xoff, 0);
-
-    await this.modelAndProgressLoading('gmail', xoff, 0);
-    await this.modelAndProgressLoading('github', xoff, 0);
-    await this.modelAndProgressLoading('linkedin', xoff, 0);
-    await this.modelAndProgressLoading('playstore', xoff, 0);
-
-    app.placeContactLinksFun();
-
-    this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(
-      './fonts/Gudea_Regular.json'
-    );
-
-    this.assets['Chela One_Regular'] = await this.fontLoader.loadAsync(
-      './fonts/Chela One_Regular.json'
-    );
-
-    this.assets['gamestart'] = await this.audioLoader.loadAsync(
-      'sounds/game start.mp3'
-    );
-    this.assets['backgroundmusic'] = await this.audioLoader.loadAsync(
-      'sounds/background 2.mp3'
-    );
-
-    await this.modelAndProgressLoading('left sign post', xoff, 0);
-    await this.modelAndProgressLoading('android icon', xoff, 0);
-    await this.modelAndProgressLoading('project landscape2', xoff, 0);
-    await this.modelAndProgressLoading('screen and keyboard', xoff, 0);
-    await this.modelAndProgressLoading('mouse', xoff, 0);
-    await this.modelAndProgressLoading('cursor', xoff, 0);
-    await this.modelAndProgressLoading('shop', xoff, 0);
-    await this.modelAndProgressLoading('cannon', xoff, 0);
-    await this.modelAndProgressLoading('teleporter', xoff, 0);
-    await this.modelAndProgressLoading('bitcoin', xoff, 0);
-    await this.modelAndProgressLoading('blockchain', xoff, 0);
-    await this.modelAndProgressLoading('experience button', xoff, 0);
-
-    app.placeProjectsFun();
-    app.placeExperienceFun();
-
-    await this.modelAndProgressLoading('trophy', xoff, 0);
-    await this.modelAndProgressLoading('archery skills', xoff, 0);
-
-    app.placeAchievementsFun();
+    for (const group of LOADING_SEQUENCE) {
+      if (group.glbs) {
+        await Promise.all(
+          group.glbs.map((name) => this.modelAndProgressLoading(name, xoff, 0))
+        );
+      }
+      if (group.fonts) {
+        for (const font of group.fonts) {
+          this.assets[font] = await this.fontLoader.loadAsync(
+            `./fonts/${font}.json`
+          );
+        }
+      }
+      if (group.sounds) {
+        for (const [name, path] of Object.entries(group.sounds)) {
+          this.assets[name] = await this.audioLoader.loadAsync(path);
+        }
+      }
+      if (group.place) group.place(this.app);
+    }
 
     this.progress[1] = true;
     this.disappearLoading();

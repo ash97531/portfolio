@@ -3,6 +3,7 @@ import { FontLoader } from 'three/examples/jsm/Addons.js';
 import { TextGeometry } from 'three/examples/jsm/Addons.js';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
+import { CONTACT_LINKS } from './content';
 
 class PlaceContactLinks extends SceneSection {
   ufomesh;
@@ -277,41 +278,27 @@ class PlaceContactLinks extends SceneSection {
 
     const loader = new FontLoader();
     loader.load('./fonts/Coffee Spark_Regular.json', (font) => {
-      this.placeButtons(
-        font,
-        'mailto: ashwani.97531@gmail.com',
-        xoff,
-        yoff + 1,
-        -1
-      );
-      this.placeButtons(
-        font,
-        'https://github.com/ash97531',
-        xoff + 6,
-        yoff + 1,
-        -1
-      );
-      this.placeButtons(
-        font,
-        'https://www.linkedin.com/in/ashwani-kumar-0406961b9/',
-        xoff,
-        yoff - 5,
-        -1
-      );
-      this.placeButtons(
-        font,
-        'https://play.google.com/store/apps/dev?id=8524140333075623671&hl=en',
-        xoff + 6,
-        yoff - 5,
-        -1
-      );
+      for (const contact of CONTACT_LINKS) {
+        this.placeButtons(
+          font,
+          contact.link,
+          xoff + contact.dx,
+          yoff + contact.dy,
+          -1
+        );
+      }
     });
 
     loader.load('./fonts/Noto Sans SemiCondensed_Regular.json', (font) => {
-      this.placeButtonNames(font, 'GMAIL', xoff, yoff + 1, -1.3);
-      this.placeButtonNames(font, 'GITHUB', xoff + 6, yoff + 1, -1.3);
-      this.placeButtonNames(font, 'LINKEDIN', xoff, yoff - 5, -1.3);
-      this.placeButtonNames(font, 'PLAYSTORE', xoff + 6, yoff - 5, -1.3);
+      for (const contact of CONTACT_LINKS) {
+        this.placeButtonNames(
+          font,
+          contact.name,
+          xoff + contact.dx,
+          yoff + contact.dy,
+          -1.3
+        );
+      }
     });
   }
 

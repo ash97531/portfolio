@@ -3,6 +3,7 @@ import * as CANNON from 'cannon-es';
 import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
+import { PROJECT_LINKS } from './content';
 
 class PlaceProjects extends SceneSection {
   ufobody;
@@ -57,17 +58,9 @@ class PlaceProjects extends SceneSection {
             this.dir.move = false;
             this.teleportUfo();
           } else {
-            // teleport to project link
-            if (this.onMountain == 0) {
-              window.open(
-                'https://play.google.com/store/apps/details?id=com.kridacreations.mouse&hl=en',
-                '_blank'
-              );
-            } else if (this.onMountain == 1) {
-              window.open(
-                'https://www.youtube.com/watch?v=AdNWGHYeAeo',
-                '_blank'
-              );
+            // open the project link
+            if (PROJECT_LINKS[this.onMountain]) {
+              window.open(PROJECT_LINKS[this.onMountain], '_blank');
             }
           }
         }

@@ -1,5 +1,11 @@
 import * as THREE from 'three';
 import SceneSection from './SceneSection';
+import {
+  ACHIEVEMENTS,
+  ACHIEVEMENTS_HEADING,
+  SKILLS_LEFT,
+  SKILLS_RIGHT,
+} from './content';
 
 class PlaceAchievements extends SceneSection {
   meshes;
@@ -281,56 +287,22 @@ class PlaceAchievements extends SceneSection {
     });
     this.placeGlbToCannonBody(treeMesh);
 
-    const headingText = this.getTextMesh('  Skills &\nAchievement', 0.7, 0.3);
+    const headingText = this.getTextMesh(ACHIEVEMENTS_HEADING, 0.7, 0.3);
     headingText.position.set(xoff - 2.5, yoff, -1);
     this.scene.add(headingText);
 
-    const ach1 = this.getTextMesh(
-      '-> Global rank 3364 (AIR 919) out of\n     10k+ teams in Hashcode 2021',
-      0.4,
-      0.3
-    );
-    ach1.position.set(xoff - 4, yoff - 3, -1);
-    this.scene.add(ach1);
+    ACHIEVEMENTS.forEach((achievement, i) => {
+      const text = this.getTextMesh(achievement, 0.4, 0.3);
+      text.position.set(xoff - 4, yoff - 3 - i * 1.5, -1);
+      this.scene.add(text);
+    });
 
-    const ach2 = this.getTextMesh(
-      '-> Smart India Hackathon Finalist 2022\n     (Built Disaster simulation tool)',
-      0.4,
-      0.3
-    );
-    ach2.position.set(xoff - 4, yoff - 4.5, -1);
-    this.scene.add(ach2);
-
-    const ach3 = this.getTextMesh(
-      '-> 500+ Questions on Leetcode and\n     Codeforces',
-      0.4,
-      0.3
-    );
-    ach3.position.set(xoff - 4, yoff - 6, -1);
-    this.scene.add(ach3);
-
-    const ach4 = this.getTextMesh(
-      '-> Secured 2nd rank out out of 5500+\n     teams in Microsoft Github Copilot\n     Hackathon',
-      0.4,
-      0.3
-    );
-    ach4.position.set(xoff - 4, yoff - 7.5, -1);
-    this.scene.add(ach4);
-
-    const leftSideSkills = this.getTextMesh(
-      '* Java * C/C++ * React * MongoDB *',
-      0.4,
-      0.3
-    );
+    const leftSideSkills = this.getTextMesh(SKILLS_LEFT, 0.4, 0.3);
     leftSideSkills.position.set(xoff - 5.5, yoff - 10.5, -1);
     leftSideSkills.rotation.set(0, 0, Math.PI / 2);
     this.scene.add(leftSideSkills);
 
-    const rightSideSkills = this.getTextMesh(
-      '* HTML/CSS/JS * Android * Flutter * SQL *',
-      0.4,
-      0.3
-    );
+    const rightSideSkills = this.getTextMesh(SKILLS_RIGHT, 0.4, 0.3);
     rightSideSkills.position.set(xoff + 6.5, yoff - 2, -1);
     rightSideSkills.rotation.set(0, 0, -Math.PI / 2);
     this.scene.add(rightSideSkills);

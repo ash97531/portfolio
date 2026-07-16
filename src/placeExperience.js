@@ -1,13 +1,12 @@
 import * as THREE from 'three';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
+import { EXPERIENCES } from './content';
 
 class PlaceExperience extends SceneSection {
   ufobody;
 
-  expButton1;
-  expButton2;
-  expButton3;
+  expButtons = []; // [{ button, link }]
 
   onExpBtn = -1;
 
@@ -32,72 +31,29 @@ class PlaceExperience extends SceneSection {
   placeModalsPosition() {
     let xoff = -38.4,
       yoff = -22;
-    this.expButton1 = this.placeGLBMesh(
-      'experience button',
-      xoff,
-      yoff,
-      -0.6,
-      0.9,
-      0.9
-    );
-    this.scene.add(this.expButton1);
-    this.expButtonText(
-      this.expButton1,
-      'MARLIN AI',
-      '(SOFTWARE ENGINEERING INTERN)',
-      '- Jun - Jul 2021',
-      [
-        '-> Built a cross platfom Flutter App with\n    React integration for course booking System',
-        '-> Developed real-time web console and Rest\n     APIs for streamlined Booking and Payment',
-      ],
-      0,
-      -1
-    );
 
-    this.expButton2 = this.placeGLBMesh(
-      'experience button',
-      xoff - 27.1,
-      yoff - 1,
-      -0.6,
-      0.9,
-      0.9
-    );
-    this.scene.add(this.expButton2);
-    this.expButtonText(
-      this.expButton2,
-      'GAMEON TECHNOLOGIES',
-      '(SOFTWARE ENGINEERING INTERN)',
-      '- Aug - Nov 2021',
-      [
-        '-> Built a real-time tournament registration\n    system with integrated payment gateway',
-        '-> Enhanced application functionality by adding\n     over 10 features and resolving critical bugs.',
-      ],
-      0,
-      -1,
-      -2
-    );
-
-    this.expButton3 = this.placeGLBMesh(
-      'experience button',
-      xoff - 44,
-      yoff + 2,
-      -0.6,
-      0.9,
-      0.9
-    );
-    this.scene.add(this.expButton3);
-    this.expButtonText(
-      this.expButton3,
-      '  Brane Enterprises',
-      '  (ASSOCIATE SOLUTION LEADER)',
-      '- Jul 2024 - Present',
-      [
-        '-> Collaborate with 5+ development team to \n    design, build, and efficient backend REST APIs\n    for various applications',
-      ],
-      0,
-      -1,
-      -2
-    );
+    for (const exp of EXPERIENCES) {
+      const button = this.placeGLBMesh(
+        'experience button',
+        xoff + exp.buttonPos.dx,
+        yoff + exp.buttonPos.dy,
+        -0.6,
+        0.9,
+        0.9
+      );
+      this.scene.add(button);
+      this.expButtonText(
+        button,
+        exp.company,
+        exp.position,
+        exp.period,
+        exp.bullets,
+        0,
+        -1,
+        exp.nameOffset
+      );
+      this.expButtons.push({ button, link: exp.link });
+    }
 
     (xoff -= 15), (yoff = -12);
     const bush = this.placeGLBMesh(
@@ -195,15 +151,9 @@ class PlaceExperience extends SceneSection {
   }
 
   update() {
-    this.enterButtonRange(
-      this.expButton1,
-      'https://drive.google.com/file/d/18O7Kphq2ZUyFED-QR5JQC1OXDwFsWUq4/view?usp=drive_link'
-    );
-    this.enterButtonRange(
-      this.expButton2,
-      'https://drive.google.com/file/d/1ec37RNmuRhBjHd27UoCFILDGsW1pMBnB/view?usp=drive_link'
-    );
-    this.enterButtonRange(this.expButton3, '');
+    for (const { button, link } of this.expButtons) {
+      this.enterButtonRange(button, link);
+    }
   }
 
   enterButtonRange(btn, onBtnLink) {
