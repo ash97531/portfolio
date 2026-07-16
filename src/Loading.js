@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
-import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import App from './App';
 
 class Loading {
@@ -40,7 +39,6 @@ class Loading {
     this.placeLoading();
     this.placeInstructions();
     this.loadModels();
-    // this.placePressEnter();
   }
 
   createGround() {
@@ -65,9 +63,6 @@ class Loading {
     planeMesh.position.copy(planeBody.position);
     this.loadingSceneBodies.push(planeBody);
     this.world.addBody(planeBody);
-
-    // meshes.push(planeMesh);
-    // bodies.push(planeBody);
   }
 
   appearPressEnter() {
@@ -85,7 +80,6 @@ class Loading {
   disappearLoading() {
     if (this.bodiesWhileLoading[0].position.z > -1.5 + 10) {
       for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
-        // console.log(this.bodiesWhileLoading[i].position.z);
         this.bodiesWhileLoading[i].position.z -= 0.02;
       }
     } else {

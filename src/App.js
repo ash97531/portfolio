@@ -2,9 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import CannonDebugger from 'cannon-es-debugger';
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-import { GUI } from 'dat.gui';
 import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 
 import PlaceContactLinks from './placeContactLinks';
@@ -13,10 +10,6 @@ import PlaceProjects from './placeProjects';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
-
-// const stats = new Stats();
-// stats.showPanel(0);
-// document.body.appendChild(stats.dom);
 
 let meshesWhileLoading = [],
   bodiesWhileLoading = [];
@@ -39,7 +32,6 @@ let startPan = new THREE.Vector2();
 let meshes = [],
   bodies = [];
 let ufobody, ufomesh;
-let cannondebugger;
 let dir = {
   right: false,
   left: false,
@@ -54,7 +46,6 @@ let speed = 0,
   maxSpeed = 0.5,
   maxAngularSpeed = 2,
   acceleration = 0.09;
-let buttonArray = [];
 const colorsArr = [
   new THREE.Color(0xffffe0), // Initial cube color
   new THREE.Color(0xffffff), // White
@@ -66,11 +57,9 @@ const colorsArr = [
   new THREE.Color(0x00ffff), // Cyan
   new THREE.Color(0x000000), // Black
 ];
-let nebula;
 
 let enterKeyPressed = false;
 
-// let ufotoplighthelper;
 class App {
   async init() {
     window.addEventListener('resize', onWindowResize, false);
@@ -92,9 +81,6 @@ class App {
 
     this.loadingScene();
     loadingAnimation();
-
-    // this.placeScenes();
-    // animate();
   }
 
   touchControls() {
@@ -241,49 +227,6 @@ class App {
     placeExperienceClass = new PlaceExperience(scene, world, assets, ufobody);
   }
 
-  async placeGLBMesh(
-    path,
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0,
-    shadow = true
-  ) {
-    const objectLoaded = await gltfLoader.loadAsync(`assets/${path}.glb`);
-    let objectMesh = objectLoaded.scene.children[0];
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    objectMesh.castShadow = true;
-    objectMesh.receiveShadow = shadow;
-    objectMesh.rotation.set(rx, ry, rz);
-
-    return objectMesh;
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      mass: 0.2, // kg
-    });
-    cannonBody.allowSleep = true;
-    cannonBody.sleepSpeedLimit = 0.1;
-    cannonBody.sleepTimeLimit = 0.5;
-    cannonBody.addShape(boxShape);
-    cannonBody.position.set(x, y, z);
-    cannonBody.quaternion.setFromEuler(rx, ry, rz);
-    return cannonBody;
-  }
-
   setUpGraphics() {
     camera = new THREE.PerspectiveCamera(
       70,
@@ -300,7 +243,6 @@ class App {
     sound = new THREE.Audio(listener);
 
     scene = new THREE.Scene();
-    // scene.fog = new THREE.FogExp2(0xcccccc, 0.018);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -314,10 +256,6 @@ class App {
     orbit.enableRotate = false;
     orbit.enableZoom = false;
     orbit.enablePan = false;
-    // orbit.mouseButtons = {
-    //   LEFT: THREE.MOUSE.PAN,
-    //   RIGHT: THREE.MOUSE.PAN,
-    // };
     orbit.update();
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
@@ -345,7 +283,6 @@ class App {
     world.solver.iterations = 10; // Set solver iterations for stability
 
     world.allowSleep = true;
-    cannondebugger = new CannonDebugger(scene, world);
   }
 
   createGround() {
@@ -368,34 +305,6 @@ class App {
     planeBody.position.set(0, 0, -1);
     planeMesh.position.copy(planeBody.position);
     world.addBody(planeBody);
-
-    // meshes.push(planeMesh);
-    // bodies.push(planeBody);
-  }
-
-  async createBox(path, x, y, z) {
-    // const cgeo = new THREE.BoxGeometry(1, 0.5, 0.5);
-    // const cmat = new THREE.MeshStandardMaterial({ color: 0xdd7d7d });
-    // const cmesh = new THREE.Mesh(cgeo, cmat);
-    // const gltfLoader = new GLTFLoader();
-    const objectLoaded = await gltfLoader.loadAsync(`assets/${path}.glb`);
-    let objectMesh = objectLoaded.scene.children[0];
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(0.5, 0.25, 0.25);
-    // objectMesh.material = new THREE.MeshStandardMaterial({ color: 0xdd7d7d });
-    scene.add(objectMesh);
-    objectMesh.castShadow = true;
-    // objecMesh.MeshStandardMaterial({ color: 0xdd7d7d });
-
-    const cbody = new CANNON.Body({
-      mass: 5, // kg
-      shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.25, 0.25)),
-    });
-    cbody.position.set(x, y, z); // m
-    world.addBody(cbody);
-
-    meshes.push(objectMesh);
-    bodies.push(cbody);
   }
 
   async player() {
@@ -404,7 +313,6 @@ class App {
       linearDamping: 0.8,
       angularDamping: 0.99,
     });
-    // ufobody.addShape(cy);
     ufobody.position.set(0, -4, 12);
 
     ufobody.addShape(
@@ -412,13 +320,10 @@ class App {
       new CANNON.Vec3(),
       new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0)
     );
-    // ufobody.addShape(cy);
     world.addBody(ufobody);
 
-    // const gltfLoader = new GLTFLoader();
     const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2glb.glb');
     ufomesh = ufoLoaded.scene.children[0];
-    // ufomesh.scale.set(0.003, 0.003, 0.003);
     ufomesh.position.set(0, 0, 0);
     ufomesh.castShadow = true;
     ufomesh.children.map((child) => {
@@ -440,10 +345,7 @@ class App {
     ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
     ufotoplight.penumbra = 1;
     scene.add(ufotoplight);
-    // ufomesh.add(ufotoplight);
     scene.add(ufotoplight.target);
-    // ufotoplighthelper = new THREE.SpotLightHelper(ufotoplight);
-    // scene.add(ufotoplighthelper);
 
     scene.add(ufomesh);
 
@@ -451,7 +353,6 @@ class App {
     bodies.push(ufobody);
     ufobody.quaternion.setFromEuler(0, 0, Math.PI);
     ufobody.applyForce(new CANNON.Vec3(2500, 0, 0));
-    // ufobody.applyTorque(new CANNON.Vec3(0, 0, 0.5));
   }
 }
 
@@ -464,8 +365,6 @@ function onWindowResize() {
 const timestep = 1 / 60;
 
 function animate() {
-  // stats.begin();
-
   world.step(timestep);
   for (let i = 0; i < meshes.length; i++) {
     meshes[i].position.copy(bodies[i].position);
@@ -504,13 +403,9 @@ function animate() {
   placeProjectsClass.update();
   placeExperienceClass.update();
 
-  // cannondebugger.update();
-  // ufotoplighthelper.update();
   TWEEN.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
-
-  // stats.end();
 }
 
 function checkIfLost() {
@@ -538,19 +433,15 @@ function floatUfo() {
   if (result.hasHit) {
     const dis = result.distance;
     const force = (1 / dis) * 17;
-    // ufobody.applyForce(new CANNON.Vec3(0, 0, 20));
     ufobody.applyForce(new CANNON.Vec3(0, 0, force >= 27 ? 27 : force));
   } else {
     ufobody.applyForce(new CANNON.Vec3(0, 0, 27));
   }
 
-  let ufoquat = new CANNON.Vec3();
-  ufobody.quaternion.toEuler(ufoquat);
   // floating mechanics
   const maxTorqueAngle = (7 / 180) * Math.PI;
   const torqueVal = 25 * maxTorqueAngle * 2;
   if (ufobody.angularVelocity.almostZero(0.5)) {
-    // if (!dir.left && !dir.right && !dir.forward && !dir.back) {
     if (ufobody.quaternion.x > maxTorqueAngle) {
       ufobody.applyTorque(new CANNON.Vec3(-torqueVal, 0, 0));
     }
@@ -695,13 +586,10 @@ function applyLocalVelocity(body, localVelocity) {
   // Add the transformed velocity to the body's current velocity
   body.velocity.x += worldVelocityVec3.x;
   body.velocity.y += worldVelocityVec3.y;
-  // body.velocity.vadd(worldVelocityVec3, body.velocity);
 }
 
 function moveUfo() {
   if (dir.move) {
-    let ufoquat = new CANNON.Vec3();
-    ufobody.quaternion.toEuler(ufoquat);
     if (dir.forward) {
       if (speed > maxSpeed) speed = maxSpeed;
       applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
@@ -740,7 +628,6 @@ function followCamera() {
 
 let animationLoaded = false;
 function loadingAnimation() {
-  // stats.begin();
   world.step(timestep);
 
   if (enterKeyPressed) return;
@@ -787,7 +674,6 @@ function loadingAnimation() {
   ufomesh.quaternion.copy(ufobody.quaternion);
   moveUfo();
   floatUfo();
-  // followCamera();
 
   if (progress[1] && !animationLoaded) {
     animationLoaded = true;
@@ -806,7 +692,6 @@ function loadingAnimation() {
 
         ufobody.position.set(-2, 0, 12);
 
-        // temporary
         orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
         camera.position.set(ufobody.position.x, ufobody.position.y - 9, 12);
         orbit.update();
@@ -827,11 +712,8 @@ function loadingAnimation() {
     });
   }
 
-  // cannondebugger.update();
   renderer.render(scene, camera);
   requestAnimationFrame(loadingAnimation);
-
-  // stats.end();
 }
 
 function playAudio() {

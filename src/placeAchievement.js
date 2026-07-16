@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import { GUI } from 'dat.gui';
 import { TextGeometry } from 'three/examples/jsm/Addons.js';
 
 class PlaceAchievements {
@@ -10,7 +8,6 @@ class PlaceAchievements {
   meshes;
   bodies;
   assets;
-  gltfLoader;
 
   constructor(scene, world, meshes, bodies, assets) {
     this.world = world;
@@ -18,7 +15,6 @@ class PlaceAchievements {
     this.meshes = meshes;
     this.bodies = bodies;
     this.assets = assets;
-    this.gltfLoader = new GLTFLoader();
 
     this.placeModalsPosition();
   }
@@ -360,37 +356,6 @@ class PlaceAchievements {
     return textMesh;
   }
 
-  guicheck(mesh) {
-    const gui = new GUI();
-    const folder = gui.addFolder('position');
-    folder.add(
-      mesh.position,
-      'x',
-      mesh.position.x - 10,
-      mesh.position.x + 10,
-      0.1
-    );
-    folder.add(
-      mesh.position,
-      'y',
-      mesh.position.y - 10,
-      mesh.position.y + 10,
-      0.1
-    );
-    folder.add(mesh.position, 'z', -2, 2, 0.1);
-    folder.open();
-    const folder2 = gui.addFolder('rotation');
-    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, 1);
-    folder2.open();
-    const folder3 = gui.addFolder('scale');
-    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
-    folder3.open();
-  }
-
   placeGLBMesh(
     path,
     x = 0,
@@ -404,8 +369,6 @@ class PlaceAchievements {
     rz = 0,
     shadow = true
   ) {
-    // const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
-    // let objectMesh = objectLoaded.scene.children[0];
     const objectMesh = this.assets[path].clone();
     objectMesh.position.set(x, y, z);
     objectMesh.scale.set(sx, sy, sz);

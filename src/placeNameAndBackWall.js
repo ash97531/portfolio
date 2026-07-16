@@ -1,14 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import { GUI } from 'dat.gui';
 
 class PlaceNameAndBackWall {
   scene;
   world;
   gltfLoader;
-  objectLoaded;
-  meshses = [];
+  meshes = [];
   bodies = [];
   assets;
 
@@ -66,7 +64,6 @@ class PlaceNameAndBackWall {
       appleTree.position.add(new THREE.Vector3(0, 0, -0.5))
     );
     this.world.addBody(cannonBody);
-    // this.guicheck(cannonBody);
 
     // brick behind left apple tree
     const dx = 0.02;
@@ -144,7 +141,6 @@ class PlaceNameAndBackWall {
     const stone2 = stoneMesh.clone();
     stone2.position.set(xoff + 0.9, yoff + 0.1, -0.75);
     stone2.scale.set(0.15, 0.15, 0.25);
-    // this.guicheck(stoneMesh);
     this.scene.add(stone2);
   }
 
@@ -366,37 +362,6 @@ class PlaceNameAndBackWall {
     }
   }
 
-  guicheck(mesh) {
-    const gui = new GUI();
-    const folder = gui.addFolder('position');
-    folder.add(
-      mesh.position,
-      'x',
-      mesh.position.x - 10,
-      mesh.position.x + 10,
-      0.1
-    );
-    folder.add(
-      mesh.position,
-      'y',
-      mesh.position.y - 10,
-      mesh.position.y + 10,
-      0.1
-    );
-    folder.add(mesh.position, 'z', -2, 2, 0.1);
-    folder.open();
-    const folder2 = gui.addFolder('rotation');
-    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, 1);
-    folder2.open();
-    const folder3 = gui.addFolder('scale');
-    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
-    folder3.open();
-  }
-
   async placeStones() {
     const stoneMesh = await this.placeGLBMesh(
       'stone1',
@@ -584,12 +549,6 @@ class PlaceNameAndBackWall {
       this.meshes.push(meshArr[i]);
       this.bodies.push(bodyArr[i]);
     }
-    // body = this.placeGlbToCannonBody(mesh, 0, 0, 0);
-    // scene.add(meshArr[0]);
-    // world.addBody(bodyArr[0]);
-
-    // meshes.push(mesh);
-    // bodies.push(body);
   }
 
   async placeBackWall() {
@@ -646,7 +605,6 @@ class PlaceNameAndBackWall {
         this.world.addBody(brickBody);
         this.meshes.push(brick);
         this.bodies.push(brickBody);
-        // this.createBox('brick', i, j, 0);
       }
     }
   }

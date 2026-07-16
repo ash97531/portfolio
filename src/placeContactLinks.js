@@ -1,15 +1,11 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { FontLoader } from 'three/examples/jsm/Addons.js';
 import { TextGeometry } from 'three/examples/jsm/Addons.js';
-import { GUI } from 'dat.gui';
 
 class PlaceContactLinks {
   scene;
   world;
-  gltfLoader;
-  objectLoaded;
   ufomesh;
   buttonArray = [];
   assets;
@@ -19,7 +15,6 @@ class PlaceContactLinks {
   constructor(scene, world, ufomesh, assets) {
     this.scene = scene;
     this.world = world;
-    this.gltfLoader = new GLTFLoader();
     this.assets = assets;
     this.ufomesh = ufomesh;
 
@@ -37,8 +32,6 @@ class PlaceContactLinks {
   async placeModelsPosition() {
     let xoff = 17,
       yoff = -8;
-    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/gmail.glb`);
-    // this.loadModels(xoff, yoff + 3, 0, 1, 0.4, 0.8);
     const gmail = await this.placeGLBMesh(
       'gmail',
       xoff,
@@ -54,12 +47,6 @@ class PlaceContactLinks {
     this.placeGlbToCannonBody(gmail);
     this.scene.add(gmail);
 
-    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/github.glb`);
-    // this.loadModels(xoff + 6, yoff + 3, 0.2, 0.015, 0.015, 0.015);
-    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/linkedin.glb`);
-    // this.loadModels(xoff, yoff - 3, 0, 0.12, 0.1, 0.4);
-    // this.objectLoaded = await this.gltfLoader.loadAsync(`assets/playstore.glb`);
-    // this.loadModels(xoff + 6, yoff - 3, 0, 1, 0.2, 0.8);
     const github = await this.placeGLBMesh(
       'github',
       xoff + 6,
@@ -291,7 +278,6 @@ class PlaceContactLinks {
     });
     this.scene.add(stone);
     this.placeGlbToCannonBody(stone);
-    // this.guicheck(stone);
 
     const loader = new FontLoader();
     loader.load('./fonts/Coffee Spark_Regular.json', (font) => {
@@ -333,42 +319,6 @@ class PlaceContactLinks {
     });
   }
 
-  guicheck(mesh) {
-    const gui = new GUI();
-    const folder = gui.addFolder('position');
-    folder.add(
-      mesh.position,
-      'x',
-      mesh.position.x - 10,
-      mesh.position.x + 10,
-      0.1
-    );
-    folder.add(
-      mesh.position,
-      'y',
-      mesh.position.y - 10,
-      mesh.position.y + 10,
-      0.1
-    );
-    folder.add(
-      mesh.position,
-      'z',
-      mesh.position.z - 10,
-      mesh.position.z + 10,
-      0.1
-    );
-    folder.open();
-    const folder2 = gui.addFolder('rotation');
-    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, 1);
-    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, 1);
-    folder2.open();
-    const folder3 = gui.addFolder('scale');
-    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
-    folder3.open();
-  }
   placeButtons(font, link, cx, cy, cz) {
     const cylindergeometry = new THREE.CylinderGeometry(1, 1, 1, 16);
     const cylindermaterial = new THREE.MeshBasicMaterial({ color: 0xffb538 });
@@ -398,8 +348,6 @@ class PlaceContactLinks {
     this.scene.add(pressEnterTextMesh);
 
     this.buttonArray.push({ button: cylinder, text: pressEnterTextMesh, link });
-    // console.log(cylinder);
-
     this.scene.add(cylinder);
   }
 
@@ -415,44 +363,6 @@ class PlaceContactLinks {
     const textMesh = new THREE.Mesh(geometry, material);
     textMesh.position.set(cx - 1, cy - 1.7, cz + 0.5);
     this.scene.add(textMesh);
-  }
-
-  loadModels(
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0
-  ) {
-    let objectMesh = this.objectLoaded.scene.children[0];
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    this.scene.add(objectMesh);
-    objectMesh.castShadow = true;
-    objectMesh.receiveShadow = true;
-    // degree
-    objectMesh.rotation.set(rx, ry, rz);
-
-    objectMesh.children.map((child) => {
-      child.castShadow = true;
-    });
-
-    const box = new THREE.Box3().setFromObject(objectMesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-    });
-    cannonBody.addShape(boxShape);
-    cannonBody.position.copy(objectMesh.position);
-    this.world.addBody(cannonBody);
   }
 
   update() {
@@ -493,8 +403,6 @@ class PlaceContactLinks {
     rz = 0,
     shadow = true
   ) {
-    // const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
-    // let objectMesh = objectLoaded.scene.children[0];
     const objectMesh = this.assets[path].clone();
     objectMesh.position.set(x, y, z);
     objectMesh.scale.set(sx, sy, sz);

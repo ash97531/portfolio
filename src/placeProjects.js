@@ -1,18 +1,11 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import { GUI } from 'dat.gui';
-import {
-  CSS2DObject,
-  FontLoader,
-  TextGeometry,
-} from 'three/examples/jsm/Addons.js';
+import { TextGeometry } from 'three/examples/jsm/Addons.js';
 import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 
 class PlaceProjects {
   scene;
   world;
-  gltfLoader;
   assets;
   ufobody;
   ufomesh;
@@ -24,8 +17,6 @@ class PlaceProjects {
 
   project1Mountain;
   project1MountainBody;
-  cursor;
-  mouse;
   transH = 0.5;
   transV = 0.5;
 
@@ -44,7 +35,6 @@ class PlaceProjects {
   constructor(scene, world, assets, ufobody, ufomesh, dir, camera, orbit) {
     this.scene = scene;
     this.world = world;
-    this.gltfLoader = new GLTFLoader();
     this.assets = assets;
     this.ufobody = ufobody;
     this.ufomesh = ufomesh;
@@ -131,7 +121,6 @@ class PlaceProjects {
   }
 
   async placeModelsPosition() {
-    const loader = new FontLoader();
     let xoff = -9,
       yoff = -8;
 
@@ -256,15 +245,6 @@ class PlaceProjects {
 
     this.project2MountainBody = this.addMountain(this.project2Mountain);
     this.eShopProject(this.project2Mountain, this.project2MountainBody);
-
-    // mountainMesh = mountainMesh.clone();
-    // mountainMesh.position.set(xoff - 26.5, yoff - 12.3, 0.55);
-    // this.addMountain(mountainMesh);
-
-    // const rectLight = new THREE.RectAreaLight(0xff5d00, 10, 3, 3);
-    // rectLight.position.set(-17, 3, 4);
-    // rectLight.lookAt(-20, 0, 0.3);
-    // this.scene.add(rectLight);
   }
 
   getTextMesh(text, size, depth) {
@@ -306,7 +286,6 @@ class PlaceProjects {
     );
 
     const kinematicBody = new CANNON.Body({
-      // type: CANNON.Body.KINEMATIC,
       mass: 0,
       shape: new CANNON.Box(new CANNON.Vec3(0.8, 1.3, 1.3)),
       position: mountainBody.position.vadd(new CANNON.Vec3(-0.7, 1.3, 1.5)),
@@ -492,69 +471,6 @@ class PlaceProjects {
     return mountainBody;
   }
 
-  guicheck(mesh) {
-    const gui = new GUI();
-    const folder = gui.addFolder('position');
-    folder.add(
-      mesh.position,
-      'x',
-      mesh.position.x - 10,
-      mesh.position.x + 10,
-      0.01
-    );
-    folder.add(
-      mesh.position,
-      'y',
-      mesh.position.y - 10,
-      mesh.position.y + 10,
-      0.01
-    );
-    folder.add(
-      mesh.position,
-      'z',
-      mesh.position.z - 2,
-      mesh.position.z + 2,
-      0.01
-    );
-    folder.open();
-    const folder2 = gui.addFolder('rotation');
-    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.open();
-    const folder3 = gui.addFolder('scale');
-    folder3.add(mesh.scale, 'x', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'y', 0, 5, 0.001);
-    folder3.add(mesh.scale, 'z', 0, 5, 0.001);
-    folder3.open();
-  }
-
-  guicannoncheck(mesh) {
-    const gui = new GUI();
-    const folder = gui.addFolder('position');
-    folder.add(
-      mesh.position,
-      'x',
-      mesh.position.x - 10,
-      mesh.position.x + 10,
-      0.1
-    );
-    folder.add(
-      mesh.position,
-      'y',
-      mesh.position.y - 10,
-      mesh.position.y + 10,
-      0.1
-    );
-    folder.add(mesh.position, 'z', -2, 2, 0.1);
-    folder.open();
-    const folder2 = gui.addFolder('rotation');
-    folder2.add(mesh.rotation, 'x', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.add(mesh.rotation, 'y', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.add(mesh.rotation, 'z', -Math.PI, Math.PI, Math.PI / 180);
-    folder2.open();
-  }
-
   placeGLBMesh(
     path,
     x = 0,
@@ -568,8 +484,6 @@ class PlaceProjects {
     rz = 0,
     shadow = true
   ) {
-    // const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
-    // let objectMesh = objectLoaded.scene.children[0];
     const objectMesh = this.assets[path].clone();
     objectMesh.position.set(x, y, z);
     objectMesh.scale.set(sx, sy, sz);
