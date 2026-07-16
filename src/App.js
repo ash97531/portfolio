@@ -56,6 +56,7 @@ class App {
   bodies = [];
 
   async init() {
+    window.__app = this; // TEMP debug handle, remove
     window.addEventListener('resize', () => this.onWindowResize(), false);
 
     this.setUpGraphics();
@@ -182,6 +183,7 @@ class App {
       side: THREE.DoubleSide,
     });
     const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+    planeMesh.name = 'ground';
     planeMesh.receiveShadow = true;
     this.scene.add(planeMesh);
 

@@ -6,6 +6,10 @@ import { distance2D } from './utils';
 const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
 const FLOAT_RAY_TO = new CANNON.Vec3(0, 0, -50);
 
+// If no scene object (other than the ground) is within this 2D distance of
+// the UFO, the player counts as lost and the direction arrow appears.
+const EMPTY_AREA_RADIUS = 25;
+
 // The UFO: physics body, mesh, movement and hover mechanics.
 class Player {
   scene;
@@ -165,9 +169,20 @@ class Player {
     }
   }
 
-  // Shows an arrow pointing back to the center when the UFO wanders too far.
+  // Shows an arrow pointing back to the center when the UFO is in an empty
+  // area: nothing but the ground plane within EMPTY_AREA_RADIUS of the UFO.
   checkIfLost() {
-    if (distance2D({ x: -10, y: -10 }, this.ufomesh.position) > 50) {
+    const nearSomething = this.scene.children.some((obj) => {
+      if (obj === this.ufomesh || obj.isLight || obj.name === 'ground')
+        return false;
+      // skip helper Object3Ds without geometry (e.g. light targets)
+      if (!obj.isMesh && obj.children.length === 0) return false;
+      return (
+        distance2D(obj.position, this.ufomesh.position) < EMPTY_AREA_RADIUS
+      );
+    });
+
+    if (!nearSomething) {
       this.directionArrow.lookAt(0, 0, 0);
       this.directionArrow.visible = true;
     } else {
