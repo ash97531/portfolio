@@ -1,10 +1,16 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 // Shared loader for all GLBs. The assets are compressed with
-// EXT_meshopt_compression (gltf-transform meshopt), so the decoder is
-// required to read them.
+// KHR_draco_mesh_compression (gltf-transform draco). Draco decodes back to
+// the original float positions inside each primitive, so the scene-graph
+// node transforms are untouched — important because placeGLBMesh overwrites
+// node position/rotation/scale on load.
+const dracoLoader = new DRACOLoader();
+// decoder files live in app/draco/, next to index.html
+dracoLoader.setDecoderPath('draco/');
+
 const gltfLoader = new GLTFLoader();
-gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+gltfLoader.setDRACOLoader(dracoLoader);
 
 export default gltfLoader;
