@@ -2,6 +2,10 @@ import * as CANNON from 'cannon-es';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { distance2D } from './utils';
 
+// Hover raycast offsets, relative to the UFO body.
+const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
+const FLOAT_RAY_TO = new CANNON.Vec3(0, 0, -50);
+
 // The UFO: physics body, mesh, movement and hover mechanics.
 class Player {
   scene;
@@ -24,6 +28,13 @@ class Player {
   maxAngularSpeed = 2;
   acceleration = 0.09;
 
+  // scratch objects reused every frame to avoid per-frame allocations
+  _rayResult = new CANNON.RaycastResult();
+  _rayFrom = new CANNON.Vec3();
+  _rayTo = new CANNON.Vec3();
+  _worldVelocity = new CANNON.Vec3();
+  _localVelocity = new CANNON.Vec3();
+
   constructor(scene, world) {
     this.scene = scene;
     this.world = world;
@@ -40,7 +51,7 @@ class Player {
     this.ufobody.addShape(
       new CANNON.Cylinder(0.5, 0.5, 0.25, 8),
       new CANNON.Vec3(),
-      new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0)
+      new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0),
     );
     this.world.addBody(this.ufobody);
 
@@ -83,26 +94,26 @@ class Player {
   }
 
   applyLocalVelocity(localVelocity) {
-    const worldVelocityVec3 = new CANNON.Vec3();
-
     // Rotate local velocity vector to world space using the body's quaternion
-    this.ufobody.quaternion.vmult(localVelocity, worldVelocityVec3);
+    this.ufobody.quaternion.vmult(localVelocity, this._worldVelocity);
 
     // Add the transformed velocity to the body's current velocity
-    this.ufobody.velocity.x += worldVelocityVec3.x;
-    this.ufobody.velocity.y += worldVelocityVec3.y;
+    this.ufobody.velocity.x += this._worldVelocity.x;
+    this.ufobody.velocity.y += this._worldVelocity.y;
   }
 
   moveUfo() {
     if (this.dir.move) {
       if (this.dir.forward) {
         if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
-        this.applyLocalVelocity(new CANNON.Vec3(0, this.speed, 0));
+        this._localVelocity.set(0, this.speed, 0);
+        this.applyLocalVelocity(this._localVelocity);
       }
 
       if (this.dir.back) {
         if (this.speed < -this.maxSpeed) this.speed = -this.maxSpeed;
-        this.applyLocalVelocity(new CANNON.Vec3(0, this.speed, 0));
+        this._localVelocity.set(0, this.speed, 0);
+        this.applyLocalVelocity(this._localVelocity);
       }
 
       if (
@@ -122,13 +133,11 @@ class Player {
   }
 
   floatUfo() {
-    const result = new CANNON.RaycastResult();
-    this.world.raycastClosest(
-      this.ufobody.position.vadd(new CANNON.Vec3(0, 0, -0.6)),
-      this.ufobody.position.vadd(new CANNON.Vec3(0, 0, -50)),
-      {},
-      result
-    );
+    const result = this._rayResult;
+    result.reset();
+    this.ufobody.position.vadd(FLOAT_RAY_FROM, this._rayFrom);
+    this.ufobody.position.vadd(FLOAT_RAY_TO, this._rayTo);
+    this.world.raycastClosest(this._rayFrom, this._rayTo, {}, result);
     if (result.hasHit) {
       const dis = result.distance;
       const force = (1 / dis) * 17;

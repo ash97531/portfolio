@@ -1,18 +1,25 @@
 {
-  "name": "jsm",
+  "name": "ashwani-portfolio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Interactive 3D portfolio - fly a UFO around my work (three.js + cannon-es)",
   "scripts": {
-    "build": "rollup -c \"rollup_config.js\" -w",
-    "start": "serve"
+    "build": "rollup -c rollup_config.js",
+    "watch": "rollup -c rollup_config.js -w",
+    "start": "serve",
+    "lint": "eslint src",
+    "format": "prettier --write src"
   },
-  "author": "Mugen87",
+  "author": "Ashwani Kumar",
   "license": "MIT",
   "type": "module",
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
     "rollup": "^4.18.0",
     "serve": "^14.2.3"
   },

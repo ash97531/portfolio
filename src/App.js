@@ -83,7 +83,7 @@ class App {
       this.bodiesWhileLoading,
       this.assets,
       this.progress,
-      this
+      this,
     );
   }
 
@@ -92,7 +92,7 @@ class App {
       this.scene,
       this.world,
       this.player.ufomesh,
-      this.assets
+      this.assets,
     );
   }
 
@@ -102,7 +102,7 @@ class App {
       this.world,
       this.meshes,
       this.bodies,
-      this.assets
+      this.assets,
     );
   }
 
@@ -115,7 +115,7 @@ class App {
       this.player.ufomesh,
       this.player.dir,
       this.cameraRig.camera,
-      this.cameraRig.orbit
+      this.cameraRig.orbit,
     );
   }
 
@@ -125,7 +125,7 @@ class App {
       this.world,
       this.meshes,
       this.bodies,
-      this.assets
+      this.assets,
     );
   }
 
@@ -134,7 +134,7 @@ class App {
       this.scene,
       this.world,
       this.assets,
-      this.player.ufobody
+      this.player.ufobody,
     );
   }
 
@@ -144,7 +144,7 @@ class App {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = true;
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(this.renderer.domElement);
 
@@ -230,13 +230,14 @@ class App {
 
     if (!this.progress[1]) {
       // if not pause loading animation
+      const result = new CANNON.RaycastResult();
       for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
-        const result = new CANNON.RaycastResult();
+        result.reset();
         this.world.raycastClosest(
           this.bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 0.6)),
           this.bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 50)),
           {},
-          result
+          result,
         );
 
         const threshold = -0.5 + 10;
@@ -246,12 +247,12 @@ class App {
           }
           if (
             LOADING_CUBE_COLORS.find((e) =>
-              e.equals(this.meshesWhileLoading[i].material.color)
+              e.equals(this.meshesWhileLoading[i].material.color),
             )
           ) {
             this.meshesWhileLoading[i].material.color.lerp(
               LOADING_CUBE_COLORS[Math.floor(Math.random() * 8)],
-              Math.random()
+              Math.random(),
             );
           }
         } else {
@@ -261,13 +262,13 @@ class App {
         }
 
         this.meshesWhileLoading[i].position.copy(
-          this.bodiesWhileLoading[i].position
+          this.bodiesWhileLoading[i].position,
         );
       }
     } else {
       for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
         this.meshesWhileLoading[i].position.copy(
-          this.bodiesWhileLoading[i].position
+          this.bodiesWhileLoading[i].position,
         );
       }
     }
@@ -276,13 +277,9 @@ class App {
     this.player.moveUfo();
     this.player.floatUfo();
 
+    // Once loading completes, InputManager's Enter handler may start the game.
     if (this.progress[1] && !this.animationLoaded) {
       this.animationLoaded = true;
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !this.enterKeyPressed) {
-          this.startMainScene();
-        }
-      });
     }
 
     this.renderer.render(this.scene, this.cameraRig.camera);

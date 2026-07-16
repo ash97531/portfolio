@@ -40,7 +40,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      true
+      true,
     );
     const appleTree = await this.placeGLBMesh('apple tree', xoff, yoff, 1.5);
     appleTree.children.map((child) => {
@@ -57,7 +57,7 @@ class PlaceNameAndBackWall extends SceneSection {
     });
     cannonBody.addShape(sphereShape);
     cannonBody.position.copy(
-      appleTree.position.add(new THREE.Vector3(0, 0, -0.5))
+      appleTree.position.add(new THREE.Vector3(0, 0, -0.5)),
     );
     this.world.addBody(cannonBody);
 
@@ -72,7 +72,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      Math.PI / 2
+      Math.PI / 2,
     );
     brickArr.push([brick, brickBody]);
 
@@ -84,7 +84,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      Math.PI / 2
+      Math.PI / 2,
     );
     brickArr.push([brick, brickBody]);
 
@@ -96,7 +96,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      Math.PI / 2
+      Math.PI / 2,
     );
     brickArr.push([brick, brickBody]);
 
@@ -108,7 +108,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0.6,
       0,
       0,
-      Math.PI / 2
+      Math.PI / 2,
     );
     brickArr.push([brick, brickBody]);
 
@@ -130,7 +130,7 @@ class PlaceNameAndBackWall extends SceneSection {
       -0.7,
       0.3,
       0.3,
-      0.25
+      0.25,
     );
     this.scene.add(stoneMesh);
 
@@ -155,7 +155,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      true
+      true,
     );
     pavementBrick.material.color.set(0xffffff);
 
@@ -164,36 +164,36 @@ class PlaceNameAndBackWall extends SceneSection {
       pave.position.set(
         xoff + (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 0.9 * i + Math.random() + 0.8 - 0.4,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
 
     //front of right flashlight
-    (xoff = 1.3), (yoff = 5.6);
+    ((xoff = 1.3), (yoff = 5.6));
     for (let i = 0; i < 5; i++) {
       const pave = pavementBrick.clone();
       pave.position.set(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 0.9 * i + Math.random() * 0.8 - 0.4,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
 
-    (xoff = -2), (yoff = 0);
+    ((xoff = -2), (yoff = 0));
     for (let i = 0; i < 6; i++) {
       const pave = pavementBrick.clone();
       pave.position.set(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.9 - 0.4,
         yoff - 0.9 * i,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
 
     // center circle
-    (xoff = -2), (yoff = -10);
+    ((xoff = -2), (yoff = -10));
 
     const indiaMap = await this.placeGLBMesh(
       'india map',
@@ -202,7 +202,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0.1,
       1.2,
       1.2,
-      1.2
+      1.2,
     );
     indiaMap.children.map((child) => {
       child.castShadow = true;
@@ -221,7 +221,7 @@ class PlaceNameAndBackWall extends SceneSection {
         pave.position.set(
           xoff + arr[i][0] * 4 + arr[j][0] * 0.7 + Math.random() * 0.8 - 0.4,
           yoff + arr[i][1] * 4 + arr[j][1] * 0.7 + Math.random() * 0.8 - 0.4,
-          -0.9
+          -0.9,
         );
         this.scene.add(pave);
         if (i != 0) {
@@ -237,7 +237,7 @@ class PlaceNameAndBackWall extends SceneSection {
               arr[j][1] * 0.7 +
               Math.random() * 0.8 -
               0.4,
-            -0.9
+            -0.9,
           );
           this.scene.add(pave);
         }
@@ -250,7 +250,7 @@ class PlaceNameAndBackWall extends SceneSection {
       pave.position.set(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 7 - 0.9 * i + Math.random() * 0.8 - 0.4,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -262,7 +262,7 @@ class PlaceNameAndBackWall extends SceneSection {
       pave.position.set(
         xoff + 8.5 + i + Math.random() * 0.9 - 0.4,
         yoff + (i % 2 == 0 ? 0 : 1) + Math.random() * 0.5 - 0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -280,7 +280,7 @@ class PlaceNameAndBackWall extends SceneSection {
           i * slope +
           Math.random() * 0.5 -
           0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -298,7 +298,7 @@ class PlaceNameAndBackWall extends SceneSection {
           i * slope +
           Math.random() * 0.5 -
           0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -316,7 +316,7 @@ class PlaceNameAndBackWall extends SceneSection {
           i * slope +
           Math.random() * 0.5 -
           0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -334,7 +334,7 @@ class PlaceNameAndBackWall extends SceneSection {
           i * slope +
           Math.random() * 0.5 -
           0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -352,7 +352,7 @@ class PlaceNameAndBackWall extends SceneSection {
           i * slope +
           Math.random() * 0.5 -
           0.25,
-        -0.9
+        -0.9,
       );
       this.scene.add(pave);
     }
@@ -369,7 +369,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0.7,
       0,
       0,
-      Math.PI / 2
+      Math.PI / 2,
     );
     this.scene.add(stoneMesh);
 
@@ -377,7 +377,7 @@ class PlaceNameAndBackWall extends SceneSection {
     const size = new THREE.Vector3();
     box.getSize(size);
     const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
+      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2),
     );
     const cannonBody = new CANNON.Body({
       type: CANNON.Body.STATIC,
@@ -394,7 +394,7 @@ class PlaceNameAndBackWall extends SceneSection {
     const size2 = new THREE.Vector3();
     box2.getSize(size2);
     const boxShape2 = new CANNON.Box(
-      new CANNON.Vec3(size2.x / 2, size2.y / 2, size2.z / 2)
+      new CANNON.Vec3(size2.x / 2, size2.y / 2, size2.z / 2),
     );
     const cannonBody2 = new CANNON.Body({
       type: CANNON.Body.STATIC,
@@ -412,7 +412,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0.02,
       0.02,
-      0.015
+      0.015,
     );
     const flashLightMesh2 = flashLightMesh.clone();
     // scene.add(flashLightMesh);
@@ -422,7 +422,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       1,
       0,
-      Math.PI
+      Math.PI,
     );
     this.world.addBody(flashLightBody);
 
@@ -441,7 +441,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       1,
       0,
-      Math.PI
+      Math.PI,
     );
     this.world.addBody(flashLightBody2);
 
@@ -466,77 +466,77 @@ class PlaceNameAndBackWall extends SceneSection {
     const xoffset = -12,
       yoffset = 10;
     meshArr.push(
-      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('s', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('s', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('h', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('h', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('w', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('w', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('n', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('n', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('i', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('i', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     // write mesh for word 'kumar'
     meshArr.push(
-      await this.placeGLBMesh('k', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('k', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('u', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('u', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('m', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('m', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('a', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
     meshArr.push(
-      await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
+      await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false),
     );
 
     bodyArr.push(this.placeGlbToDynamicBody(meshArr[0], xoffset, yoffset, 0));
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[1], xoffset + 1.55, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[1], xoffset + 1.55, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[2], xoffset + 3.05, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[2], xoffset + 3.05, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[3], xoffset + 5, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[3], xoffset + 5, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[4], xoffset + 7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[4], xoffset + 7, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[5], xoffset + 8.7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[5], xoffset + 8.7, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[6], xoffset + 10, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[6], xoffset + 10, yoffset, 0),
     );
 
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[7], xoffset + 12, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[7], xoffset + 12, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[8], xoffset + 13.7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[8], xoffset + 13.7, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[9], xoffset + 15.6, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[9], xoffset + 15.6, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[10], xoffset + 17.6, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[10], xoffset + 17.6, yoffset, 0),
     );
     bodyArr.push(
-      this.placeGlbToDynamicBody(meshArr[11], xoffset + 19.4, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[11], xoffset + 19.4, yoffset, 0),
     );
 
     for (let i = 0; i < meshArr.length; i++) {
@@ -559,7 +559,7 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       0,
       0,
-      true
+      true,
     );
     const skipArr = [
       [4, 4],
@@ -595,7 +595,7 @@ class PlaceNameAndBackWall extends SceneSection {
           j - 0.5 - j * 0.5,
           0,
           0,
-          (Math.random() * 50 - 25 * Math.PI) / 180
+          (Math.random() * 50 - 25 * Math.PI) / 180,
         );
         this.scene.add(brick);
         this.world.addBody(brickBody);
@@ -618,7 +618,7 @@ class PlaceNameAndBackWall extends SceneSection {
     rx = 0,
     ry = 0,
     rz = 0,
-    shadow = true
+    shadow = true,
   ) {
     const objectLoaded = await this.gltfLoader.loadAsync(`assets/${path}.glb`);
     let objectMesh = objectLoaded.scene.children[0];

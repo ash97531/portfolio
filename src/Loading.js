@@ -80,7 +80,7 @@ class Loading {
     bodiesWhileLoading,
     assets,
     progress,
-    app
+    app,
   ) {
     this.scene = scene;
     this.world = world;
@@ -276,7 +276,7 @@ class Loading {
           depth: 0.5,
           curveSegments: 12,
           bevelEnabled: false,
-        }
+        },
       );
       const material = new THREE.MeshBasicMaterial({ color: 0xadff2f });
       const instructionText = new THREE.Mesh(geometry, material);
@@ -406,7 +406,7 @@ class Loading {
         xoff + this.progress[0] * 0.6 * 1.5 + 0.6,
         yoff,
         i,
-        -0.6 * 9
+        -0.6 * 9,
       );
   }
 
@@ -416,13 +416,13 @@ class Loading {
     for (const group of LOADING_SEQUENCE) {
       if (group.glbs) {
         await Promise.all(
-          group.glbs.map((name) => this.modelAndProgressLoading(name, xoff, 0))
+          group.glbs.map((name) => this.modelAndProgressLoading(name, xoff, 0)),
         );
       }
       if (group.fonts) {
         for (const font of group.fonts) {
           this.assets[font] = await this.fontLoader.loadAsync(
-            `./fonts/${font}.json`
+            `./fonts/${font}.json`,
           );
         }
       }

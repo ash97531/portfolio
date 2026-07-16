@@ -23,7 +23,7 @@ class CameraRig {
       70,
       window.innerWidth / window.innerHeight,
       0.01,
-      2000
+      2000,
     );
     this.camera.position.set(12.5, -14.5, 12.5 + 10);
     this.camera.rotation.set(0.74, 2.71, -2.511);
@@ -51,12 +51,12 @@ class CameraRig {
     this.ufotoplight.position.set(
       this.camera.position.x,
       this.camera.position.y,
-      this.camera.position.z
+      this.camera.position.z,
     );
     this.ufotoplight.target.position.set(
       this.camera.position.x,
       this.camera.position.y,
-      0
+      0,
     );
   }
 
@@ -72,7 +72,7 @@ class CameraRig {
             y: player.ufobody.position.y - 9 + this.camZoomY,
             z: 12 + this.camZoomZ,
           },
-          500
+          500,
         )
         .easing(TWEEN.Easing.Quadratic.InOut)
         .onComplete(() => {
@@ -88,12 +88,12 @@ class CameraRig {
     this.orbit.target.set(
       player.ufobody.position.x,
       player.ufobody.position.y,
-      0.5
+      0.5,
     );
     this.camera.position.set(
       player.ufobody.position.x,
       player.ufobody.position.y - 9 + this.camZoomY,
-      12 + this.camZoomZ
+      12 + this.camZoomZ,
     );
     this.orbit.update();
     this.moveSpotlightToCamera();
@@ -104,12 +104,12 @@ class CameraRig {
     this.orbit.target.set(
       player.ufobody.position.x,
       player.ufobody.position.y,
-      0.5
+      0.5,
     );
     this.camera.position.set(
       player.ufobody.position.x,
       player.ufobody.position.y - 9,
-      12
+      12,
     );
     this.orbit.update();
     this.moveSpotlightToCamera();
@@ -167,7 +167,7 @@ class CameraRig {
     this.camera.position.set(
       this.app.player.ufobody.position.x,
       this.app.player.ufobody.position.y - 9 + this.camZoomY,
-      12 + this.camZoomZ
+      12 + this.camZoomZ,
     );
     this.orbit.update();
 

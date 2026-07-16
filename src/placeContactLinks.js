@@ -16,14 +16,12 @@ class PlaceContactLinks extends SceneSection {
     this.ufomesh = ufomesh;
 
     this.placeModelsPosition();
+  }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (this.onBtn != -1) {
-          window.open(this.onBtn, '_blank');
-        }
-      }
-    });
+  onEnter() {
+    if (this.onBtn != -1) {
+      window.open(this.onBtn, '_blank');
+    }
   }
 
   async placeModelsPosition() {
@@ -36,7 +34,7 @@ class PlaceContactLinks extends SceneSection {
       0,
       1,
       0.4,
-      0.8
+      0.8,
     );
     gmail.children.map((child) => {
       child.castShadow = true;
@@ -51,7 +49,7 @@ class PlaceContactLinks extends SceneSection {
       0.2,
       0.015,
       0.015,
-      0.015
+      0.015,
     );
     github.children.map((child) => {
       child.castShadow = true;
@@ -66,7 +64,7 @@ class PlaceContactLinks extends SceneSection {
       0,
       0.12,
       0.1,
-      0.4
+      0.4,
     );
     linkedin.children.map((child) => {
       child.castShadow = true;
@@ -81,7 +79,7 @@ class PlaceContactLinks extends SceneSection {
       0,
       1,
       0.2,
-      0.8
+      0.8,
     );
     playstore.children.map((child) => {
       child.castShadow = true;
@@ -96,7 +94,7 @@ class PlaceContactLinks extends SceneSection {
       0.9,
       0.2,
       0.2,
-      0.2
+      0.2,
     );
     this.scene.add(treeMesh);
     treeMesh.children.map((child) => {
@@ -112,7 +110,7 @@ class PlaceContactLinks extends SceneSection {
       1.8,
       0.3,
       0.3,
-      0.3
+      0.3,
     );
     this.scene.add(treeMesh2);
     treeMesh2.children.map((child) => {
@@ -127,7 +125,7 @@ class PlaceContactLinks extends SceneSection {
       -0.3,
       3,
       3,
-      3
+      3,
     );
     this.scene.add(stoneMesh);
     this.placeGlbToCannonBody(stoneMesh);
@@ -139,7 +137,7 @@ class PlaceContactLinks extends SceneSection {
       -1,
       2,
       2,
-      2
+      2,
     );
     this.scene.add(stoneMesh2);
 
@@ -150,7 +148,7 @@ class PlaceContactLinks extends SceneSection {
       -1,
       2.5,
       2.5,
-      2.5
+      2.5,
     );
     this.scene.add(stoneMesh3);
 
@@ -159,7 +157,7 @@ class PlaceContactLinks extends SceneSection {
       'apple tree',
       xoff - 4,
       yoff - 18,
-      2.1
+      2.1,
     );
     appleTree.children.map((child) => {
       child.castShadow = true;
@@ -174,7 +172,7 @@ class PlaceContactLinks extends SceneSection {
       2.1,
       1.4,
       1.4,
-      1.4
+      1.4,
     );
     appleTree2.children.map((child) => {
       child.castShadow = true;
@@ -189,7 +187,7 @@ class PlaceContactLinks extends SceneSection {
       -1,
       1.2,
       1.2,
-      1.5
+      1.5,
     );
     this.scene.add(stoneMesh4);
 
@@ -200,7 +198,7 @@ class PlaceContactLinks extends SceneSection {
       -1,
       1.7,
       1.2,
-      2.5
+      2.5,
     );
     this.scene.add(stoneMesh5);
 
@@ -211,7 +209,7 @@ class PlaceContactLinks extends SceneSection {
       -0.2,
       4,
       3,
-      3
+      3,
     );
     this.scene.add(stoneMesh6);
     this.placeGlbToCannonBody(stoneMesh6);
@@ -224,7 +222,7 @@ class PlaceContactLinks extends SceneSection {
       'dark bush',
       xoff - 6.1,
       yoff + 1.2,
-      -0.5
+      -0.5,
     );
     bushDark.rotation.set(Math.PI / 4, Math.PI / 2, 0);
     this.scene.add(bushDark);
@@ -233,7 +231,7 @@ class PlaceContactLinks extends SceneSection {
       'fence 4 sticks',
       xoff + 2,
       yoff + 6,
-      0
+      0,
     );
     fence.rotation.set(0, 0, Math.PI / 2);
     this.scene.add(fence);
@@ -268,7 +266,7 @@ class PlaceContactLinks extends SceneSection {
       0.004,
       0,
       0,
-      -Math.PI / 2
+      -Math.PI / 2,
     );
     stone.children.map((child) => {
       child.castShadow = true;
@@ -284,7 +282,7 @@ class PlaceContactLinks extends SceneSection {
           contact.link,
           xoff + contact.dx,
           yoff + contact.dy,
-          -1
+          -1,
         );
       }
     });
@@ -296,7 +294,7 @@ class PlaceContactLinks extends SceneSection {
           contact.name,
           xoff + contact.dx,
           yoff + contact.dy,
-          -1.3
+          -1.3,
         );
       }
     });
@@ -324,7 +322,7 @@ class PlaceContactLinks extends SceneSection {
     });
     const pressEnterTextMesh = new THREE.Mesh(
       pressEnterTextGeometry,
-      pressEnterMaterial
+      pressEnterMaterial,
     );
     pressEnterTextMesh.position.set(cx - 0.5, cy, cz + 3);
     pressEnterTextMesh.rotateX(Math.PI / 2);

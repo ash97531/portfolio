@@ -2,6 +2,11 @@ import * as THREE from 'three';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
 import { EXPERIENCES } from './content';
+import hud from './Hud';
+
+// Distances (in world units) from an experience button's center.
+const BUTTON_NEAR_RADIUS = 8;
+const BUTTON_ON_RADIUS = 6;
 
 class PlaceExperience extends SceneSection {
   ufobody;
@@ -18,14 +23,12 @@ class PlaceExperience extends SceneSection {
     this.ufobody = ufobody;
 
     this.placeModalsPosition();
+  }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (this.onExpBtn != -1) {
-          window.open(this.onExpBtn, '_blank');
-        }
-      }
-    });
+  onEnter() {
+    if (this.onExpBtn !== -1 && this.onExpBtn !== '') {
+      window.open(this.onExpBtn, '_blank');
+    }
   }
 
   placeModalsPosition() {
@@ -39,7 +42,7 @@ class PlaceExperience extends SceneSection {
         yoff + exp.buttonPos.dy,
         -0.6,
         0.9,
-        0.9
+        0.9,
       );
       this.scene.add(button);
       this.expButtonText(
@@ -50,12 +53,12 @@ class PlaceExperience extends SceneSection {
         exp.bullets,
         0,
         -1,
-        exp.nameOffset
+        exp.nameOffset,
       );
       this.expButtons.push({ button, link: exp.link });
     }
 
-    (xoff -= 15), (yoff = -12);
+    ((xoff -= 15), (yoff = -12));
     const bush = this.placeGLBMesh(
       'bush',
       xoff + 2,
@@ -63,7 +66,7 @@ class PlaceExperience extends SceneSection {
       -0.5,
       1.2,
       1.2,
-      1.2
+      1.2,
     );
     this.scene.add(bush);
 
@@ -74,7 +77,7 @@ class PlaceExperience extends SceneSection {
       -0.5,
       1.4,
       1.4,
-      1.2
+      1.2,
     );
     this.scene.add(bush2);
 
@@ -85,7 +88,7 @@ class PlaceExperience extends SceneSection {
       -0.5,
       1.2,
       1.2,
-      1.2
+      1.2,
     );
     bushDark.rotation.set(Math.PI / 4, Math.PI / 2, 0);
     this.scene.add(bushDark);
@@ -97,7 +100,7 @@ class PlaceExperience extends SceneSection {
       -0.5,
       1.4,
       1.4,
-      1.2
+      1.2,
     );
     darkBush2.rotation.set(Math.PI / 4, 0, 0);
     this.scene.add(darkBush2);
@@ -109,7 +112,7 @@ class PlaceExperience extends SceneSection {
       -0.5,
       1.6,
       1.6,
-      1.6
+      1.6,
     );
     this.scene.add(darkBush3);
   }
@@ -122,7 +125,7 @@ class PlaceExperience extends SceneSection {
     descArr,
     xoff,
     yoff,
-    h = 0
+    h = 0,
   ) {
     const buttonLight = new THREE.SpotLight(0xffd700, 40);
     buttonLight.position.set(0, 0, 3.4);
@@ -158,22 +161,18 @@ class PlaceExperience extends SceneSection {
 
   enterButtonRange(btn, onBtnLink) {
     const distToButton = distance2D(btn.position, this.ufobody.position);
-    if (distToButton < 8 /* on button check */) {
-      if (distToButton < 6 /* on mountain check */) {
-        document.getElementById('modal-text').textContent =
-          'Press ENTER: Fly to experience';
+    if (distToButton < BUTTON_NEAR_RADIUS) {
+      hud.setMessage('Press ENTER: Fly to experience');
+      if (distToButton < BUTTON_ON_RADIUS) {
         if (btn.position.z > -1) {
           btn.position.z -= 0.01;
-          document.getElementById('modal-container').classList.add('six');
-          document.getElementById('modal-container').classList.remove('out');
+          hud.show();
           this.onExpBtn = onBtnLink;
         }
       } else {
-        document.getElementById('modal-text').textContent =
-          'Press ENTER: Fly to experience';
         if (btn.position.z < -0.6) {
           btn.position.z += 0.01;
-          document.getElementById('modal-container').classList.add('out');
+          hud.hide();
           this.onExpBtn = -1;
         }
       }

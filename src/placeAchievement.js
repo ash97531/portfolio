@@ -33,7 +33,7 @@ class PlaceAchievements extends SceneSection {
             brick,
             xoff - j * 0.5 - j * dx + 0.25,
             yoff - 0.25,
-            i - 0.5 * i - 0.4
+            i - 0.5 * i - 0.4,
           );
           this.scene.add(brick);
           this.world.addBody(brickBody);
@@ -45,7 +45,7 @@ class PlaceAchievements extends SceneSection {
             brick,
             xoff,
             yoff - j * 0.5 - j * dx,
-            i - 0.5 * i - 0.4
+            i - 0.5 * i - 0.4,
           );
           this.scene.add(brick);
           this.world.addBody(brickBody);
@@ -62,7 +62,7 @@ class PlaceAchievements extends SceneSection {
       0,
       0.02,
       0.02,
-      0.015
+      0.015,
     );
     const flashLightBody = this.placeGlbToDynamicBody(
       flashLightMesh,
@@ -71,7 +71,7 @@ class PlaceAchievements extends SceneSection {
       3,
       0,
       Math.PI,
-      Math.PI / 3
+      Math.PI / 3,
     );
     this.world.addBody(flashLightBody);
 
@@ -99,7 +99,7 @@ class PlaceAchievements extends SceneSection {
       1.8,
       0.3,
       0.3,
-      0.3
+      0.3,
     );
     this.scene.add(treeMeshDec);
     treeMeshDec.children.map((child) => {
@@ -111,7 +111,7 @@ class PlaceAchievements extends SceneSection {
       'fence 4 sticks',
       xoff - 22,
       yoff - 13,
-      0
+      0,
     );
     fence.rotation.set(0, 0, Math.PI / 2);
     this.scene.add(fence);
@@ -121,7 +121,7 @@ class PlaceAchievements extends SceneSection {
       'fence 4 sticks',
       xoff - 25,
       yoff - 9,
-      0
+      0,
     );
     this.scene.add(fence2);
     this.placeGlbToCannonBody(fence2);
@@ -133,7 +133,7 @@ class PlaceAchievements extends SceneSection {
       -1.2,
       3,
       3,
-      3
+      3,
     );
     this.scene.add(stoneMesh);
     this.placeGlbToCannonBody(stoneMesh);
@@ -145,7 +145,7 @@ class PlaceAchievements extends SceneSection {
       -1.1,
       2,
       2,
-      2
+      2,
     );
     this.scene.add(stoneMesh2);
     this.placeGlbToCannonBody(stoneMesh2);
@@ -157,7 +157,7 @@ class PlaceAchievements extends SceneSection {
       -1.1,
       1.5,
       1.5,
-      1.5
+      1.5,
     );
     this.scene.add(stoneMesh3);
     this.placeGlbToCannonBody(stoneMesh3);
@@ -172,7 +172,7 @@ class PlaceAchievements extends SceneSection {
       0.004,
       0,
       0,
-      1
+      1,
     );
     combinedstone.children.map((child) => {
       child.castShadow = true;
@@ -187,7 +187,7 @@ class PlaceAchievements extends SceneSection {
       -0.5,
       1.2,
       1.2,
-      1.2
+      1.2,
     );
     this.scene.add(bush);
 
@@ -198,7 +198,7 @@ class PlaceAchievements extends SceneSection {
       -0.5,
       1.4,
       1.4,
-      1.2
+      1.2,
     );
     this.scene.add(bush2);
 
@@ -206,7 +206,7 @@ class PlaceAchievements extends SceneSection {
       'bush',
       xoff + 2.5,
       yoff - 13.5,
-      -0.5
+      -0.5,
     );
     this.scene.add(bush3);
     bush3.rotation.set(Math.PI / 4, 0, 0);
@@ -218,7 +218,7 @@ class PlaceAchievements extends SceneSection {
       -0.5,
       1.2,
       1.2,
-      1.2
+      1.2,
     );
     bushDark.rotation.set(Math.PI / 4, Math.PI / 2, 0);
     this.scene.add(bushDark);
@@ -230,7 +230,7 @@ class PlaceAchievements extends SceneSection {
       -0.5,
       1.4,
       1.4,
-      1.2
+      1.2,
     );
     darkBush2.rotation.set(Math.PI / 4, 0, 0);
     this.scene.add(darkBush2);
@@ -242,7 +242,7 @@ class PlaceAchievements extends SceneSection {
       -0.5,
       1.6,
       1.6,
-      1.6
+      1.6,
     );
     this.scene.add(darkBush3);
 
@@ -253,7 +253,7 @@ class PlaceAchievements extends SceneSection {
       0.5,
       0.65,
       0.65,
-      0.65
+      0.65,
     );
     trophy.children.map((child) => {
       child.castShadow = true;
@@ -268,7 +268,7 @@ class PlaceAchievements extends SceneSection {
       0.9,
       0.2,
       0.2,
-      0.2
+      0.2,
     );
     const archery = await this.placeGLBMesh(
       'archery skills',
@@ -278,7 +278,7 @@ class PlaceAchievements extends SceneSection {
       2.5,
       2.5,
       2.5,
-      -Math.PI / 7
+      -Math.PI / 7,
     );
     treeMesh.add(archery);
     this.scene.add(treeMesh);
@@ -309,7 +309,6 @@ class PlaceAchievements extends SceneSection {
 
     this.createBrickJenga();
   }
-
 }
 
 export default PlaceAchievements;

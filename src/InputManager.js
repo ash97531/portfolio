@@ -17,7 +17,24 @@ class InputManager {
     return this.app.player;
   }
 
+  // Single Enter handler for the whole app: starts the main scene from the
+  // loading screen, then delegates to whichever section the UFO is on.
+  handleEnter() {
+    const app = this.app;
+    if (!app.enterKeyPressed) {
+      if (app.animationLoaded) app.startMainScene();
+      return;
+    }
+    app.placeContactLinksClass?.onEnter();
+    app.placeProjectsClass?.onEnter();
+    app.placeExperienceClass?.onEnter();
+  }
+
   keydown(event) {
+    if (event.key === 'Enter') {
+      this.handleEnter();
+      return;
+    }
     const key = event.key.toLowerCase();
     if (key === 'd' || key === 'arrowright') {
       this.player.dir.right = true;

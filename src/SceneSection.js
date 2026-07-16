@@ -28,7 +28,7 @@ class SceneSection {
     rx = 0,
     ry = 0,
     rz = 0,
-    shadow = this.receiveShadowByDefault
+    shadow = this.receiveShadowByDefault,
   ) {
     const objectMesh = this.assets[path].clone();
     objectMesh.position.set(x, y, z);
@@ -48,7 +48,7 @@ class SceneSection {
       type: CANNON.Body.STATIC,
     });
     cannonBody.addShape(
-      new CANNON.Box(new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2))
+      new CANNON.Box(new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)),
     );
     cannonBody.position.copy(mesh.position);
     this.world.addBody(cannonBody);
@@ -66,7 +66,7 @@ class SceneSection {
     cannonBody.sleepSpeedLimit = 0.1;
     cannonBody.sleepTimeLimit = 0.5;
     cannonBody.addShape(
-      new CANNON.Box(new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2))
+      new CANNON.Box(new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)),
     );
     cannonBody.position.set(x, y, z);
     cannonBody.quaternion.setFromEuler(rx, ry, rz);

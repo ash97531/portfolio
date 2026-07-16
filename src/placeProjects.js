@@ -4,6 +4,14 @@ import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
 import { PROJECT_LINKS } from './content';
+import hud from './Hud';
+
+// Distances (in world units) from a mountain's center.
+const ON_MOUNTAIN_RADIUS = 4.83; // close enough to count as "on" the mountain
+const MOUNTAIN_TOP_RADIUS = 4.73; // radius of the flat mountain top
+const TELEPORTER_RADIUS = 0.9;
+// Teleporter pad position relative to the mountain center.
+const TELEPORTER_OFFSET = { x: 2.15, y: -0.1 };
 
 class PlaceProjects extends SceneSection {
   ufobody;
@@ -40,32 +48,31 @@ class PlaceProjects extends SceneSection {
     this.orbit = orbit;
 
     this.placeModelsPosition();
+  }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (this.onMountain != -1) {
-          const project = this.mountainArray[this.onMountain];
-          if (
-            distance2D(
-              {
-                x: project.position.x + 2.15,
-                y: project.position.y - 0.1,
-              },
-              this.ufobody.position
-            ) < 0.9 // radius of teleporter
-          ) {
-            // teleport to project mountain
-            this.dir.move = false;
-            this.teleportUfo();
-          } else {
-            // open the project link
-            if (PROJECT_LINKS[this.onMountain]) {
-              window.open(PROJECT_LINKS[this.onMountain], '_blank');
-            }
-          }
-        }
-      }
-    });
+  onEnter() {
+    if (this.onMountain == -1) return;
+
+    if (this.isUfoOnTeleporter()) {
+      // teleport to the other project mountain
+      this.dir.move = false;
+      this.teleportUfo();
+    } else if (PROJECT_LINKS[this.onMountain]) {
+      window.open(PROJECT_LINKS[this.onMountain], '_blank');
+    }
+  }
+
+  isUfoOnTeleporter() {
+    const project = this.mountainArray[this.onMountain];
+    return (
+      distance2D(
+        {
+          x: project.position.x + TELEPORTER_OFFSET.x,
+          y: project.position.y + TELEPORTER_OFFSET.y,
+        },
+        this.ufobody.position,
+      ) < TELEPORTER_RADIUS
+    );
   }
 
   teleportUfo() {
@@ -91,7 +98,7 @@ class PlaceProjects extends SceneSection {
           x: this.ufobody.position.x,
           y: this.ufobody.position.y,
           z: 0.5,
-        }
+        },
       );
 
       return;
@@ -123,7 +130,7 @@ class PlaceProjects extends SceneSection {
       -0.2,
       2,
       2,
-      2
+      2,
     );
     projectSignPost.rotation.set(0, 0, -Math.PI / 2);
     projectSignPost.children.map((child) => {
@@ -149,7 +156,7 @@ class PlaceProjects extends SceneSection {
       0.7,
       0,
       0,
-      -Math.PI / 2
+      -Math.PI / 2,
     );
     androidIcon.children.map((child) => {
       child.castShadow = true;
@@ -159,7 +166,7 @@ class PlaceProjects extends SceneSection {
     const PCMouseControllerText = this.getTextMesh(
       'PC Mouse Controller',
       1.5,
-      0.2
+      0.2,
     );
     PCMouseControllerText.position.set(3.2, -16.4, -1.48);
     PCMouseControllerText.rotation.set(0, 0, Math.PI / 2);
@@ -176,12 +183,12 @@ class PlaceProjects extends SceneSection {
       3,
       0,
       0,
-      -0.61
+      -0.61,
     );
     this.project1MountainBody = this.addMountain(this.project1Mountain);
     this.mouseControllerProject(
       this.project1Mountain,
-      this.project1MountainBody
+      this.project1MountainBody,
     );
 
     // Eshop project
@@ -192,7 +199,7 @@ class PlaceProjects extends SceneSection {
       0.5,
       3.2,
       4.5,
-      3.2
+      3.2,
     );
     this.placeGlbToCannonBody(bitcoin);
     const eshopText = this.getTextMesh('E-shop', 0.4, 0.2);
@@ -214,7 +221,7 @@ class PlaceProjects extends SceneSection {
       2.5,
       0,
       0,
-      Math.PI / 4
+      Math.PI / 4,
     );
     blockchainModel.children.map((child) => {
       child.castShadow = true;
@@ -232,7 +239,7 @@ class PlaceProjects extends SceneSection {
       3,
       0,
       0,
-      -0.61
+      -0.61,
     );
 
     this.project2MountainBody = this.addMountain(this.project2Mountain);
@@ -256,11 +263,11 @@ class PlaceProjects extends SceneSection {
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.5, 0.6, 0.5)),
       new CANNON.Vec3(-1, 2, 3.4),
-      new CANNON.Quaternion().setFromEuler(0, (-30 * Math.PI) / 180, 0)
+      new CANNON.Quaternion().setFromEuler(0, (-30 * Math.PI) / 180, 0),
     );
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.4, 0.8, 0.6)),
-      new CANNON.Vec3(1.8, 3, -3.1)
+      new CANNON.Vec3(1.8, 3, -3.1),
     );
 
     const kinematicBody = new CANNON.Body({
@@ -270,11 +277,11 @@ class PlaceProjects extends SceneSection {
       quaternion: new CANNON.Quaternion().setFromEuler(
         0,
         0,
-        (-70 * Math.PI) / 180
+        (-70 * Math.PI) / 180,
       ),
     });
     this.world.addBody(kinematicBody);
-    kinematicBody.addEventListener('collide', (e) => {
+    kinematicBody.addEventListener('collide', () => {
       if (this.shakeTime <= 0.5) this.resetShopAndCannon();
     });
   }
@@ -307,7 +314,7 @@ class PlaceProjects extends SceneSection {
         position: new CANNON.Vec3(
           this.project2MountainBody.position.x - 0.6, //5.6
           this.project2MountainBody.position.y - 2.7, //6.4
-          this.project2MountainBody.position.z + 2.65 //4.4
+          this.project2MountainBody.position.z + 2.65, //4.4
         ),
         quaternion: new CANNON.Quaternion().setFromEuler(0, 0, 0),
         allowSleep: true,
@@ -325,7 +332,7 @@ class PlaceProjects extends SceneSection {
         mass: 0.2,
         shape: new CANNON.Cylinder(0.15, 0.15, 0.1, 8),
         position: this.project2MountainBody.position.vadd(
-          new CANNON.Vec3(1.6, 2.4, 3.85)
+          new CANNON.Vec3(1.6, 2.4, 3.85),
         ),
         quaternion: new CANNON.Quaternion().setFromEuler(0, 0, 0),
         allowSleep: true,
@@ -375,22 +382,24 @@ class PlaceProjects extends SceneSection {
       0.92,
       0,
       0,
-      -0.66
+      -0.66,
     );
     mountain.add(screen);
 
     const mouse = this.placeGLBMesh('mouse', -0.04, 0.3, 0.5);
     mouse.rotation.set(0, 0, -0.66);
+    mouse.name = 'pcMouse';
     mountain.add(mouse);
 
     const cursor = this.placeGLBMesh('cursor', -0.65, 0.1, 0.98, 1, 0.5, 0.5);
     cursor.rotation.set(0, 0, -0.66);
+    cursor.name = 'pcCursor';
     mountain.add(cursor);
 
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.2, 1, 1.8)),
       new CANNON.Vec3(-1.6, 2.8, -1),
-      new CANNON.Quaternion().setFromEuler(0, (-50 * Math.PI) / 180, 0)
+      new CANNON.Quaternion().setFromEuler(0, (-50 * Math.PI) / 180, 0),
     );
   }
 
@@ -421,28 +430,28 @@ class PlaceProjects extends SceneSection {
         size.x / 4 - 0.6,
         size.x / 4 + 2.6,
         size.z / 2 - 0.3,
-        16
+        16,
       ),
       quaternion: new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0),
     });
     mountainBody.quaternion.setFromEuler(Math.PI / 2, -0.35, 0);
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.5, 0.8, 0.8)),
-      new CANNON.Vec3(1.6, 2, -2.8)
+      new CANNON.Vec3(1.6, 2, -2.8),
     );
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.5, 1.4, 0.5)),
-      new CANNON.Vec3(-3.4, 3, 1.1)
+      new CANNON.Vec3(-3.4, 3, 1.1),
     );
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.2, 0.8, 1.2)),
       new CANNON.Vec3(3.8, 1.6, -0.5),
-      new CANNON.Quaternion().setFromEuler(0, (5 * Math.PI) / 180, 0)
+      new CANNON.Quaternion().setFromEuler(0, (5 * Math.PI) / 180, 0),
     );
     mountainBody.addShape(
       new CANNON.Box(new CANNON.Vec3(0.2, 0.8, 1.9)),
       new CANNON.Vec3(-2.1, 1.8, -2.5),
-      new CANNON.Quaternion().setFromEuler(0, (-50 * Math.PI) / 180, 0)
+      new CANNON.Quaternion().setFromEuler(0, (-50 * Math.PI) / 180, 0),
     );
 
     this.world.addBody(mountainBody);
@@ -451,50 +460,33 @@ class PlaceProjects extends SceneSection {
 
   checkTeleporter() {
     const project = this.mountainArray[this.onMountain];
-    if (
-      distance2D(
-        {
-          x: project.position.x + 2.15,
-          y: project.position.y - 0.1,
-        },
-        this.ufobody.position
-      ) < 0.9 // radius of teleporter
-    ) {
-      //switch on teleporter light
-      project.children[13].intensity = 4;
-      document.getElementById('modal-img').data = 'images/teleporter.png';
-      document.getElementById('modal-text').textContent =
-        'Press ENTER: Teleport to other project';
+    const teleporterLight = project.getObjectByName('teleporterLight');
+    if (this.isUfoOnTeleporter()) {
+      teleporterLight.intensity = 4;
+      hud.setMessage(
+        'Press ENTER: Teleport to other project',
+        'images/teleporter.png',
+      );
     } else {
-      project.children[13].intensity = 0.5;
-      document.getElementById('modal-img').data = 'images/ufo.png';
-      document.getElementById('modal-text').textContent =
-        'Press ENTER: Fly to project';
-      //switch off teleporter light
+      teleporterLight.intensity = 0.5;
+      hud.setMessage('Press ENTER: Fly to project', 'images/ufo.png');
     }
   }
 
   update() {
     const distToProject1 = distance2D(
       this.project1Mountain.position,
-      this.ufobody.position
+      this.ufobody.position,
     );
-    if (distToProject1 < 4.83 /* on mountain check */) {
-      if (distToProject1 < 4.73 /* top radius of mountain */) {
+    if (distToProject1 < ON_MOUNTAIN_RADIUS) {
+      if (distToProject1 < MOUNTAIN_TOP_RADIUS) {
         this.onMountain = 0;
         this.checkTeleporter();
 
-        document.getElementById('modal-container').classList.add('six');
-        document.getElementById('modal-container').classList.remove('out');
+        hud.show();
 
-        const cursor =
-          this.project1Mountain.children[
-            this.project1Mountain.children.length - 1
-          ];
-        const mouse =
-          this.project1Mountain.children[
-            this.project1Mountain.children.length - 2
-          ];
+        const cursor = this.project1Mountain.getObjectByName('pcCursor');
+        const mouse = this.project1Mountain.getObjectByName('pcMouse');
         if (this.dir.forward) {
           //cursor
           cursor.position.z = Math.min(cursor.position.z + 0.01, 1.2);
@@ -526,21 +518,20 @@ class PlaceProjects extends SceneSection {
         }
       } else {
         this.onMountain = -1;
-        document.getElementById('modal-container').classList.add('out');
+        hud.hide();
       }
     }
 
     const distToProject2 = distance2D(
       this.project2Mountain.position,
-      this.ufobody.position
+      this.ufobody.position,
     );
-    if (distToProject2 < 4.83 /* on mountain check */) {
-      if (distToProject2 < 4.73 /* top radius of mountain */) {
+    if (distToProject2 < ON_MOUNTAIN_RADIUS) {
+      if (distToProject2 < MOUNTAIN_TOP_RADIUS) {
         this.onMountain = 1;
         this.checkTeleporter();
 
-        document.getElementById('modal-container').classList.add('six');
-        document.getElementById('modal-container').classList.remove('out');
+        hud.show();
 
         this.coinAtTopOfShop.rotateZ(0.05);
         this.fireCoinCannon();
@@ -553,7 +544,7 @@ class PlaceProjects extends SceneSection {
       } else {
         this.onMountain = -1;
         this.shakeTime = 0.5;
-        document.getElementById('modal-container').classList.add('out');
+        hud.hide();
       }
     }
   }
