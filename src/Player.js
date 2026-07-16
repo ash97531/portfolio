@@ -1,14 +1,24 @@
 import * as CANNON from 'cannon-es';
 import gltfLoader from './gltfLoader';
-import { distance2D } from './utils';
 
 // Hover raycast offsets, relative to the UFO body.
 const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
 const FLOAT_RAY_TO = new CANNON.Vec3(0, 0, -50);
 
-// If no scene object (other than the ground) is within this 2D distance of
-// the UFO, the player counts as lost and the direction arrow appears.
-const EMPTY_AREA_RADIUS = 25;
+// The world areas the player can meaningfully be "at". Outside all of
+// them the player counts as lost and the direction arrow appears.
+// Centers/radii derived from the section placement code.
+const POPULATED_ZONES = [
+  { x: -2, y: 2, r: 28 }, // center: name wall, flashlights, india map
+  { x: 19, y: -8, r: 22 }, // contact links and surrounding greenery
+  { x: -25, y: -4.5, r: 15 }, // project 1 (PC Mouse Controller)
+  { x: -55.5, y: -5, r: 15 }, // project 2 (E-shop)
+  { x: -38.4, y: -22, r: 15 }, // experience 1 (Marlin AI)
+  { x: -65.5, y: -23, r: 15 }, // experience 2 (GameOn)
+  { x: -82.4, y: -20, r: 15 }, // experience 3 (Brane)
+  { x: -2, y: -27, r: 14 }, // skills & achievements
+  { x: -22, y: -32, r: 14 }, // jenga stack + achievement greenery
+];
 
 // The UFO: physics body, mesh, movement and hover mechanics.
 class Player {
@@ -168,23 +178,17 @@ class Player {
     }
   }
 
-  // Shows an arrow pointing back to the center when the UFO is in an empty
-  // area: nothing but the ground plane within EMPTY_AREA_RADIUS of the UFO.
+  // Shows an arrow pointing back to the center when the UFO is outside
+  // every populated zone (squared distances: no sqrt needed).
   checkIfLost() {
-    const nearSomething = this.scene.children.some((obj) => {
-      if (obj === this.ufomesh || obj.isLight || obj.name === 'ground')
-        return false;
-      // instanced meshes sit at the origin; their position says nothing
-      // about where their instances are
-      if (obj.isInstancedMesh) return false;
-      // skip helper Object3Ds without geometry (e.g. light targets)
-      if (!obj.isMesh && obj.children.length === 0) return false;
-      return (
-        distance2D(obj.position, this.ufomesh.position) < EMPTY_AREA_RADIUS
-      );
+    const pos = this.ufomesh.position;
+    const inZone = POPULATED_ZONES.some((zone) => {
+      const dx = zone.x - pos.x;
+      const dy = zone.y - pos.y;
+      return dx * dx + dy * dy < zone.r * zone.r;
     });
 
-    if (!nearSomething) {
+    if (!inZone) {
       this.directionArrow.lookAt(0, 0, 0);
       this.directionArrow.visible = true;
     } else {
