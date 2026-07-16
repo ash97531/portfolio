@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { TextGeometry } from 'three/examples/jsm/Addons.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 // Shared helpers for the world sections (projects, experience, contacts, ...).
 // Subclasses may override `textFont` and `receiveShadowByDefault`.

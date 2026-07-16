@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { FontLoader } from 'three/examples/jsm/Addons.js';
-import { TextGeometry } from 'three/examples/jsm/Addons.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import SceneSection from './SceneSection';
 import { distance2D } from './utils';
 import { CONTACT_LINKS } from './content';

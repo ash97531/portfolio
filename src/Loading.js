@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 // Assets load group by group (models within a group load in parallel);
 // after each group finishes, its world section is placed via the App hooks.
