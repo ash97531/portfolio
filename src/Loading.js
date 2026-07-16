@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
-import App from './App';
 
 class Loading {
   scene;
@@ -14,6 +13,7 @@ class Loading {
   bodiesWhileLoading;
   assets;
   progress;
+  app; // the running App instance; used to place world sections as assets arrive
   loadingSceneMeshes = [];
   loadingSceneBodies = [];
 
@@ -23,7 +23,8 @@ class Loading {
     meshesWhileLoading,
     bodiesWhileLoading,
     assets,
-    progress
+    progress,
+    app
   ) {
     this.scene = scene;
     this.world = world;
@@ -34,6 +35,7 @@ class Loading {
     this.bodiesWhileLoading = bodiesWhileLoading;
     this.assets = assets;
     this.progress = progress;
+    this.app = app;
 
     this.createGround();
     this.placeLoading();
@@ -354,7 +356,7 @@ class Loading {
 
   async loadModels() {
     const xoff = -0.6;
-    const app = new App();
+    const app = this.app;
 
     await this.modelAndProgressLoading('brick', xoff, 0);
     await this.modelAndProgressLoading('apple tree', xoff, 0);

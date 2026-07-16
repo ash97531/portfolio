@@ -12,42 +12,9 @@ import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
 import { distance2D } from './utils';
 
-let meshesWhileLoading = [],
-  bodiesWhileLoading = [];
-let progress = [0, false]; // first index for progress, second for pause loading
-let assets = {};
-let loadingSceneClass;
-const totalAssets = 29;
+const TIMESTEP = 1 / 60;
 
-let placeContactLinksClass, placeProjectsClass, placeExperienceClass;
-
-let camera, scene, renderer, world, orbit, listener, sound;
-
-const ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
-let camZoomY = 0,
-  camZoomZ = 0,
-  repositioned = true;
-let isPanning = false;
-let startPan = new THREE.Vector2();
-
-let meshes = [],
-  bodies = [];
-let ufobody, ufomesh;
-let dir = {
-  right: false,
-  left: false,
-  forward: false,
-  back: false,
-  move: true,
-};
-let directionArrow;
-
-const gltfLoader = new GLTFLoader();
-let speed = 0,
-  maxSpeed = 0.5,
-  maxAngularSpeed = 2,
-  acceleration = 0.09;
-const colorsArr = [
+const LOADING_CUBE_COLORS = [
   new THREE.Color(0xffffe0), // Initial cube color
   new THREE.Color(0xffffff), // White
   new THREE.Color(0xff0000), // Red
@@ -59,18 +26,66 @@ const colorsArr = [
   new THREE.Color(0x000000), // Black
 ];
 
-let enterKeyPressed = false;
-
 class App {
+  // graphics / physics
+  camera;
+  scene;
+  renderer;
+  world;
+  orbit;
+  listener;
+  sound;
+  gltfLoader = new GLTFLoader();
+
+  // loading state
+  meshesWhileLoading = [];
+  bodiesWhileLoading = [];
+  progress = [0, false]; // first index for progress, second for pause loading
+  assets = {};
+  loadingSceneClass;
+  animationLoaded = false;
+  enterKeyPressed = false;
+
+  // world sections
+  placeContactLinksClass;
+  placeProjectsClass;
+  placeExperienceClass;
+
+  // player
+  meshes = [];
+  bodies = [];
+  ufobody;
+  ufomesh;
+  directionArrow;
+  ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
+  dir = {
+    right: false,
+    left: false,
+    forward: false,
+    back: false,
+    move: true,
+  };
+  speed = 0;
+  maxSpeed = 0.5;
+  maxAngularSpeed = 2;
+  acceleration = 0.09;
+
+  // camera state
+  camZoomY = 0;
+  camZoomZ = 0;
+  repositioned = true;
+  isPanning = false;
+  startPan = new THREE.Vector2();
+
   async init() {
-    window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener('keydown', keydown, false);
-    window.addEventListener('keyup', keyup, false);
-    window.addEventListener('keypress', keypress, false);
-    window.addEventListener('wheel', cameraZoom, false);
-    window.addEventListener('mousedown', onMouseDown, false);
-    window.addEventListener('mousemove', onMouseMove, false);
-    window.addEventListener('mouseup', onMouseUp, false);
+    window.addEventListener('resize', () => this.onWindowResize(), false);
+    window.addEventListener('keydown', (e) => this.keydown(e), false);
+    window.addEventListener('keyup', (e) => this.keyup(e), false);
+    window.addEventListener('keypress', (e) => this.keypress(e), false);
+    window.addEventListener('wheel', (e) => this.cameraZoom(e), false);
+    window.addEventListener('mousedown', (e) => this.onMouseDown(e), false);
+    window.addEventListener('mousemove', (e) => this.onMouseMove(e), false);
+    window.addEventListener('mouseup', (e) => this.onMouseUp(e), false);
 
     this.setUpGraphics();
     this.setupPhysicsWorld();
@@ -81,7 +96,7 @@ class App {
     await this.player();
 
     this.loadingScene();
-    loadingAnimation();
+    this.loadingAnimation();
   }
 
   touchControls() {
@@ -97,7 +112,7 @@ class App {
       document.getElementById('vertical-controls').style.display = 'none';
       document.getElementById('controls').style.display = 'none';
     } else {
-      camera.position.set(13, -23, 39);
+      this.camera.position.set(13, -23, 39);
     }
 
     let ufofront, ufoback;
@@ -105,16 +120,16 @@ class App {
     document.getElementById('upButton').addEventListener('touchstart', (e) => {
       e.preventDefault();
       ufofront = setInterval(() => {
-        dir.back = true;
-        speed -= acceleration;
+        this.dir.back = true;
+        this.speed -= this.acceleration;
       }, 1000 / 60);
     });
 
     document.getElementById('upButton').addEventListener('touchend', (e) => {
       e.preventDefault();
       clearInterval(ufofront);
-      dir.back = false;
-      speed = 0;
+      this.dir.back = false;
+      this.speed = 0;
     });
 
     document
@@ -122,48 +137,48 @@ class App {
       .addEventListener('touchstart', (e) => {
         e.preventDefault();
         ufoback = setInterval(() => {
-          dir.forward = true;
-          speed += acceleration;
+          this.dir.forward = true;
+          this.speed += this.acceleration;
         }, 1000 / 60);
       });
 
     document.getElementById('downButton').addEventListener('touchend', (e) => {
       e.preventDefault();
       clearInterval(ufoback);
-      dir.forward = false;
-      speed = 0;
+      this.dir.forward = false;
+      this.speed = 0;
     });
 
     document
       .getElementById('leftButton')
       .addEventListener('touchstart', (e) => {
         e.preventDefault();
-        dir.left = true;
+        this.dir.left = true;
       });
 
     document.getElementById('leftButton').addEventListener('touchend', (e) => {
       e.preventDefault();
-      dir.left = false;
+      this.dir.left = false;
     });
 
     document
       .getElementById('rightButton')
       .addEventListener('touchstart', (e) => {
         e.preventDefault();
-        dir.right = true;
+        this.dir.right = true;
       });
 
     document.getElementById('rightButton').addEventListener('touchend', (e) => {
       e.preventDefault();
-      dir.right = false;
+      this.dir.right = false;
     });
 
     document
       .getElementById('jumpButton')
       .addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (ufobody.position.z < camera.position.z - 5)
-          ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
+        if (this.ufobody.position.z < this.camera.position.z - 5)
+          this.ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
       });
 
     document
@@ -184,89 +199,107 @@ class App {
   }
 
   loadingScene() {
-    loadingSceneClass = new Loading(
-      scene,
-      world,
-      meshesWhileLoading,
-      bodiesWhileLoading,
-      assets,
-      progress
+    this.loadingSceneClass = new Loading(
+      this.scene,
+      this.world,
+      this.meshesWhileLoading,
+      this.bodiesWhileLoading,
+      this.assets,
+      this.progress,
+      this
     );
   }
 
-  async placeContactLinksFun() {
-    placeContactLinksClass = new PlaceContactLinks(
-      scene,
-      world,
-      ufomesh,
-      assets
+  placeContactLinksFun() {
+    this.placeContactLinksClass = new PlaceContactLinks(
+      this.scene,
+      this.world,
+      this.ufomesh,
+      this.assets
     );
   }
 
-  async placeNameAndBackWallFun() {
-    new PlaceNameAndBackWall(scene, world, meshes, bodies, assets);
-  }
-
-  async placeProjectsFun() {
-    placeProjectsClass = new PlaceProjects(
-      scene,
-      world,
-      assets,
-      ufobody,
-      ufomesh,
-      dir,
-      camera,
-      orbit
+  placeNameAndBackWallFun() {
+    new PlaceNameAndBackWall(
+      this.scene,
+      this.world,
+      this.meshes,
+      this.bodies,
+      this.assets
     );
   }
 
-  async placeAchievementsFun() {
-    new PlaceAchievements(scene, world, meshes, bodies, assets);
+  placeProjectsFun() {
+    this.placeProjectsClass = new PlaceProjects(
+      this.scene,
+      this.world,
+      this.assets,
+      this.ufobody,
+      this.ufomesh,
+      this.dir,
+      this.camera,
+      this.orbit
+    );
   }
 
-  async placeExperienceFun() {
-    placeExperienceClass = new PlaceExperience(scene, world, assets, ufobody);
+  placeAchievementsFun() {
+    new PlaceAchievements(
+      this.scene,
+      this.world,
+      this.meshes,
+      this.bodies,
+      this.assets
+    );
+  }
+
+  placeExperienceFun() {
+    this.placeExperienceClass = new PlaceExperience(
+      this.scene,
+      this.world,
+      this.assets,
+      this.ufobody
+    );
   }
 
   setUpGraphics() {
-    camera = new THREE.PerspectiveCamera(
+    this.camera = new THREE.PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
       0.01,
       2000
     );
-    camera.position.set(12.5, -14.5, 12.5 + 10);
-    camera.rotation.set(0.74, 2.71, -2.511);
+    this.camera.position.set(12.5, -14.5, 12.5 + 10);
+    this.camera.rotation.set(0.74, 2.71, -2.511);
 
-    listener = new THREE.AudioListener();
-    camera.add(listener);
+    this.listener = new THREE.AudioListener();
+    this.camera.add(this.listener);
 
-    sound = new THREE.Audio(listener);
+    this.sound = new THREE.Audio(this.listener);
 
-    scene = new THREE.Scene();
+    this.scene = new THREE.Scene();
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(renderer.domElement);
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(this.renderer.domElement);
 
-    orbit = new OrbitControls(camera, renderer.domElement);
-    orbit.target.set(12.5, -7.8, 3.42 + 10);
-    orbit.enableRotate = false;
-    orbit.enableZoom = false;
-    orbit.enablePan = false;
-    orbit.update();
+    this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.target.set(12.5, -7.8, 3.42 + 10);
+    this.orbit.enableRotate = false;
+    this.orbit.enableZoom = false;
+    this.orbit.enablePan = false;
+    this.orbit.update();
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
-    scene.add(ambientLight);
+    this.scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true;
-    scene.add(directionalLight);
+    this.scene.add(directionalLight);
     directionalLight.shadow.camera.left = 100;
     directionalLight.shadow.camera.right = -100;
     directionalLight.shadow.camera.top = 100;
@@ -275,27 +308,26 @@ class App {
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.3);
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
-    scene.add(directionalLight2);
+    this.scene.add(directionalLight2);
   }
 
   setupPhysicsWorld() {
-    world = new CANNON.World({ gravity: new CANNON.Vec3(0, 0, -9.81) });
-    world.broadphase = new CANNON.SAPBroadphase(world); // Use SAP broadphase
-    world.solver.iterations = 10; // Set solver iterations for stability
+    this.world = new CANNON.World({ gravity: new CANNON.Vec3(0, 0, -9.81) });
+    this.world.broadphase = new CANNON.SAPBroadphase(this.world);
+    this.world.solver.iterations = 10; // Set solver iterations for stability
 
-    world.allowSleep = true;
+    this.world.allowSleep = true;
   }
 
   createGround() {
     const planeGeo = new THREE.BoxGeometry(1000, 1000, 0.5);
-    //E7A752
     const planeMat = new THREE.MeshStandardMaterial({
       color: 0x70ac29,
       side: THREE.DoubleSide,
     });
     const planeMesh = new THREE.Mesh(planeGeo, planeMat);
     planeMesh.receiveShadow = true;
-    scene.add(planeMesh);
+    this.scene.add(planeMesh);
 
     const planePhysMat = new CANNON.Material();
     const planeBody = new CANNON.Body({
@@ -305,426 +337,435 @@ class App {
     });
     planeBody.position.set(0, 0, -1);
     planeMesh.position.copy(planeBody.position);
-    world.addBody(planeBody);
+    this.world.addBody(planeBody);
   }
 
   async player() {
-    ufobody = new CANNON.Body({
+    this.ufobody = new CANNON.Body({
       mass: 2,
       linearDamping: 0.8,
       angularDamping: 0.99,
     });
-    ufobody.position.set(0, -4, 12);
+    this.ufobody.position.set(0, -4, 12);
 
-    ufobody.addShape(
+    this.ufobody.addShape(
       new CANNON.Cylinder(0.5, 0.5, 0.25, 8),
       new CANNON.Vec3(),
       new CANNON.Quaternion().setFromEuler(Math.PI / 2, 0, 0)
     );
-    world.addBody(ufobody);
+    this.world.addBody(this.ufobody);
 
-    const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2glb.glb');
-    ufomesh = ufoLoaded.scene.children[0];
-    ufomesh.position.set(0, 0, 0);
-    ufomesh.castShadow = true;
-    ufomesh.children.map((child) => {
+    const ufoLoaded = await this.gltfLoader.loadAsync('assets/ufo2glb.glb');
+    this.ufomesh = ufoLoaded.scene.children[0];
+    this.ufomesh.position.set(0, 0, 0);
+    this.ufomesh.castShadow = true;
+    this.ufomesh.children.forEach((child) => {
       child.castShadow = true;
     });
 
-    directionArrow = await gltfLoader.loadAsync('assets/cursor.glb');
-    directionArrow = directionArrow.scene.children[0];
-    directionArrow.position.set(0, 0, 2);
-    directionArrow.scale.set(12, 6, 6);
-    directionArrow.visible = false;
-    ufomesh.add(directionArrow);
+    const arrowLoaded = await this.gltfLoader.loadAsync('assets/cursor.glb');
+    this.directionArrow = arrowLoaded.scene.children[0];
+    this.directionArrow.position.set(0, 0, 2);
+    this.directionArrow.scale.set(12, 6, 6);
+    this.directionArrow.visible = false;
+    this.ufomesh.add(this.directionArrow);
 
-    ufotoplight.position.set(
-      camera.position.x,
-      camera.position.y,
-      camera.position.z
+    this.ufotoplight.penumbra = 1;
+    this.moveSpotlightToCamera();
+    this.scene.add(this.ufotoplight);
+    this.scene.add(this.ufotoplight.target);
+
+    this.scene.add(this.ufomesh);
+
+    this.meshes.push(this.ufomesh);
+    this.bodies.push(this.ufobody);
+    this.ufobody.quaternion.setFromEuler(0, 0, Math.PI);
+    this.ufobody.applyForce(new CANNON.Vec3(2500, 0, 0));
+  }
+
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // Keeps the UFO spotlight glued to the camera position.
+  moveSpotlightToCamera() {
+    this.ufotoplight.position.set(
+      this.camera.position.x,
+      this.camera.position.y,
+      this.camera.position.z
     );
-    ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
-    ufotoplight.penumbra = 1;
-    scene.add(ufotoplight);
-    scene.add(ufotoplight.target);
-
-    scene.add(ufomesh);
-
-    meshes.push(ufomesh);
-    bodies.push(ufobody);
-    ufobody.quaternion.setFromEuler(0, 0, Math.PI);
-    ufobody.applyForce(new CANNON.Vec3(2500, 0, 0));
-  }
-}
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-const timestep = 1 / 60;
-
-function animate() {
-  world.step(timestep);
-  for (let i = 0; i < meshes.length; i++) {
-    meshes[i].position.copy(bodies[i].position);
-    meshes[i].quaternion.copy(bodies[i].quaternion);
+    this.ufotoplight.target.position.set(
+      this.camera.position.x,
+      this.camera.position.y,
+      0
+    );
   }
 
-  moveUfo();
-  floatUfo();
-  if (
-    Math.abs(ufobody.velocity.x) >= 0.1 ||
-    Math.abs(ufobody.velocity.y) >= 0.1
-  ) {
-    if (!repositioned) {
-      new TWEEN.Tween(camera.position)
-        .to(
-          {
-            x: ufobody.position.x,
-            y: ufobody.position.y - 9 + camZoomY,
-            z: 12 + camZoomZ,
-          },
-          500
-        )
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .onComplete(() => {
-          repositioned = true;
-        })
-        .start();
-    } else {
-      followCamera();
-    }
-  }
-
-  checkIfLost();
-
-  placeContactLinksClass.update();
-  placeProjectsClass.update();
-  placeExperienceClass.update();
-
-  TWEEN.update();
-  renderer.render(scene, camera);
-  requestAnimationFrame(animate);
-}
-
-function checkIfLost() {
-  if (distance2D({ x: -10, y: -10 }, ufomesh.position) > 50) {
-    directionArrow.lookAt(0, 0, 0);
-    directionArrow.visible = true;
-  } else {
-    directionArrow.visible = false;
-  }
-}
-
-function floatUfo() {
-  const result = new CANNON.RaycastResult();
-  world.raycastClosest(
-    ufobody.position.vadd(new CANNON.Vec3(0, 0, -0.6)),
-    ufobody.position.vadd(new CANNON.Vec3(0, 0, -50)),
-    {},
-    result
-  );
-  if (result.hasHit) {
-    const dis = result.distance;
-    const force = (1 / dis) * 17;
-    ufobody.applyForce(new CANNON.Vec3(0, 0, force >= 27 ? 27 : force));
-  } else {
-    ufobody.applyForce(new CANNON.Vec3(0, 0, 27));
-  }
-
-  // floating mechanics
-  const maxTorqueAngle = (7 / 180) * Math.PI;
-  const torqueVal = 25 * maxTorqueAngle * 2;
-  if (ufobody.angularVelocity.almostZero(0.5)) {
-    if (ufobody.quaternion.x > maxTorqueAngle) {
-      ufobody.applyTorque(new CANNON.Vec3(-torqueVal, 0, 0));
-    }
-    if (ufobody.quaternion.x < -maxTorqueAngle) {
-      ufobody.applyTorque(new CANNON.Vec3(torqueVal, 0, 0));
-    }
-    if (ufobody.quaternion.y > maxTorqueAngle) {
-      ufobody.applyTorque(new CANNON.Vec3(0, -torqueVal, 0));
-    }
-    if (ufobody.quaternion.y < -maxTorqueAngle) {
-      ufobody.applyTorque(new CANNON.Vec3(0, torqueVal, 0));
-    }
-  }
-}
-
-function onMouseDown(event) {
-  if (event.button === 0) {
-    isPanning = true;
-    startPan.set(event.clientX, event.clientY);
-  }
-}
-
-function onMouseMove(event) {
-  if (!isPanning) return;
-  if (!enterKeyPressed) return;
-  if (
-    Math.abs(ufobody.velocity.x) >= 0.1 ||
-    Math.abs(ufobody.velocity.y) >= 0.1
-  )
-    return;
-  repositioned = false;
-
-  const panEnd = new THREE.Vector2(event.clientX, event.clientY);
-  const panDelta = new THREE.Vector2().subVectors(panEnd, startPan);
-  const panSpeed = 0.01;
-  orbit.target.x -= panDelta.x * panSpeed;
-  orbit.target.y += panDelta.y * panSpeed;
-  camera.position.x -= panDelta.x * panSpeed;
-  camera.position.y += panDelta.y * panSpeed;
-
-  startPan.copy(panEnd);
-  orbit.update();
-
-  ufotoplight.position.set(
-    camera.position.x,
-    camera.position.y,
-    camera.position.z
-  );
-  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
-}
-
-function onMouseUp(event) {
-  if (event.button === 0) {
-    isPanning = false;
-  }
-}
-
-function cameraZoom(event) {
-  if (!repositioned) return;
-  if (!enterKeyPressed) return;
-  const delta = event.deltaY * 0.01;
-  camZoomY += delta;
-  camZoomZ -= delta;
-  if (camZoomY > 3) {
-    camZoomY = 3;
-    camZoomZ = -3;
-    return;
-  }
-  if (camZoomY < -6) {
-    camZoomY = -6;
-    camZoomZ = 6;
-    return;
-  }
-  camera.position.set(
-    ufobody.position.x,
-    ufobody.position.y - 9 + camZoomY,
-    12 + camZoomZ
-  );
-  orbit.update();
-
-  ufotoplight.position.set(
-    camera.position.x,
-    camera.position.y,
-    camera.position.z
-  );
-  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
-}
-
-function keydown(event) {
-  const key = event.key.toLowerCase();
-  if (key === 'd' || key === 'arrowright') {
-    dir.right = true;
-  }
-  if (key === 'a' || key === 'arrowleft') {
-    dir.left = true;
-  }
-  if (key === 's' || key === 'arrowdown' || dir.forward) {
-    dir.forward = true;
-    speed += acceleration;
-  }
-  if (key === 'w' || key === 'arrowup' || dir.back) {
-    dir.back = true;
-    speed -= acceleration;
-  }
-}
-
-function keyup(event) {
-  const key = event.key.toLowerCase();
-  if (key === 'd' || key === 'arrowright') dir.right = false;
-  if (key === 'a' || key === 'arrowleft') dir.left = false;
-  if (key === 's' || key === 'arrowdown') {
-    dir.forward = false;
-    speed = 0;
-  }
-  if (key === 'w' || key === 'arrowup') {
-    dir.back = false;
-    speed = 0;
-  }
-}
-
-function keypress(event) {
-  const key = event.key.toLowerCase();
-
-  if (key === ' ') {
-    if (ufobody.position.z < camera.position.z - 5)
-      ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
-  }
-}
-
-function applyLocalVelocity(body, localVelocity) {
-  // Convert local velocity to a quaternion
-  const localVelocityVec3 = new CANNON.Vec3(
-    localVelocity.x,
-    localVelocity.y,
-    localVelocity.z
-  );
-  const worldVelocityVec3 = new CANNON.Vec3();
-
-  // Rotate local velocity vector to world space using the body's quaternion
-  body.quaternion.vmult(localVelocityVec3, worldVelocityVec3);
-
-  // Add the transformed velocity to the body's current velocity
-  body.velocity.x += worldVelocityVec3.x;
-  body.velocity.y += worldVelocityVec3.y;
-}
-
-function moveUfo() {
-  if (dir.move) {
-    if (dir.forward) {
-      if (speed > maxSpeed) speed = maxSpeed;
-      applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
+  animate() {
+    this.world.step(TIMESTEP);
+    for (let i = 0; i < this.meshes.length; i++) {
+      this.meshes[i].position.copy(this.bodies[i].position);
+      this.meshes[i].quaternion.copy(this.bodies[i].quaternion);
     }
 
-    if (dir.back) {
-      if (speed < -maxSpeed) speed = -maxSpeed;
-      applyLocalVelocity(ufobody, new CANNON.Vec3(0, speed, 0));
-    }
-
-    if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.left) {
-      ufobody.angularVelocity.z += 1.5;
-    }
-
-    if (ufobody.angularVelocity.length() < maxAngularSpeed && dir.right) {
-      ufobody.angularVelocity.z -= 1.5;
-    }
-  }
-}
-
-function followCamera() {
-  orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
-  camera.position.set(
-    ufobody.position.x,
-    ufobody.position.y - 9 + camZoomY,
-    12 + camZoomZ
-  );
-  orbit.update();
-  ufotoplight.position.set(
-    camera.position.x,
-    camera.position.y,
-    camera.position.z
-  );
-  ufotoplight.target.position.set(camera.position.x, camera.position.y, 0);
-}
-
-let animationLoaded = false;
-function loadingAnimation() {
-  world.step(timestep);
-
-  if (enterKeyPressed) return;
-
-  if (!progress[1]) {
-    // if not pause loading animation
-    for (let i = 0; i < bodiesWhileLoading.length; i++) {
-      const result = new CANNON.RaycastResult();
-      world.raycastClosest(
-        bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 0.6)),
-        bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 50)),
-        {},
-        result
-      );
-
-      const threshold = -0.5 + 10;
-      if (result.hasHit) {
-        if (bodiesWhileLoading[i].position.z > threshold) {
-          bodiesWhileLoading[i].position.z -= 0.05;
-        }
-        if (
-          colorsArr.find((e) => e.equals(meshesWhileLoading[i].material.color))
-        ) {
-          meshesWhileLoading[i].material.color.lerp(
-            colorsArr[Math.floor(Math.random() * 8)],
-            Math.random()
-          );
-        }
+    this.moveUfo();
+    this.floatUfo();
+    if (
+      Math.abs(this.ufobody.velocity.x) >= 0.1 ||
+      Math.abs(this.ufobody.velocity.y) >= 0.1
+    ) {
+      if (!this.repositioned) {
+        new TWEEN.Tween(this.camera.position)
+          .to(
+            {
+              x: this.ufobody.position.x,
+              y: this.ufobody.position.y - 9 + this.camZoomY,
+              z: 12 + this.camZoomZ,
+            },
+            500
+          )
+          .easing(TWEEN.Easing.Quadratic.InOut)
+          .onComplete(() => {
+            this.repositioned = true;
+          })
+          .start();
       } else {
-        if (bodiesWhileLoading[i].position.z < 0 + 10) {
-          bodiesWhileLoading[i].position.z += 0.03;
-        }
+        this.followCamera();
       }
-
-      meshesWhileLoading[i].position.copy(bodiesWhileLoading[i].position);
     }
-  } else {
-    for (let i = 0; i < bodiesWhileLoading.length; i++) {
-      meshesWhileLoading[i].position.copy(bodiesWhileLoading[i].position);
+
+    this.checkIfLost();
+
+    this.placeContactLinksClass.update();
+    this.placeProjectsClass.update();
+    this.placeExperienceClass.update();
+
+    TWEEN.update();
+    this.renderer.render(this.scene, this.camera);
+    requestAnimationFrame(() => this.animate());
+  }
+
+  checkIfLost() {
+    if (distance2D({ x: -10, y: -10 }, this.ufomesh.position) > 50) {
+      this.directionArrow.lookAt(0, 0, 0);
+      this.directionArrow.visible = true;
+    } else {
+      this.directionArrow.visible = false;
     }
   }
 
-  ufomesh.position.copy(ufobody.position);
-  ufomesh.quaternion.copy(ufobody.quaternion);
-  moveUfo();
-  floatUfo();
+  floatUfo() {
+    const result = new CANNON.RaycastResult();
+    this.world.raycastClosest(
+      this.ufobody.position.vadd(new CANNON.Vec3(0, 0, -0.6)),
+      this.ufobody.position.vadd(new CANNON.Vec3(0, 0, -50)),
+      {},
+      result
+    );
+    if (result.hasHit) {
+      const dis = result.distance;
+      const force = (1 / dis) * 17;
+      this.ufobody.applyForce(new CANNON.Vec3(0, 0, force >= 27 ? 27 : force));
+    } else {
+      this.ufobody.applyForce(new CANNON.Vec3(0, 0, 27));
+    }
 
-  if (progress[1] && !animationLoaded) {
-    animationLoaded = true;
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !enterKeyPressed) {
-        if (listener.context.state === 'suspended') {
-          listener.context.resume().then(() => {
-            playAudio();
-          });
+    // floating mechanics
+    const maxTorqueAngle = (7 / 180) * Math.PI;
+    const torqueVal = 25 * maxTorqueAngle * 2;
+    if (this.ufobody.angularVelocity.almostZero(0.5)) {
+      if (this.ufobody.quaternion.x > maxTorqueAngle) {
+        this.ufobody.applyTorque(new CANNON.Vec3(-torqueVal, 0, 0));
+      }
+      if (this.ufobody.quaternion.x < -maxTorqueAngle) {
+        this.ufobody.applyTorque(new CANNON.Vec3(torqueVal, 0, 0));
+      }
+      if (this.ufobody.quaternion.y > maxTorqueAngle) {
+        this.ufobody.applyTorque(new CANNON.Vec3(0, -torqueVal, 0));
+      }
+      if (this.ufobody.quaternion.y < -maxTorqueAngle) {
+        this.ufobody.applyTorque(new CANNON.Vec3(0, torqueVal, 0));
+      }
+    }
+  }
+
+  onMouseDown(event) {
+    if (event.button === 0) {
+      this.isPanning = true;
+      this.startPan.set(event.clientX, event.clientY);
+    }
+  }
+
+  onMouseMove(event) {
+    if (!this.isPanning) return;
+    if (!this.enterKeyPressed) return;
+    if (
+      Math.abs(this.ufobody.velocity.x) >= 0.1 ||
+      Math.abs(this.ufobody.velocity.y) >= 0.1
+    )
+      return;
+    this.repositioned = false;
+
+    const panEnd = new THREE.Vector2(event.clientX, event.clientY);
+    const panDelta = new THREE.Vector2().subVectors(panEnd, this.startPan);
+    const panSpeed = 0.01;
+    this.orbit.target.x -= panDelta.x * panSpeed;
+    this.orbit.target.y += panDelta.y * panSpeed;
+    this.camera.position.x -= panDelta.x * panSpeed;
+    this.camera.position.y += panDelta.y * panSpeed;
+
+    this.startPan.copy(panEnd);
+    this.orbit.update();
+
+    this.moveSpotlightToCamera();
+  }
+
+  onMouseUp(event) {
+    if (event.button === 0) {
+      this.isPanning = false;
+    }
+  }
+
+  cameraZoom(event) {
+    if (!this.repositioned) return;
+    if (!this.enterKeyPressed) return;
+    const delta = event.deltaY * 0.01;
+    this.camZoomY += delta;
+    this.camZoomZ -= delta;
+    if (this.camZoomY > 3) {
+      this.camZoomY = 3;
+      this.camZoomZ = -3;
+      return;
+    }
+    if (this.camZoomY < -6) {
+      this.camZoomY = -6;
+      this.camZoomZ = 6;
+      return;
+    }
+    this.camera.position.set(
+      this.ufobody.position.x,
+      this.ufobody.position.y - 9 + this.camZoomY,
+      12 + this.camZoomZ
+    );
+    this.orbit.update();
+
+    this.moveSpotlightToCamera();
+  }
+
+  keydown(event) {
+    const key = event.key.toLowerCase();
+    if (key === 'd' || key === 'arrowright') {
+      this.dir.right = true;
+    }
+    if (key === 'a' || key === 'arrowleft') {
+      this.dir.left = true;
+    }
+    if (key === 's' || key === 'arrowdown' || this.dir.forward) {
+      this.dir.forward = true;
+      this.speed += this.acceleration;
+    }
+    if (key === 'w' || key === 'arrowup' || this.dir.back) {
+      this.dir.back = true;
+      this.speed -= this.acceleration;
+    }
+  }
+
+  keyup(event) {
+    const key = event.key.toLowerCase();
+    if (key === 'd' || key === 'arrowright') this.dir.right = false;
+    if (key === 'a' || key === 'arrowleft') this.dir.left = false;
+    if (key === 's' || key === 'arrowdown') {
+      this.dir.forward = false;
+      this.speed = 0;
+    }
+    if (key === 'w' || key === 'arrowup') {
+      this.dir.back = false;
+      this.speed = 0;
+    }
+  }
+
+  keypress(event) {
+    const key = event.key.toLowerCase();
+
+    if (key === ' ') {
+      if (this.ufobody.position.z < this.camera.position.z - 5)
+        this.ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
+    }
+  }
+
+  applyLocalVelocity(body, localVelocity) {
+    const worldVelocityVec3 = new CANNON.Vec3();
+
+    // Rotate local velocity vector to world space using the body's quaternion
+    body.quaternion.vmult(localVelocity, worldVelocityVec3);
+
+    // Add the transformed velocity to the body's current velocity
+    body.velocity.x += worldVelocityVec3.x;
+    body.velocity.y += worldVelocityVec3.y;
+  }
+
+  moveUfo() {
+    if (this.dir.move) {
+      if (this.dir.forward) {
+        if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+        this.applyLocalVelocity(
+          this.ufobody,
+          new CANNON.Vec3(0, this.speed, 0)
+        );
+      }
+
+      if (this.dir.back) {
+        if (this.speed < -this.maxSpeed) this.speed = -this.maxSpeed;
+        this.applyLocalVelocity(
+          this.ufobody,
+          new CANNON.Vec3(0, this.speed, 0)
+        );
+      }
+
+      if (
+        this.ufobody.angularVelocity.length() < this.maxAngularSpeed &&
+        this.dir.left
+      ) {
+        this.ufobody.angularVelocity.z += 1.5;
+      }
+
+      if (
+        this.ufobody.angularVelocity.length() < this.maxAngularSpeed &&
+        this.dir.right
+      ) {
+        this.ufobody.angularVelocity.z -= 1.5;
+      }
+    }
+  }
+
+  followCamera() {
+    this.orbit.target.set(
+      this.ufobody.position.x,
+      this.ufobody.position.y,
+      0.5
+    );
+    this.camera.position.set(
+      this.ufobody.position.x,
+      this.ufobody.position.y - 9 + this.camZoomY,
+      12 + this.camZoomZ
+    );
+    this.orbit.update();
+    this.moveSpotlightToCamera();
+  }
+
+  loadingAnimation() {
+    this.world.step(TIMESTEP);
+
+    if (this.enterKeyPressed) return;
+
+    if (!this.progress[1]) {
+      // if not pause loading animation
+      for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
+        const result = new CANNON.RaycastResult();
+        this.world.raycastClosest(
+          this.bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 0.6)),
+          this.bodiesWhileLoading[i].position.vadd(new CANNON.Vec3(0, 0, 50)),
+          {},
+          result
+        );
+
+        const threshold = -0.5 + 10;
+        if (result.hasHit) {
+          if (this.bodiesWhileLoading[i].position.z > threshold) {
+            this.bodiesWhileLoading[i].position.z -= 0.05;
+          }
+          if (
+            LOADING_CUBE_COLORS.find((e) =>
+              e.equals(this.meshesWhileLoading[i].material.color)
+            )
+          ) {
+            this.meshesWhileLoading[i].material.color.lerp(
+              LOADING_CUBE_COLORS[Math.floor(Math.random() * 8)],
+              Math.random()
+            );
+          }
         } else {
-          playAudio();
+          if (this.bodiesWhileLoading[i].position.z < 0 + 10) {
+            this.bodiesWhileLoading[i].position.z += 0.03;
+          }
         }
 
-        enterKeyPressed = true;
-        loadingSceneClass.removeModels(true);
-
-        ufobody.position.set(-2, 0, 12);
-
-        orbit.target.set(ufobody.position.x, ufobody.position.y, 0.5);
-        camera.position.set(ufobody.position.x, ufobody.position.y - 9, 12);
-        orbit.update();
-        ufotoplight.position.set(
-          camera.position.x,
-          camera.position.y,
-          camera.position.z
+        this.meshesWhileLoading[i].position.copy(
+          this.bodiesWhileLoading[i].position
         );
-        ufotoplight.target.position.set(
-          camera.position.x,
-          camera.position.y,
-          0
-        );
-
-        animate();
-        return;
       }
-    });
+    } else {
+      for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
+        this.meshesWhileLoading[i].position.copy(
+          this.bodiesWhileLoading[i].position
+        );
+      }
+    }
+
+    this.ufomesh.position.copy(this.ufobody.position);
+    this.ufomesh.quaternion.copy(this.ufobody.quaternion);
+    this.moveUfo();
+    this.floatUfo();
+
+    if (this.progress[1] && !this.animationLoaded) {
+      this.animationLoaded = true;
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !this.enterKeyPressed) {
+          this.startMainScene();
+        }
+      });
+    }
+
+    this.renderer.render(this.scene, this.camera);
+    requestAnimationFrame(() => this.loadingAnimation());
   }
 
-  renderer.render(scene, camera);
-  requestAnimationFrame(loadingAnimation);
-}
+  startMainScene() {
+    if (this.listener.context.state === 'suspended') {
+      this.listener.context.resume().then(() => {
+        this.playAudio();
+      });
+    } else {
+      this.playAudio();
+    }
 
-function playAudio() {
-  sound.setBuffer(assets['gamestart']);
-  sound.setLoop(false);
-  sound.setVolume(0.8);
-  sound.play();
+    this.enterKeyPressed = true;
+    this.loadingSceneClass.removeModels(true);
 
-  setTimeout(() => {
-    sound.stop();
-    sound.setBuffer(assets['backgroundmusic']);
-    sound.setLoop(true);
-    sound.setVolume(0.1);
-    sound.play();
-  }, 1500);
+    this.ufobody.position.set(-2, 0, 12);
+
+    this.orbit.target.set(
+      this.ufobody.position.x,
+      this.ufobody.position.y,
+      0.5
+    );
+    this.camera.position.set(
+      this.ufobody.position.x,
+      this.ufobody.position.y - 9,
+      12
+    );
+    this.orbit.update();
+    this.moveSpotlightToCamera();
+
+    this.animate();
+  }
+
+  playAudio() {
+    this.sound.setBuffer(this.assets['gamestart']);
+    this.sound.setLoop(false);
+    this.sound.setVolume(0.8);
+    this.sound.play();
+
+    setTimeout(() => {
+      this.sound.stop();
+      this.sound.setBuffer(this.assets['backgroundmusic']);
+      this.sound.setLoop(true);
+      this.sound.setVolume(0.1);
+      this.sound.play();
+    }, 1500);
+  }
 }
 
 export default App;
