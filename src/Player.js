@@ -175,6 +175,9 @@ class Player {
     const nearSomething = this.scene.children.some((obj) => {
       if (obj === this.ufomesh || obj.isLight || obj.name === 'ground')
         return false;
+      // instanced meshes sit at the origin; their position says nothing
+      // about where their instances are
+      if (obj.isInstancedMesh) return false;
       // skip helper Object3Ds without geometry (e.g. light targets)
       if (!obj.isMesh && obj.children.length === 0) return false;
       return (

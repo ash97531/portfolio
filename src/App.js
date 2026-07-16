@@ -15,18 +15,6 @@ import AudioManager from './AudioManager';
 
 const TIMESTEP = 1 / 60;
 
-const LOADING_CUBE_COLORS = [
-  new THREE.Color(0xffffe0), // Initial cube color
-  new THREE.Color(0xffffff), // White
-  new THREE.Color(0xff0000), // Red
-  new THREE.Color(0xffff00), // Yellow
-  new THREE.Color(0x00ff00), // Green
-  new THREE.Color(0x0000ff), // Blue
-  new THREE.Color(0xff00ff), // Magenta
-  new THREE.Color(0x00ffff), // Cyan
-  new THREE.Color(0x000000), // Black
-];
-
 class App {
   scene;
   renderer;
@@ -38,7 +26,6 @@ class App {
   input;
 
   // loading state
-  meshesWhileLoading = [];
   bodiesWhileLoading = [];
   progress = [0, false]; // first index for progress, second for pause loading
   assets = {};
@@ -50,6 +37,8 @@ class App {
   placeContactLinksClass;
   placeProjectsClass;
   placeExperienceClass;
+  placeNameAndBackWallClass;
+  placeAchievementsClass;
 
   // synced mesh/body pairs (bricks, letters, flashlights, the UFO, ...)
   meshes = [];
@@ -80,7 +69,6 @@ class App {
     this.loadingSceneClass = new Loading(
       this.scene,
       this.world,
-      this.meshesWhileLoading,
       this.bodiesWhileLoading,
       this.assets,
       this.progress,
@@ -98,7 +86,7 @@ class App {
   }
 
   placeNameAndBackWallFun() {
-    new PlaceNameAndBackWall(
+    this.placeNameAndBackWallClass = new PlaceNameAndBackWall(
       this.scene,
       this.world,
       this.meshes,
@@ -121,7 +109,7 @@ class App {
   }
 
   placeAchievementsFun() {
-    new PlaceAchievements(
+    this.placeAchievementsClass = new PlaceAchievements(
       this.scene,
       this.world,
       this.meshes,
@@ -146,7 +134,9 @@ class App {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // cap at 2: 3x-density phone screens cost ~2.25x the pixels for no
+    // visible gain
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.body.appendChild(this.renderer.domElement);
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
@@ -219,6 +209,8 @@ class App {
     this.placeContactLinksClass.update();
     this.placeProjectsClass.update();
     this.placeExperienceClass.update();
+    this.placeNameAndBackWallClass?.update();
+    this.placeAchievementsClass?.update();
 
     TWEEN.update();
     this.renderer.render(this.scene, this.cameraRig.camera);
@@ -247,33 +239,16 @@ class App {
           if (this.bodiesWhileLoading[i].position.z > threshold) {
             this.bodiesWhileLoading[i].position.z -= 0.05;
           }
-          if (
-            LOADING_CUBE_COLORS.find((e) =>
-              e.equals(this.meshesWhileLoading[i].material.color),
-            )
-          ) {
-            this.meshesWhileLoading[i].material.color.lerp(
-              LOADING_CUBE_COLORS[Math.floor(Math.random() * 8)],
-              Math.random(),
-            );
-          }
+          this.loadingSceneClass.lerpCellColorOnce(i);
         } else {
           if (this.bodiesWhileLoading[i].position.z < 0 + 10) {
             this.bodiesWhileLoading[i].position.z += 0.03;
           }
         }
-
-        this.meshesWhileLoading[i].position.copy(
-          this.bodiesWhileLoading[i].position,
-        );
-      }
-    } else {
-      for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
-        this.meshesWhileLoading[i].position.copy(
-          this.bodiesWhileLoading[i].position,
-        );
       }
     }
+    // draw all letter cells at their body positions (single instanced mesh)
+    this.loadingSceneClass.letterCells.update();
 
     this.player.syncMeshToBody();
     this.player.moveUfo();

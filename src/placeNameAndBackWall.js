@@ -2,11 +2,16 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import SceneSection from './SceneSection';
+import InstancedMeshGroup from './InstancedMeshGroup';
 
 class PlaceNameAndBackWall extends SceneSection {
   gltfLoader;
   meshes = [];
   bodies = [];
+
+  brickTemplate; // shared source mesh for all instanced bricks
+  brickGroup; // back wall + left tree bricks (dynamic, one draw call)
+  pavementGroup; // pavement bricks (static, one draw call)
 
   constructor(scene, world, meshes, bodies, assets) {
     super(scene, world, assets);
@@ -15,6 +20,11 @@ class PlaceNameAndBackWall extends SceneSection {
     this.bodies = bodies;
 
     this.placeModelsPosition();
+  }
+
+  // Sync instanced bricks to their physics bodies; called from App.animate.
+  update() {
+    this.brickGroup?.update();
   }
 
   async placeModelsPosition() {
@@ -29,19 +39,6 @@ class PlaceNameAndBackWall extends SceneSection {
   async placeLeftTree() {
     const xoff = -18,
       yoff = 9;
-    const brickMesh = await this.placeGLBMesh(
-      'brick',
-      0,
-      0,
-      0,
-      0.5,
-      0.25,
-      0.25,
-      0,
-      0,
-      0,
-      true,
-    );
     const appleTree = await this.placeGLBMesh('apple tree', xoff, yoff, 1.5);
     appleTree.children.map((child) => {
       child.castShadow = true;
@@ -61,66 +58,27 @@ class PlaceNameAndBackWall extends SceneSection {
     );
     this.world.addBody(cannonBody);
 
-    // brick behind left apple tree
+    // bricks behind left apple tree (instanced with the back-wall bricks)
     const dx = 0.02;
-    let brickArr = [];
-    let brick = brickMesh.clone();
-    let brickBody = this.placeGlbToDynamicBody(
-      brick,
-      xoff - 1.5,
-      yoff - dx,
-      0,
-      0,
-      0,
-      Math.PI / 2,
-    );
-    brickArr.push([brick, brickBody]);
-
-    brick = brickMesh.clone();
-    brickBody = this.placeGlbToDynamicBody(
-      brick,
-      xoff - 1.5,
-      yoff - 1 - dx,
-      0,
-      0,
-      0,
-      Math.PI / 2,
-    );
-    brickArr.push([brick, brickBody]);
-
-    brick = brickMesh.clone();
-    brickBody = this.placeGlbToDynamicBody(
-      brick,
-      xoff - 1.5,
-      yoff - 2 - dx,
-      0,
-      0,
-      0,
-      Math.PI / 2,
-    );
-    brickArr.push([brick, brickBody]);
-
-    brick = brickMesh.clone();
-    brickBody = this.placeGlbToDynamicBody(
-      brick,
-      xoff - 1.5,
-      yoff + 0.5,
-      0.6,
-      0,
-      0,
-      Math.PI / 2,
-    );
-    brickArr.push([brick, brickBody]);
-
-    brick = brickMesh.clone();
-    brickBody = this.placeGlbToDynamicBody(brick, xoff - 1.2, yoff + 1);
-    brickArr.push([brick, brickBody]);
-
-    for (let i = 0; i < brickArr.length; i++) {
-      this.scene.add(brickArr[i][0]);
-      this.world.addBody(brickArr[i][1]);
-      this.meshes.push(brickArr[i][0]);
-      this.bodies.push(brickArr[i][1]);
+    const brickPlacements = [
+      [xoff - 1.5, yoff - dx, 0, Math.PI / 2],
+      [xoff - 1.5, yoff - 1 - dx, 0, Math.PI / 2],
+      [xoff - 1.5, yoff - 2 - dx, 0, Math.PI / 2],
+      [xoff - 1.5, yoff + 0.5, 0.6, Math.PI / 2],
+      [xoff - 1.2, yoff + 1, 0, 0],
+    ];
+    for (const [x, y, z, rz] of brickPlacements) {
+      const brickBody = this.placeGlbToDynamicBody(
+        this.brickTemplate,
+        x,
+        y,
+        z,
+        0,
+        0,
+        rz,
+      );
+      this.world.addBody(brickBody);
+      this.brickGroup.addBody(brickBody, this.brickTemplate.scale);
     }
 
     const stoneMesh = await this.placeGLBMesh(
@@ -143,7 +101,6 @@ class PlaceNameAndBackWall extends SceneSection {
   async pavements() {
     let xoff = -8,
       yoff = 5.5;
-    //front of left flashlight
     const pavementBrick = await this.placeGLBMesh(
       'brick',
       0,
@@ -159,37 +116,40 @@ class PlaceNameAndBackWall extends SceneSection {
     );
     pavementBrick.material.color.set(0xffffff);
 
+    // all pavement bricks are static: one instanced draw call
+    this.pavementGroup = new InstancedMeshGroup(pavementBrick, 100);
+    this.scene.add(this.pavementGroup.mesh);
+    const paveScale = pavementBrick.scale;
+
+    //front of left flashlight
     for (let i = 0; i < 4; i++) {
-      const pave = pavementBrick.clone();
-      pave.position.set(
+      this.pavementGroup.addStatic(
         xoff + (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 0.9 * i + Math.random() + 0.8 - 0.4,
         -0.9,
+        paveScale,
       );
-      this.scene.add(pave);
     }
 
     //front of right flashlight
     ((xoff = 1.3), (yoff = 5.6));
     for (let i = 0; i < 5; i++) {
-      const pave = pavementBrick.clone();
-      pave.position.set(
+      this.pavementGroup.addStatic(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 0.9 * i + Math.random() * 0.8 - 0.4,
         -0.9,
+        paveScale,
       );
-      this.scene.add(pave);
     }
 
     ((xoff = -2), (yoff = 0));
     for (let i = 0; i < 6; i++) {
-      const pave = pavementBrick.clone();
-      pave.position.set(
+      this.pavementGroup.addStatic(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.9 - 0.4,
         yoff - 0.9 * i,
         -0.9,
+        paveScale,
       );
-      this.scene.add(pave);
     }
 
     // center circle
@@ -217,16 +177,14 @@ class PlaceNameAndBackWall extends SceneSection {
     ];
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 4; j++) {
-        const pave = pavementBrick.clone();
-        pave.position.set(
+        this.pavementGroup.addStatic(
           xoff + arr[i][0] * 4 + arr[j][0] * 0.7 + Math.random() * 0.8 - 0.4,
           yoff + arr[i][1] * 4 + arr[j][1] * 0.7 + Math.random() * 0.8 - 0.4,
           -0.9,
+          paveScale,
         );
-        this.scene.add(pave);
         if (i != 0) {
-          const pave = pavementBrick.clone();
-          pave.position.set(
+          this.pavementGroup.addStatic(
             xoff +
               arr[i][0] * 5 * (i % 2 == 0 ? 0 : 1) +
               arr[j][0] * 0.7 +
@@ -238,123 +196,56 @@ class PlaceNameAndBackWall extends SceneSection {
               Math.random() * 0.8 -
               0.4,
             -0.9,
+            paveScale,
           );
-          this.scene.add(pave);
         }
       }
     }
 
     // Skill and achievement side pavement
     for (let i = 0; i < 5; i++) {
-      const pave = pavementBrick.clone();
-      pave.position.set(
+      this.pavementGroup.addStatic(
         xoff - (i % 2 == 0 ? 0 : 1) + Math.random() * 0.8 - 0.5,
         yoff - 7 - 0.9 * i + Math.random() * 0.8 - 0.4,
         -0.9,
+        paveScale,
       );
-      this.scene.add(pave);
     }
 
     // information side pavement
     for (let i = 0; i < 7; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
+      this.pavementGroup.addStatic(
         xoff + 8.5 + i + Math.random() * 0.9 - 0.4,
         yoff + (i % 2 == 0 ? 0 : 1) + Math.random() * 0.5 - 0.25,
         -0.9,
+        paveScale,
+        Math.PI / 2,
       );
-      this.scene.add(pave);
     }
 
-    // project side pavement
-    let slope = -0.35;
-    for (let i = 0; i < 7; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
-        xoff - 8.5 - i - Math.random() * 0.9 + 0.4,
-        yoff -
-          1.5 +
-          (i % 2 == 0 ? 0 : 1) +
-          i * slope +
-          Math.random() * 0.5 -
-          0.25,
-        -0.9,
-      );
-      this.scene.add(pave);
-    }
-
-    //Experience 1 pavement
-    slope = -0.2;
-    for (let i = 0; i < 7; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
-        xoff - 23 - i - Math.random() * 0.9 + 0.4,
-        yoff -
-          7 +
-          (i % 2 == 0 ? 0 : 1) +
-          i * slope +
-          Math.random() * 0.5 -
-          0.25,
-        -0.9,
-      );
-      this.scene.add(pave);
-    }
-
-    // project 2 pavement
-    slope = 0.25;
-    for (let i = 0; i < 5; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
-        xoff - 43 - i - Math.random() * 0.9 + 0.4,
-        yoff -
-          7.5 +
-          (i % 2 == 0 ? 0 : 1) +
-          i * slope +
-          Math.random() * 0.5 -
-          0.25,
-        -0.9,
-      );
-      this.scene.add(pave);
-    }
-
-    // experience 2 button
-    slope = -0.2;
-    for (let i = 0; i < 5; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
-        xoff - 53 - i - Math.random() * 0.9 + 0.4,
-        yoff -
-          7.5 +
-          (i % 2 == 0 ? 0 : 1) +
-          i * slope +
-          Math.random() * 0.5 -
-          0.25,
-        -0.9,
-      );
-      this.scene.add(pave);
-    }
-
-    // experience 3 button
-    slope = 0.25;
-    for (let i = 0; i < 5; i++) {
-      const pave = pavementBrick.clone();
-      pave.rotation.z = Math.PI / 2;
-      pave.position.set(
-        xoff - 70 - i - Math.random() * 0.9 + 0.4,
-        yoff -
-          7.5 +
-          (i % 2 == 0 ? 0 : 1) +
-          i * slope +
-          Math.random() * 0.5 -
-          0.25,
-        -0.9,
-      );
-      this.scene.add(pave);
+    // sloped side pavements: [xStart, yStart, count, slope]
+    const slopedPaths = [
+      [-8.5, -1.5, 7, -0.35], // project side
+      [-23, -7, 7, -0.2], // experience 1
+      [-43, -7.5, 5, 0.25], // project 2
+      [-53, -7.5, 5, -0.2], // experience 2
+      [-70, -7.5, 5, 0.25], // experience 3
+    ];
+    for (const [xStart, yStart, count, slope] of slopedPaths) {
+      for (let i = 0; i < count; i++) {
+        this.pavementGroup.addStatic(
+          xoff + xStart - i - Math.random() * 0.9 + 0.4,
+          yoff +
+            yStart +
+            (i % 2 == 0 ? 0 : 1) +
+            i * slope +
+            Math.random() * 0.5 -
+            0.25,
+          -0.9,
+          paveScale,
+          Math.PI / 2,
+        );
+      }
     }
   }
 
@@ -548,7 +439,7 @@ class PlaceNameAndBackWall extends SceneSection {
   }
 
   async placeBackWall() {
-    const brickMesh = await this.placeGLBMesh(
+    this.brickTemplate = await this.placeGLBMesh(
       'brick',
       0,
       0,
@@ -561,6 +452,12 @@ class PlaceNameAndBackWall extends SceneSection {
       0,
       true,
     );
+    // back wall (~103) + left tree (5) bricks in one instanced draw call
+    this.brickGroup = new InstancedMeshGroup(this.brickTemplate, 120, {
+      dynamic: true,
+    });
+    this.scene.add(this.brickGroup.mesh);
+
     const skipArr = [
       [4, 4],
       [5, 4],
@@ -587,9 +484,8 @@ class PlaceNameAndBackWall extends SceneSection {
           }
         }
         if (skip) continue;
-        const brick = brickMesh.clone();
         const brickBody = this.placeGlbToDynamicBody(
-          brick,
+          this.brickTemplate,
           i - 14 + (j % 2 != 0 ? 0.5 : 0) + i * dx,
           13,
           j - 0.5 - j * 0.5,
@@ -597,10 +493,8 @@ class PlaceNameAndBackWall extends SceneSection {
           0,
           (Math.random() * 50 - 25 * Math.PI) / 180,
         );
-        this.scene.add(brick);
         this.world.addBody(brickBody);
-        this.meshes.push(brick);
-        this.bodies.push(brickBody);
+        this.brickGroup.addBody(brickBody, this.brickTemplate.scale);
       }
     }
   }

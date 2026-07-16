@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import SceneSection from './SceneSection';
+import InstancedMeshGroup from './InstancedMeshGroup';
 import {
   ACHIEVEMENTS,
   ACHIEVEMENTS_HEADING,
@@ -11,6 +12,8 @@ class PlaceAchievements extends SceneSection {
   meshes;
   bodies;
 
+  jengaGroup; // jenga bricks (dynamic, one draw call)
+
   textFont = 'Gudea_Regular';
 
   constructor(scene, world, meshes, bodies, assets) {
@@ -21,37 +24,43 @@ class PlaceAchievements extends SceneSection {
     this.placeModalsPosition();
   }
 
+  // Sync instanced jenga bricks to their physics bodies; called from App.animate.
+  update() {
+    this.jengaGroup?.update();
+  }
+
   createBrickJenga() {
     const dx = 0.01;
     const xoff = -20,
       yoff = -23;
+
+    // two scale variants of the same brick share one instanced mesh
+    const brickAcross = this.placeGLBMesh('brick', 0, 0, 0, 0.25, 0.5, 0.25);
+    const brickAlong = this.placeGLBMesh('brick', 0, 0, 0, 0.5, 0.25, 0.25);
+    this.jengaGroup = new InstancedMeshGroup(brickAlong, 12, {
+      dynamic: true,
+    });
+    this.scene.add(this.jengaGroup.mesh);
+
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 2; j++) {
-        if (i % 2 == 1) {
-          const brick = this.placeGLBMesh('brick', 0, 0, 0, 0.25, 0.5, 0.25);
-          const brickBody = this.placeGlbToDynamicBody(
-            brick,
-            xoff - j * 0.5 - j * dx + 0.25,
-            yoff - 0.25,
-            i - 0.5 * i - 0.4,
-          );
-          this.scene.add(brick);
-          this.world.addBody(brickBody);
-          this.meshes.push(brick);
-          this.bodies.push(brickBody);
-        } else {
-          const brick = this.placeGLBMesh('brick', 0, 0, 0, 0.5, 0.25, 0.25);
-          const brickBody = this.placeGlbToDynamicBody(
-            brick,
-            xoff,
-            yoff - j * 0.5 - j * dx,
-            i - 0.5 * i - 0.4,
-          );
-          this.scene.add(brick);
-          this.world.addBody(brickBody);
-          this.meshes.push(brick);
-          this.bodies.push(brickBody);
-        }
+        const template = i % 2 == 1 ? brickAcross : brickAlong;
+        const brickBody =
+          i % 2 == 1
+            ? this.placeGlbToDynamicBody(
+                template,
+                xoff - j * 0.5 - j * dx + 0.25,
+                yoff - 0.25,
+                i - 0.5 * i - 0.4,
+              )
+            : this.placeGlbToDynamicBody(
+                template,
+                xoff,
+                yoff - j * 0.5 - j * dx,
+                i - 0.5 * i - 0.4,
+              );
+        this.world.addBody(brickBody);
+        this.jengaGroup.addBody(brickBody, template.scale);
       }
     }
 

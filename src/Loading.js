@@ -3,6 +3,26 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import InstancedMeshGroup from './InstancedMeshGroup';
+
+const CELL_BASE_COLOR = new THREE.Color(0xffffe0);
+
+// Palette the letter cells flash through while models load.
+export const LOADING_CUBE_COLORS = [
+  CELL_BASE_COLOR, // Initial cube color
+  new THREE.Color(0xffffff), // White
+  new THREE.Color(0xff0000), // Red
+  new THREE.Color(0xffff00), // Yellow
+  new THREE.Color(0x00ff00), // Green
+  new THREE.Color(0x0000ff), // Blue
+  new THREE.Color(0xff00ff), // Magenta
+  new THREE.Color(0x00ffff), // Cyan
+  new THREE.Color(0x000000), // Black
+];
+
+// Enough for the LOADING letters plus one progress cell per asset;
+// the PRESS ENTER letters reuse the same instanced mesh after a clear().
+const MAX_LETTER_CELLS = 400;
 
 // Assets load group by group (models within a group load in parallel);
 // after each group finishes, its world section is placed via the App hooks.
@@ -66,7 +86,6 @@ class Loading {
   gltfLoader;
   fontLoader;
   audioLoader;
-  meshesWhileLoading;
   bodiesWhileLoading;
   assets;
   progress;
@@ -74,25 +93,31 @@ class Loading {
   loadingSceneMeshes = [];
   loadingSceneBodies = [];
 
-  constructor(
-    scene,
-    world,
-    meshesWhileLoading,
-    bodiesWhileLoading,
-    assets,
-    progress,
-    app,
-  ) {
+  letterCells; // all letter cubes drawn as one InstancedMesh
+  cellColors = []; // per-cell colors (instanceColor is write-only)
+  cellScale = new THREE.Vector3(1, 1, 1);
+  cellShape = new CANNON.Box(new CANNON.Vec3(0.25, 0.25, 0.25));
+
+  constructor(scene, world, bodiesWhileLoading, assets, progress, app) {
     this.scene = scene;
     this.world = world;
     this.gltfLoader = new GLTFLoader();
     this.fontLoader = new FontLoader();
     this.audioLoader = new THREE.AudioLoader();
-    this.meshesWhileLoading = meshesWhileLoading;
     this.bodiesWhileLoading = bodiesWhileLoading;
     this.assets = assets;
     this.progress = progress;
     this.app = app;
+
+    const cellTemplate = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.5, 0.5),
+      // white base so the per-instance color shows unchanged
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    );
+    this.letterCells = new InstancedMeshGroup(cellTemplate, MAX_LETTER_CELLS, {
+      dynamic: true,
+    });
+    this.scene.add(this.letterCells.mesh);
 
     this.createGround();
     this.placeLoading();
@@ -153,22 +178,30 @@ class Loading {
   }
 
   placeLetterCells(xoff, yoff, i, j, z = 0) {
-    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffe0 });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.castShadow = true;
-    this.scene.add(cube);
-
-    const shape = new CANNON.Box(new CANNON.Vec3(0.25, 0.25, 0.25));
     const body = new CANNON.Body({
       type: CANNON.Body.KINEMATIC,
     });
-    body.addShape(shape);
+    body.addShape(this.cellShape);
     body.position.set(xoff + i, yoff + j, z + 10);
     this.world.addBody(body);
-
-    this.meshesWhileLoading.push(cube);
     this.bodiesWhileLoading.push(body);
+
+    const index = this.letterCells.addBody(body, this.cellScale);
+    this.cellColors.push(CELL_BASE_COLOR.clone());
+    this.letterCells.setColorAt(index, this.cellColors[index]);
+  }
+
+  // Cells lerp away from the base palette exactly once, when they first
+  // land near the ground (called from App.loadingAnimation).
+  lerpCellColorOnce(index) {
+    const color = this.cellColors[index];
+    if (LOADING_CUBE_COLORS.find((e) => e.equals(color))) {
+      color.lerp(
+        LOADING_CUBE_COLORS[Math.floor(Math.random() * 8)],
+        Math.random(),
+      );
+      this.letterCells.setColorAt(index, color);
+    }
   }
 
   placePressEnter() {
@@ -387,10 +420,12 @@ class Loading {
 
   removeModels(enterMainScene = false) {
     while (this.bodiesWhileLoading.length > 0) {
-      this.scene.remove(this.meshesWhileLoading.pop());
       this.world.removeBody(this.bodiesWhileLoading.pop());
     }
+    this.letterCells.clear();
+    this.cellColors = [];
     if (enterMainScene) {
+      this.scene.remove(this.letterCells.mesh);
       while (this.loadingSceneMeshes.length > 0)
         this.scene.remove(this.loadingSceneMeshes.pop());
       while (this.loadingSceneBodies.length > 0)
