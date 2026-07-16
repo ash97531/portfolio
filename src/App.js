@@ -142,6 +142,7 @@ class App {
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     this.scene.add(ambientLight);
 
+    // the only shadow-casting light in the scene
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
@@ -151,6 +152,10 @@ class App {
     directionalLight.shadow.camera.right = -100;
     directionalLight.shadow.camera.top = 100;
     directionalLight.shadow.camera.bottom = -100;
+    // sharper shadows (default map is 512x512) and a tighter depth range
+    directionalLight.shadow.mapSize.set(1024, 1024);
+    directionalLight.shadow.camera.near = 10;
+    directionalLight.shadow.camera.far = 250;
 
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.3);
     directionalLight2.position.set(0, -20, 10);

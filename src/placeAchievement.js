@@ -88,7 +88,8 @@ class PlaceAchievements extends SceneSection {
     spotLight.position.set(0, 1, 0);
     spotLight.target.position.set(0, 13, 0);
     spotLight.angle = 0.6;
-    spotLight.castShadow = true;
+    // decorative light: skipping its shadow pass saves a full scene render
+    spotLight.castShadow = false;
     flashLightMesh.add(spotLight);
     flashLightMesh.add(spotLight.target);
     this.scene.add(flashLightMesh);

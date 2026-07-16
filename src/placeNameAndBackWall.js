@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
 import SceneSection from './SceneSection';
 import InstancedMeshGroup from './InstancedMeshGroup';
+import gltfLoader from './gltfLoader';
 
 class PlaceNameAndBackWall extends SceneSection {
   gltfLoader;
@@ -15,7 +15,7 @@ class PlaceNameAndBackWall extends SceneSection {
 
   constructor(scene, world, meshes, bodies, assets) {
     super(scene, world, assets);
-    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader = gltfLoader;
     this.meshes = meshes;
     this.bodies = bodies;
 
@@ -321,7 +321,8 @@ class PlaceNameAndBackWall extends SceneSection {
     spotLight.position.set(0, 1, 0);
     spotLight.target.position.set(0, 13, 0);
     spotLight.angle = 0.6;
-    spotLight.castShadow = true;
+    // decorative light: skipping its shadow pass saves a full scene render
+    spotLight.castShadow = false;
     flashLightMesh.add(spotLight);
     flashLightMesh.add(spotLight.target);
     this.scene.add(flashLightMesh);
@@ -340,7 +341,7 @@ class PlaceNameAndBackWall extends SceneSection {
     spotLight2.position.set(0, 1, 0);
     spotLight2.target.position.set(0, 13, 0);
     spotLight2.angle = 0.6;
-    spotLight2.castShadow = true;
+    spotLight2.castShadow = false;
     flashLightMesh2.add(spotLight2);
     flashLightMesh2.add(spotLight2.target);
     this.scene.add(flashLightMesh2);

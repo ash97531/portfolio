@@ -1,5 +1,5 @@
 import * as CANNON from 'cannon-es';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import gltfLoader from './gltfLoader';
 import { distance2D } from './utils';
 
 // Hover raycast offsets, relative to the UFO body.
@@ -14,7 +14,6 @@ const EMPTY_AREA_RADIUS = 25;
 class Player {
   scene;
   world;
-  gltfLoader = new GLTFLoader();
 
   ufobody;
   ufomesh;
@@ -59,7 +58,7 @@ class Player {
     );
     this.world.addBody(this.ufobody);
 
-    const ufoLoaded = await this.gltfLoader.loadAsync('assets/ufo2glb.glb');
+    const ufoLoaded = await gltfLoader.loadAsync('assets/ufo2glb.glb');
     this.ufomesh = ufoLoaded.scene.children[0];
     this.ufomesh.position.set(0, 0, 0);
     this.ufomesh.castShadow = true;
@@ -67,7 +66,7 @@ class Player {
       child.castShadow = true;
     });
 
-    const arrowLoaded = await this.gltfLoader.loadAsync('assets/cursor.glb');
+    const arrowLoaded = await gltfLoader.loadAsync('assets/cursor.glb');
     this.directionArrow = arrowLoaded.scene.children[0];
     this.directionArrow.position.set(0, 0, 2);
     this.directionArrow.scale.set(12, 6, 6);

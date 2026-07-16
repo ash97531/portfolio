@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
+import gltfLoader from './gltfLoader';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import InstancedMeshGroup from './InstancedMeshGroup';
@@ -101,7 +101,7 @@ class Loading {
   constructor(scene, world, bodiesWhileLoading, assets, progress, app) {
     this.scene = scene;
     this.world = world;
-    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader = gltfLoader;
     this.fontLoader = new FontLoader();
     this.audioLoader = new THREE.AudioLoader();
     this.bodiesWhileLoading = bodiesWhileLoading;
