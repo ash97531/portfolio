@@ -1,10 +1,8 @@
 import * as THREE from 'three';
-import { TextGeometry } from 'three/examples/jsm/Addons.js';
+import SceneSection from './SceneSection';
+import { distance2D } from './utils';
 
-class PlaceExperience {
-  scene;
-  world;
-  assets;
+class PlaceExperience extends SceneSection {
   ufobody;
 
   expButton1;
@@ -13,10 +11,11 @@ class PlaceExperience {
 
   onExpBtn = -1;
 
+  // original meshes never set receiveShadow
+  receiveShadowByDefault = false;
+
   constructor(scene, world, assets, ufobody) {
-    this.scene = scene;
-    this.world = world;
-    this.assets = assets;
+    super(scene, world, assets);
     this.ufobody = ufobody;
 
     this.placeModalsPosition();
@@ -195,41 +194,6 @@ class PlaceExperience {
     }
   }
 
-  getTextMesh(text, size, depth) {
-    const geometry = new TextGeometry(text, {
-      font: this.assets['Chela One_Regular'],
-      size: size,
-      depth: depth,
-      curveSegments: 10,
-      bevelEnabled: false,
-    });
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const textMesh = new THREE.Mesh(geometry, material);
-    textMesh.castShadow = true;
-    return textMesh;
-  }
-
-  placeGLBMesh(
-    path,
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0
-  ) {
-    const objectMesh = this.assets[path].clone();
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    objectMesh.castShadow = true;
-    objectMesh.rotation.set(rx, ry, rz);
-
-    return objectMesh;
-  }
-
   update() {
     this.enterButtonRange(
       this.expButton1,
@@ -243,18 +207,9 @@ class PlaceExperience {
   }
 
   enterButtonRange(btn, onBtnLink) {
-    if (
-      Math.sqrt(
-        Math.pow(btn.position.x - this.ufobody.position.x, 2) +
-          Math.pow(btn.position.y - this.ufobody.position.y, 2)
-      ) < 8 // on button check
-    ) {
-      if (
-        Math.sqrt(
-          Math.pow(btn.position.x - this.ufobody.position.x, 2) +
-            Math.pow(btn.position.y - this.ufobody.position.y, 2)
-        ) < 6 // on mountain check
-      ) {
+    const distToButton = distance2D(btn.position, this.ufobody.position);
+    if (distToButton < 8 /* on button check */) {
+      if (distToButton < 6 /* on mountain check */) {
         document.getElementById('modal-text').textContent =
           'Press ENTER: Fly to experience';
         if (btn.position.z > -1) {

@@ -1,12 +1,10 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { TextGeometry } from 'three/examples/jsm/Addons.js';
 import TWEEN from 'three/examples/jsm/libs/tween.module.js';
+import SceneSection from './SceneSection';
+import { distance2D } from './utils';
 
-class PlaceProjects {
-  scene;
-  world;
-  assets;
+class PlaceProjects extends SceneSection {
   ufobody;
   ufomesh;
   dir;
@@ -33,9 +31,7 @@ class PlaceProjects {
   bodies = [];
 
   constructor(scene, world, assets, ufobody, ufomesh, dir, camera, orbit) {
-    this.scene = scene;
-    this.world = world;
-    this.assets = assets;
+    super(scene, world, assets);
     this.ufobody = ufobody;
     this.ufomesh = ufomesh;
     this.dir = dir;
@@ -49,9 +45,12 @@ class PlaceProjects {
         if (this.onMountain != -1) {
           const project = this.mountainArray[this.onMountain];
           if (
-            Math.sqrt(
-              Math.pow(project.position.x + 2.15 - this.ufobody.position.x, 2) +
-                Math.pow(project.position.y - 0.1 - this.ufobody.position.y, 2)
+            distance2D(
+              {
+                x: project.position.x + 2.15,
+                y: project.position.y - 0.1,
+              },
+              this.ufobody.position
             ) < 0.9 // radius of teleporter
           ) {
             // teleport to project mountain
@@ -245,20 +244,6 @@ class PlaceProjects {
 
     this.project2MountainBody = this.addMountain(this.project2Mountain);
     this.eShopProject(this.project2Mountain, this.project2MountainBody);
-  }
-
-  getTextMesh(text, size, depth) {
-    const geometry = new TextGeometry(text, {
-      font: this.assets['Chela One_Regular'],
-      size: size,
-      depth: depth,
-      curveSegments: 10,
-      bevelEnabled: false,
-    });
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const textMesh = new THREE.Mesh(geometry, material);
-    textMesh.castShadow = true;
-    return textMesh;
   }
 
   eShopProject(mountain, mountainBody) {
@@ -471,50 +456,15 @@ class PlaceProjects {
     return mountainBody;
   }
 
-  placeGLBMesh(
-    path,
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0,
-    shadow = true
-  ) {
-    const objectMesh = this.assets[path].clone();
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    objectMesh.castShadow = true;
-    objectMesh.receiveShadow = shadow;
-    objectMesh.rotation.set(rx, ry, rz);
-
-    return objectMesh;
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-    });
-    cannonBody.addShape(boxShape);
-    cannonBody.position.copy(mesh.position);
-    this.world.addBody(cannonBody);
-  }
-
   checkTeleporter() {
     const project = this.mountainArray[this.onMountain];
     if (
-      Math.sqrt(
-        Math.pow(project.position.x + 2.15 - this.ufobody.position.x, 2) +
-          Math.pow(project.position.y - 0.1 - this.ufobody.position.y, 2)
+      distance2D(
+        {
+          x: project.position.x + 2.15,
+          y: project.position.y - 0.1,
+        },
+        this.ufobody.position
       ) < 0.9 // radius of teleporter
     ) {
       //switch on teleporter light
@@ -532,30 +482,12 @@ class PlaceProjects {
   }
 
   update() {
-    if (
-      Math.sqrt(
-        Math.pow(
-          this.project1Mountain.position.x - this.ufobody.position.x,
-          2
-        ) +
-          Math.pow(
-            this.project1Mountain.position.y - this.ufobody.position.y,
-            2
-          )
-      ) < 4.83 // on mountain check
-    ) {
-      if (
-        Math.sqrt(
-          Math.pow(
-            this.project1Mountain.position.x - this.ufobody.position.x,
-            2
-          ) +
-            Math.pow(
-              this.project1Mountain.position.y - this.ufobody.position.y,
-              2
-            )
-        ) < 4.73 // top radius of mountain
-      ) {
+    const distToProject1 = distance2D(
+      this.project1Mountain.position,
+      this.ufobody.position
+    );
+    if (distToProject1 < 4.83 /* on mountain check */) {
+      if (distToProject1 < 4.73 /* top radius of mountain */) {
         this.onMountain = 0;
         this.checkTeleporter();
 
@@ -605,30 +537,12 @@ class PlaceProjects {
       }
     }
 
-    if (
-      Math.sqrt(
-        Math.pow(
-          this.project2Mountain.position.x - this.ufobody.position.x,
-          2
-        ) +
-          Math.pow(
-            this.project2Mountain.position.y - this.ufobody.position.y,
-            2
-          )
-      ) < 4.83 // top radius of mountain
-    ) {
-      if (
-        Math.sqrt(
-          Math.pow(
-            this.project2Mountain.position.x - this.ufobody.position.x,
-            2
-          ) +
-            Math.pow(
-              this.project2Mountain.position.y - this.ufobody.position.y,
-              2
-            )
-        ) < 4.73 // top radius of mountain
-      ) {
+    const distToProject2 = distance2D(
+      this.project2Mountain.position,
+      this.ufobody.position
+    );
+    if (distToProject2 < 4.83 /* on mountain check */) {
+      if (distToProject2 < 4.73 /* top radius of mountain */) {
         this.onMountain = 1;
         this.checkTeleporter();
 

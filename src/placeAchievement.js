@@ -1,20 +1,16 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
-import { TextGeometry } from 'three/examples/jsm/Addons.js';
+import SceneSection from './SceneSection';
 
-class PlaceAchievements {
-  world;
-  scene;
+class PlaceAchievements extends SceneSection {
   meshes;
   bodies;
-  assets;
+
+  textFont = 'Gudea_Regular';
 
   constructor(scene, world, meshes, bodies, assets) {
-    this.world = world;
-    this.scene = scene;
+    super(scene, world, assets);
     this.meshes = meshes;
     this.bodies = bodies;
-    this.assets = assets;
 
     this.placeModalsPosition();
   }
@@ -342,76 +338,6 @@ class PlaceAchievements {
     this.createBrickJenga();
   }
 
-  getTextMesh(text, size, depth) {
-    const geometry = new TextGeometry(text, {
-      font: this.assets['Gudea_Regular'],
-      size: size,
-      depth: depth,
-      curveSegments: 10,
-      bevelEnabled: false,
-    });
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const textMesh = new THREE.Mesh(geometry, material);
-    textMesh.castShadow = true;
-    return textMesh;
-  }
-
-  placeGLBMesh(
-    path,
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0,
-    shadow = true
-  ) {
-    const objectMesh = this.assets[path].clone();
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    objectMesh.castShadow = true;
-    objectMesh.receiveShadow = shadow;
-    objectMesh.rotation.set(rx, ry, rz);
-
-    return objectMesh;
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-    });
-    cannonBody.addShape(boxShape);
-    cannonBody.position.copy(mesh.position);
-    this.world.addBody(cannonBody);
-  }
-
-  placeGlbToDynamicBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      mass: 0.2, // kg
-    });
-    cannonBody.allowSleep = true;
-    cannonBody.sleepSpeedLimit = 0.1;
-    cannonBody.sleepTimeLimit = 0.5;
-    cannonBody.addShape(boxShape);
-    cannonBody.position.set(x, y, z);
-    cannonBody.quaternion.setFromEuler(rx, ry, rz);
-    return cannonBody;
-  }
 }
 
 export default PlaceAchievements;

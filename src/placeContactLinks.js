@@ -1,21 +1,17 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
 import { FontLoader } from 'three/examples/jsm/Addons.js';
 import { TextGeometry } from 'three/examples/jsm/Addons.js';
+import SceneSection from './SceneSection';
+import { distance2D } from './utils';
 
-class PlaceContactLinks {
-  scene;
-  world;
+class PlaceContactLinks extends SceneSection {
   ufomesh;
   buttonArray = [];
-  assets;
 
   onBtn = -1;
 
   constructor(scene, world, ufomesh, assets) {
-    this.scene = scene;
-    this.world = world;
-    this.assets = assets;
+    super(scene, world, assets);
     this.ufomesh = ufomesh;
 
     this.placeModelsPosition();
@@ -370,12 +366,7 @@ class PlaceContactLinks {
     for (let i = 0; i < this.buttonArray.length; i++) {
       const button = this.buttonArray[i].button;
       const text = this.buttonArray[i].text;
-      if (
-        Math.sqrt(
-          Math.pow(button.position.x - this.ufomesh.position.x, 2) +
-            Math.pow(button.position.y - this.ufomesh.position.y, 2)
-        ) < 1.1
-      ) {
+      if (distance2D(button.position, this.ufomesh.position) < 1.1) {
         isUfoOnButton = true;
         text.material.opacity = Math.min(text.material.opacity + 0.05, 1);
         button.position.z = Math.max(button.position.z - 0.05, -1.2);
@@ -388,44 +379,6 @@ class PlaceContactLinks {
     if (!isUfoOnButton) {
       this.onBtn = -1;
     }
-  }
-
-  async placeGLBMesh(
-    path,
-    x = 0,
-    y = 0,
-    z = 0,
-    sx = 1,
-    sy = 1,
-    sz = 1,
-    rx = 0,
-    ry = 0,
-    rz = 0,
-    shadow = true
-  ) {
-    const objectMesh = this.assets[path].clone();
-    objectMesh.position.set(x, y, z);
-    objectMesh.scale.set(sx, sy, sz);
-    objectMesh.castShadow = true;
-    objectMesh.receiveShadow = shadow;
-    objectMesh.rotation.set(rx, ry, rz);
-
-    return objectMesh;
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-    });
-    cannonBody.addShape(boxShape);
-    cannonBody.position.copy(mesh.position);
-    this.world.addBody(cannonBody);
   }
 }
 

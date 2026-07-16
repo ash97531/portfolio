@@ -1,22 +1,18 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
+import SceneSection from './SceneSection';
 
-class PlaceNameAndBackWall {
-  scene;
-  world;
+class PlaceNameAndBackWall extends SceneSection {
   gltfLoader;
   meshes = [];
   bodies = [];
-  assets;
 
   constructor(scene, world, meshes, bodies, assets) {
-    this.scene = scene;
-    this.world = world;
+    super(scene, world, assets);
     this.gltfLoader = new GLTFLoader();
     this.meshes = meshes;
     this.bodies = bodies;
-    this.assets = assets;
 
     this.placeModelsPosition();
   }
@@ -69,7 +65,7 @@ class PlaceNameAndBackWall {
     const dx = 0.02;
     let brickArr = [];
     let brick = brickMesh.clone();
-    let brickBody = this.placeGlbToCannonBody(
+    let brickBody = this.placeGlbToDynamicBody(
       brick,
       xoff - 1.5,
       yoff - dx,
@@ -81,7 +77,7 @@ class PlaceNameAndBackWall {
     brickArr.push([brick, brickBody]);
 
     brick = brickMesh.clone();
-    brickBody = this.placeGlbToCannonBody(
+    brickBody = this.placeGlbToDynamicBody(
       brick,
       xoff - 1.5,
       yoff - 1 - dx,
@@ -93,7 +89,7 @@ class PlaceNameAndBackWall {
     brickArr.push([brick, brickBody]);
 
     brick = brickMesh.clone();
-    brickBody = this.placeGlbToCannonBody(
+    brickBody = this.placeGlbToDynamicBody(
       brick,
       xoff - 1.5,
       yoff - 2 - dx,
@@ -105,7 +101,7 @@ class PlaceNameAndBackWall {
     brickArr.push([brick, brickBody]);
 
     brick = brickMesh.clone();
-    brickBody = this.placeGlbToCannonBody(
+    brickBody = this.placeGlbToDynamicBody(
       brick,
       xoff - 1.5,
       yoff + 0.5,
@@ -117,7 +113,7 @@ class PlaceNameAndBackWall {
     brickArr.push([brick, brickBody]);
 
     brick = brickMesh.clone();
-    brickBody = this.placeGlbToCannonBody(brick, xoff - 1.2, yoff + 1);
+    brickBody = this.placeGlbToDynamicBody(brick, xoff - 1.2, yoff + 1);
     brickArr.push([brick, brickBody]);
 
     for (let i = 0; i < brickArr.length; i++) {
@@ -420,7 +416,7 @@ class PlaceNameAndBackWall {
     );
     const flashLightMesh2 = flashLightMesh.clone();
     // scene.add(flashLightMesh);
-    const flashLightBody = this.placeGlbToCannonBody(
+    const flashLightBody = this.placeGlbToDynamicBody(
       flashLightMesh,
       -5.6,
       0,
@@ -439,7 +435,7 @@ class PlaceNameAndBackWall {
     flashLightMesh.add(spotLight.target);
     this.scene.add(flashLightMesh);
 
-    const flashLightBody2 = this.placeGlbToCannonBody(
+    const flashLightBody2 = this.placeGlbToDynamicBody(
       flashLightMesh2,
       0.8,
       0,
@@ -507,40 +503,40 @@ class PlaceNameAndBackWall {
       await this.placeGLBMesh('r', 0, 0, 0, 0.05, 0.05, 0.05, 0, 0, 0, false)
     );
 
-    bodyArr.push(this.placeGlbToCannonBody(meshArr[0], xoffset, yoffset, 0));
+    bodyArr.push(this.placeGlbToDynamicBody(meshArr[0], xoffset, yoffset, 0));
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[1], xoffset + 1.55, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[1], xoffset + 1.55, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[2], xoffset + 3.05, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[2], xoffset + 3.05, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[3], xoffset + 5, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[3], xoffset + 5, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[4], xoffset + 7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[4], xoffset + 7, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[5], xoffset + 8.7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[5], xoffset + 8.7, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[6], xoffset + 10, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[6], xoffset + 10, yoffset, 0)
     );
 
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[7], xoffset + 12, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[7], xoffset + 12, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[8], xoffset + 13.7, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[8], xoffset + 13.7, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[9], xoffset + 15.6, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[9], xoffset + 15.6, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[10], xoffset + 17.6, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[10], xoffset + 17.6, yoffset, 0)
     );
     bodyArr.push(
-      this.placeGlbToCannonBody(meshArr[11], xoffset + 19.4, yoffset, 0)
+      this.placeGlbToDynamicBody(meshArr[11], xoffset + 19.4, yoffset, 0)
     );
 
     for (let i = 0; i < meshArr.length; i++) {
@@ -592,7 +588,7 @@ class PlaceNameAndBackWall {
         }
         if (skip) continue;
         const brick = brickMesh.clone();
-        const brickBody = this.placeGlbToCannonBody(
+        const brickBody = this.placeGlbToDynamicBody(
           brick,
           i - 14 + (j % 2 != 0 ? 0.5 : 0) + i * dx,
           13,
@@ -609,6 +605,8 @@ class PlaceNameAndBackWall {
     }
   }
 
+  // Overrides SceneSection: the name letters (a, s, h, ...) are not in the
+  // preloaded assets cache, so this loads each GLB from disk instead.
   async placeGLBMesh(
     path,
     x = 0,
@@ -631,25 +629,6 @@ class PlaceNameAndBackWall {
     objectMesh.rotation.set(rx, ry, rz);
 
     return objectMesh;
-  }
-
-  placeGlbToCannonBody(mesh, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const boxShape = new CANNON.Box(
-      new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
-    );
-    const cannonBody = new CANNON.Body({
-      mass: 0.2, // kg
-    });
-    cannonBody.allowSleep = true;
-    cannonBody.sleepSpeedLimit = 0.1;
-    cannonBody.sleepTimeLimit = 0.5;
-    cannonBody.addShape(boxShape);
-    cannonBody.position.set(x, y, z);
-    cannonBody.quaternion.setFromEuler(rx, ry, rz);
-    return cannonBody;
   }
 }
 

@@ -10,6 +10,7 @@ import PlaceProjects from './placeProjects';
 import Loading from './Loading';
 import PlaceAchievements from './placeAchievement';
 import PlaceExperience from './placeExperience';
+import { distance2D } from './utils';
 
 let meshesWhileLoading = [],
   bodiesWhileLoading = [];
@@ -409,12 +410,7 @@ function animate() {
 }
 
 function checkIfLost() {
-  if (
-    Math.sqrt(
-      Math.pow(-10 - ufomesh.position.x, 2) +
-        Math.pow(-10 - ufomesh.position.y, 2)
-    ) > 50
-  ) {
+  if (distance2D({ x: -10, y: -10 }, ufomesh.position) > 50) {
     directionArrow.lookAt(0, 0, 0);
     directionArrow.visible = true;
   } else {
