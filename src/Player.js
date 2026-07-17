@@ -1,24 +1,10 @@
-import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import gltfLoader from './gltfLoader';
+import ThrusterFlame from './ThrusterFlame';
 
 // Hover raycast offsets, relative to the UFO body.
 const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
 const FLOAT_RAY_TO = new CANNON.Vec3(0, 0, -50);
-
-// Thruster flame beneath the UFO: idle flicker at rest, a quick "bump" when
-// jump (Space) is pressed. A cone tapering to a point below the saucer
-// reads as a thin line rather than a puffy blob.
-const FLAME_COLOR = 0x2f9bff;
-const FLAME_RADIUS = 0.12;
-const FLAME_HEIGHT = 0.9;
-const FLAME_ATTACH_Z = -0.15; // local z on the UFO mesh: just under the saucer
-const FLAME_FLICKER_AMOUNT = 0.12; // +/- 12% length wobble at idle
-const FLAME_FLICKER_SPEED = 9; // radians/sec
-const FLAME_BOOST_LENGTH = 1.9; // length multiplier at full boost
-const FLAME_BOOST_WIDTH = 1.3; // width multiplier at full boost
-const FLAME_BOOST_DECAY = 4; // per-second decay back to idle
-const FLAME_DT = 1 / 60; // matches the fixed physics timestep
 
 // The world areas the player can meaningfully be "at". Outside all of
 // them the player counts as lost and the direction arrow appears.
@@ -43,9 +29,7 @@ class Player {
   ufobody;
   ufomesh;
   directionArrow;
-  flameMesh;
-  _flameTime = 0;
-  _flameBoost = 0;
+  flame;
 
   dir = {
     right: false,
@@ -104,40 +88,13 @@ class Player {
     this.directionArrow.visible = false;
     this.ufomesh.add(this.directionArrow);
 
-    this.flameMesh = this._createFlame();
-    this.ufomesh.add(this.flameMesh);
+    this.flame = new ThrusterFlame();
+    this.ufomesh.add(this.flame.points);
 
     this.scene.add(this.ufomesh);
 
     this.ufobody.quaternion.setFromEuler(0, 0, Math.PI);
     this.ufobody.applyForce(new CANNON.Vec3(2500, 0, 0));
-  }
-
-  _createFlame() {
-    const geometry = new THREE.ConeGeometry(
-      FLAME_RADIUS,
-      FLAME_HEIGHT,
-      12,
-      1,
-      true,
-    );
-    // shift the pivot to the wide base, so scaling stretches the tip
-    // downward instead of growing symmetrically around the middle
-    geometry.translate(0, FLAME_HEIGHT / 2, 0);
-    // Normal (not additive) blending: additive sums with whatever's behind
-    // it, which over the green ground shifted a blue flame toward cyan/mint.
-    const material = new THREE.MeshBasicMaterial({
-      color: FLAME_COLOR,
-      transparent: true,
-      opacity: 0.85,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    });
-    const flame = new THREE.Mesh(geometry, material);
-    // cone's local +Y (apex) maps to -Z (down, away from the ship)
-    flame.rotation.x = -Math.PI / 2;
-    flame.position.z = FLAME_ATTACH_Z;
-    return flame;
   }
 
   syncMeshToBody() {
@@ -153,7 +110,7 @@ class Player {
   }
 
   jump(cameraZ) {
-    this._flameBoost = 1;
+    this.flame.triggerBoost();
     if (this.ufobody.position.z < cameraZ - 5)
       this.ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
   }
@@ -234,27 +191,7 @@ class Player {
     );
     this.ufobody.applyTorque(this._levelTorque);
 
-    this._updateFlame();
-  }
-
-  // Idle flicker, plus a quick stretch-and-widen "bump" on jump that eases
-  // back down to idle (boost decays exponentially each frame).
-  _updateFlame() {
-    this._flameTime += FLAME_DT;
-    this._flameBoost = Math.max(
-      0,
-      this._flameBoost - FLAME_BOOST_DECAY * FLAME_DT,
-    );
-
-    const flicker =
-      1 +
-      FLAME_FLICKER_AMOUNT * Math.sin(this._flameTime * FLAME_FLICKER_SPEED);
-    const lengthBoost = 1 + this._flameBoost * (FLAME_BOOST_LENGTH - 1);
-    const widthBoost = 1 + this._flameBoost * (FLAME_BOOST_WIDTH - 1);
-
-    this.flameMesh.scale.set(widthBoost, flicker * lengthBoost, widthBoost);
-    this.flameMesh.material.opacity =
-      0.7 + 0.15 * flicker + this._flameBoost * 0.15;
+    this.flame.update();
   }
 
   // Shows an arrow pointing back to the center when the UFO is outside
