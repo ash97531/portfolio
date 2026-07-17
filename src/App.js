@@ -12,6 +12,8 @@ import Player from './Player';
 import CameraRig from './CameraRig';
 import InputManager from './InputManager';
 import AudioManager from './AudioManager';
+import DayNightController from './DayNightController';
+import Lanterns from './Lanterns';
 
 const TIMESTEP = 1 / 60;
 
@@ -24,6 +26,7 @@ class App {
   audio;
   player;
   input;
+  dayNight;
 
   // loading state
   bodiesWhileLoading = [];
@@ -53,6 +56,15 @@ class App {
     this.audio = new AudioManager(this.cameraRig.camera);
     this.setupPhysicsWorld();
     this.createGround();
+
+    this.dayNight = new DayNightController(
+      this.scene,
+      this.hemiLight,
+      this.dirLight,
+      this.dirLight2,
+      this.groundMesh,
+    );
+    this.setupDayNightToggle();
 
     this.player = new Player(this.scene, this.world);
     await this.player.init();
@@ -93,6 +105,13 @@ class App {
       this.bodies,
       this.assets,
     );
+    this.placeNameAndBackWallClass.ready.then(() => {
+      this.lanterns = new Lanterns(
+        this.scene,
+        this.placeNameAndBackWallClass.getPavementPositions(),
+      );
+      this.dayNight.onNightFactorChange((f) => this.lanterns.setNightFactor(f));
+    });
   }
 
   placeProjectsFun() {
@@ -141,6 +160,7 @@ class App {
 
     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
     this.scene.add(ambientLight);
+    this.hemiLight = ambientLight;
 
     // the only shadow-casting light in the scene
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
@@ -156,11 +176,13 @@ class App {
     directionalLight.shadow.mapSize.set(1024, 1024);
     directionalLight.shadow.camera.near = 10;
     directionalLight.shadow.camera.far = 250;
+    this.dirLight = directionalLight;
 
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.3);
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
     this.scene.add(directionalLight2);
+    this.dirLight2 = directionalLight2;
   }
 
   setupPhysicsWorld() {
@@ -181,6 +203,7 @@ class App {
     planeMesh.name = 'ground';
     planeMesh.receiveShadow = true;
     this.scene.add(planeMesh);
+    this.groundMesh = planeMesh;
 
     const planePhysMat = new CANNON.Material();
     const planeBody = new CANNON.Body({
@@ -191,6 +214,22 @@ class App {
     planeBody.position.set(0, 0, -1);
     planeMesh.position.copy(planeBody.position);
     this.world.addBody(planeBody);
+  }
+
+  setupDayNightToggle() {
+    const button = document.getElementById('daynight-toggle');
+    if (!button) return;
+
+    const syncIcon = () => {
+      button.textContent = this.dayNight.isNight ? '☀️' : '🌙';
+      button.classList.toggle('is-night', this.dayNight.isNight);
+    };
+    syncIcon();
+
+    button.addEventListener('click', () => {
+      this.dayNight.toggle();
+      syncIcon();
+    });
   }
 
   onWindowResize() {
@@ -210,6 +249,7 @@ class App {
     this.player.floatUfo();
     this.cameraRig.update(this.player);
     this.player.checkIfLost();
+    this.dayNight.update(TIMESTEP);
 
     this.placeContactLinksClass.update();
     this.placeProjectsClass.update();
@@ -258,6 +298,8 @@ class App {
     this.player.syncMeshToBody();
     this.player.moveUfo();
     this.player.floatUfo();
+    this.dayNight.update(TIMESTEP);
+    TWEEN.update();
 
     // Once loading completes, InputManager's Enter handler may start the game.
     if (this.progress[1] && !this.animationLoaded) {

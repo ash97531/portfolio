@@ -19,7 +19,24 @@ class PlaceNameAndBackWall extends SceneSection {
     this.meshes = meshes;
     this.bodies = bodies;
 
-    this.placeModelsPosition();
+    // resolves once the pavement path exists, so lanterns can be aligned to it
+    this.ready = this.placeModelsPosition();
+  }
+
+  // World-space positions of every pavement tile, in placement order (which
+  // roughly traces the walkable path) - used to align lanterns along it.
+  getPavementPositions() {
+    const positions = [];
+    const mat = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    for (let i = 0; i < this.pavementGroup.mesh.count; i++) {
+      this.pavementGroup.mesh.getMatrixAt(i, mat);
+      mat.decompose(pos, quat, scale);
+      positions.push(pos.clone());
+    }
+    return positions;
   }
 
   // Sync instanced bricks to their physics bodies; called from App.animate.
