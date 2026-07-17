@@ -47,6 +47,9 @@ class Player {
   _rayTo = new CANNON.Vec3();
   _worldVelocity = new CANNON.Vec3();
   _localVelocity = new CANNON.Vec3();
+  _levelTorque = new CANNON.Vec3();
+  _localUp = new CANNON.Vec3(0, 0, 1);
+  _currentUp = new CANNON.Vec3();
 
   constructor(scene, world) {
     this.scene = scene;
@@ -159,23 +162,28 @@ class Player {
       this.ufobody.applyForce(new CANNON.Vec3(0, 0, 27));
     }
 
-    // floating mechanics
-    const maxTorqueAngle = (7 / 180) * Math.PI;
-    const torqueVal = 25 * maxTorqueAngle * 2;
-    if (this.ufobody.angularVelocity.almostZero(0.5)) {
-      if (this.ufobody.quaternion.x > maxTorqueAngle) {
-        this.ufobody.applyTorque(new CANNON.Vec3(-torqueVal, 0, 0));
-      }
-      if (this.ufobody.quaternion.x < -maxTorqueAngle) {
-        this.ufobody.applyTorque(new CANNON.Vec3(torqueVal, 0, 0));
-      }
-      if (this.ufobody.quaternion.y > maxTorqueAngle) {
-        this.ufobody.applyTorque(new CANNON.Vec3(0, -torqueVal, 0));
-      }
-      if (this.ufobody.quaternion.y < -maxTorqueAngle) {
-        this.ufobody.applyTorque(new CANNON.Vec3(0, torqueVal, 0));
-      }
-    }
+    // floating mechanics: spring the UFO back to level (roll/pitch only -
+    // yaw in .z is left alone, that's the turning direction). Torque is
+    // proportional to (localUp x worldUp), which is yaw-invariant - unlike
+    // using the raw quaternion x/y components directly (which only cancel
+    // tilt correctly at zero yaw and badly overshoot at other headings,
+    // since the UFO spawns facing 180deg). A derivative term against
+    // angular velocity kills the ringing. Replaces the old deadband +
+    // bang-bang torque, which only engaged past ~14deg of tilt and could
+    // then stall at that boundary forever. Tuned (and verified in-browser
+    // by stepping the physics loop directly) to recover from any tilt,
+    // with or without spin from a hit, to level within ~1-1.5s.
+    const LEVEL_SPRING = 10;
+    const LEVEL_DAMPING = 2;
+    this.ufobody.quaternion.vmult(this._localUp, this._currentUp);
+    this._levelTorque.set(
+      LEVEL_SPRING * this._currentUp.y -
+        LEVEL_DAMPING * this.ufobody.angularVelocity.x,
+      -LEVEL_SPRING * this._currentUp.x -
+        LEVEL_DAMPING * this.ufobody.angularVelocity.y,
+      0,
+    );
+    this.ufobody.applyTorque(this._levelTorque);
   }
 
   // Shows an arrow pointing back to the center when the UFO is outside
