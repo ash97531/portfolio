@@ -259,6 +259,7 @@ class App {
     this.player.syncMeshToBody();
     this.player.moveUfo();
     this.player.floatUfo();
+    this.player.updateBullets(TIMESTEP);
 
     // Once loading completes, InputManager's Enter handler may start the game.
     if (this.progress[1] && !this.animationLoaded) {
