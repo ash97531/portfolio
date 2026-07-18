@@ -208,6 +208,7 @@ class App {
 
     this.player.moveUfo();
     this.player.floatUfo();
+    this.player.updateBullets(TIMESTEP);
     this.cameraRig.update(this.player);
     this.player.checkIfLost();
 

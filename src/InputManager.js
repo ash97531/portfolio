@@ -50,6 +50,9 @@ class InputManager {
       this.player.dir.back = true;
       this.player.speed -= this.player.acceleration;
     }
+    if (key === 'shift' && !event.repeat) {
+      this.player.shoot();
+    }
   }
 
   keyup(event) {

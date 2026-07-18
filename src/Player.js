@@ -1,6 +1,7 @@
 import * as CANNON from 'cannon-es';
 import gltfLoader from './gltfLoader';
 import ThrusterFlame from './ThrusterFlame';
+import BulletManager from './Bullet';
 
 // Hover raycast offsets, relative to the UFO body.
 const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
@@ -30,6 +31,7 @@ class Player {
   ufomesh;
   directionArrow;
   flame;
+  bullets;
 
   dir = {
     right: false,
@@ -56,6 +58,7 @@ class Player {
   constructor(scene, world) {
     this.scene = scene;
     this.world = world;
+    this.bullets = new BulletManager(scene, world);
   }
 
   async init() {
@@ -113,6 +116,14 @@ class Player {
     this.flame.triggerBoost();
     if (this.ufobody.position.z < cameraZ - 5)
       this.ufobody.applyForce(new CANNON.Vec3(0, 0, 600));
+  }
+
+  shoot() {
+    this.bullets.fire(this.ufobody);
+  }
+
+  updateBullets(dt) {
+    this.bullets.update(dt);
   }
 
   applyLocalVelocity(localVelocity) {
