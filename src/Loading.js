@@ -1,9 +1,84 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as CANNON from 'cannon-es';
-import { FontLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
-import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import App from './App';
+import gltfLoader from './gltfLoader';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import InstancedMeshGroup from './InstancedMeshGroup';
+
+const CELL_BASE_COLOR = new THREE.Color(0xffffe0);
+
+// Palette the letter cells flash through while models load.
+export const LOADING_CUBE_COLORS = [
+  CELL_BASE_COLOR, // Initial cube color
+  new THREE.Color(0xffffff), // White
+  new THREE.Color(0xff0000), // Red
+  new THREE.Color(0xffff00), // Yellow
+  new THREE.Color(0x00ff00), // Green
+  new THREE.Color(0x0000ff), // Blue
+  new THREE.Color(0xff00ff), // Magenta
+  new THREE.Color(0x00ffff), // Cyan
+  new THREE.Color(0x000000), // Black
+];
+
+// Enough for the LOADING letters plus one progress cell per asset;
+// the PRESS ENTER letters reuse the same instanced mesh after a clear().
+const MAX_LETTER_CELLS = 400;
+
+// Assets load group by group (models within a group load in parallel);
+// after each group finishes, its world section is placed via the App hooks.
+const LOADING_SEQUENCE = [
+  {
+    glbs: [
+      'brick',
+      'apple tree',
+      'apple tree stone',
+      'stone1',
+      'stone24',
+      'flashlight optimised',
+      'tree4ashoka',
+      'india map',
+    ],
+    place: (app) => app.placeNameAndBackWallFun(),
+  },
+  {
+    glbs: ['bush', 'dark bush', 'fence 4 sticks', 'stone combined 1'],
+  },
+  {
+    glbs: ['gmail', 'github', 'linkedin', 'playstore'],
+    place: (app) => app.placeContactLinksFun(),
+  },
+  {
+    fonts: ['Gudea_Regular', 'Chela One_Regular'],
+    sounds: {
+      gamestart: 'sounds/game start.mp3',
+      backgroundmusic: 'sounds/background 2.mp3',
+    },
+  },
+  {
+    glbs: [
+      'left sign post',
+      'android icon',
+      'project landscape2',
+      'screen and keyboard',
+      'mouse',
+      'cursor',
+      'shop',
+      'cannon',
+      'teleporter',
+      'bitcoin',
+      'blockchain',
+      'experience button',
+    ],
+    place: (app) => {
+      app.placeProjectsFun();
+      app.placeExperienceFun();
+    },
+  },
+  {
+    glbs: ['trophy', 'archery skills'],
+    place: (app) => app.placeAchievementsFun(),
+  },
+];
 
 class Loading {
   scene;
@@ -11,36 +86,43 @@ class Loading {
   gltfLoader;
   fontLoader;
   audioLoader;
-  meshesWhileLoading;
   bodiesWhileLoading;
   assets;
   progress;
+  app; // the running App instance; used to place world sections as assets arrive
   loadingSceneMeshes = [];
   loadingSceneBodies = [];
 
-  constructor(
-    scene,
-    world,
-    meshesWhileLoading,
-    bodiesWhileLoading,
-    assets,
-    progress
-  ) {
+  letterCells; // all letter cubes drawn as one InstancedMesh
+  cellColors = []; // per-cell colors (instanceColor is write-only)
+  cellScale = new THREE.Vector3(1, 1, 1);
+  cellShape = new CANNON.Box(new CANNON.Vec3(0.25, 0.25, 0.25));
+
+  constructor(scene, world, bodiesWhileLoading, assets, progress, app) {
     this.scene = scene;
     this.world = world;
-    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader = gltfLoader;
     this.fontLoader = new FontLoader();
     this.audioLoader = new THREE.AudioLoader();
-    this.meshesWhileLoading = meshesWhileLoading;
     this.bodiesWhileLoading = bodiesWhileLoading;
     this.assets = assets;
     this.progress = progress;
+    this.app = app;
+
+    const cellTemplate = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.5, 0.5),
+      // white base so the per-instance color shows unchanged
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    );
+    this.letterCells = new InstancedMeshGroup(cellTemplate, MAX_LETTER_CELLS, {
+      dynamic: true,
+    });
+    this.scene.add(this.letterCells.mesh);
 
     this.createGround();
     this.placeLoading();
     this.placeInstructions();
     this.loadModels();
-    // this.placePressEnter();
   }
 
   createGround() {
@@ -65,9 +147,6 @@ class Loading {
     planeMesh.position.copy(planeBody.position);
     this.loadingSceneBodies.push(planeBody);
     this.world.addBody(planeBody);
-
-    // meshes.push(planeMesh);
-    // bodies.push(planeBody);
   }
 
   appearPressEnter() {
@@ -85,7 +164,6 @@ class Loading {
   disappearLoading() {
     if (this.bodiesWhileLoading[0].position.z > -1.5 + 10) {
       for (let i = 0; i < this.bodiesWhileLoading.length; i++) {
-        // console.log(this.bodiesWhileLoading[i].position.z);
         this.bodiesWhileLoading[i].position.z -= 0.02;
       }
     } else {
@@ -100,22 +178,30 @@ class Loading {
   }
 
   placeLetterCells(xoff, yoff, i, j, z = 0) {
-    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffe0 });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.castShadow = true;
-    this.scene.add(cube);
-
-    const shape = new CANNON.Box(new CANNON.Vec3(0.25, 0.25, 0.25));
     const body = new CANNON.Body({
       type: CANNON.Body.KINEMATIC,
     });
-    body.addShape(shape);
+    body.addShape(this.cellShape);
     body.position.set(xoff + i, yoff + j, z + 10);
     this.world.addBody(body);
-
-    this.meshesWhileLoading.push(cube);
     this.bodiesWhileLoading.push(body);
+
+    const index = this.letterCells.addBody(body, this.cellScale);
+    this.cellColors.push(CELL_BASE_COLOR.clone());
+    this.letterCells.setColorAt(index, this.cellColors[index]);
+  }
+
+  // Cells lerp away from the base palette exactly once, when they first
+  // land near the ground (called from App.loadingAnimation).
+  lerpCellColorOnce(index) {
+    const color = this.cellColors[index];
+    if (LOADING_CUBE_COLORS.find((e) => e.equals(color))) {
+      color.lerp(
+        LOADING_CUBE_COLORS[Math.floor(Math.random() * 8)],
+        Math.random(),
+      );
+      this.letterCells.setColorAt(index, color);
+    }
   }
 
   placePressEnter() {
@@ -224,7 +310,7 @@ class Loading {
           depth: 0.5,
           curveSegments: 12,
           bevelEnabled: false,
-        }
+        },
       );
       const material = new THREE.MeshBasicMaterial({ color: 0xadff2f });
       const instructionText = new THREE.Mesh(geometry, material);
@@ -334,10 +420,12 @@ class Loading {
 
   removeModels(enterMainScene = false) {
     while (this.bodiesWhileLoading.length > 0) {
-      this.scene.remove(this.meshesWhileLoading.pop());
       this.world.removeBody(this.bodiesWhileLoading.pop());
     }
+    this.letterCells.clear();
+    this.cellColors = [];
     if (enterMainScene) {
+      this.scene.remove(this.letterCells.mesh);
       while (this.loadingSceneMeshes.length > 0)
         this.scene.remove(this.loadingSceneMeshes.pop());
       while (this.loadingSceneBodies.length > 0)
@@ -354,72 +442,33 @@ class Loading {
         xoff + this.progress[0] * 0.6 * 1.5 + 0.6,
         yoff,
         i,
-        -0.6 * 9
+        -0.6 * 9,
       );
   }
 
   async loadModels() {
     const xoff = -0.6;
-    const app = new App();
 
-    await this.modelAndProgressLoading('brick', xoff, 0);
-    await this.modelAndProgressLoading('apple tree', xoff, 0);
-    await this.modelAndProgressLoading('apple tree stone', xoff, 0);
-    await this.modelAndProgressLoading('stone1', xoff, 0);
-    await this.modelAndProgressLoading('stone24', xoff, 0);
-    await this.modelAndProgressLoading('flashlight optimised', xoff, 0);
-    await this.modelAndProgressLoading('tree4ashoka', xoff, 0);
-    await this.modelAndProgressLoading('india map', xoff, 0);
-
-    app.placeNameAndBackWallFun();
-
-    await this.modelAndProgressLoading('bush', xoff, 0);
-    await this.modelAndProgressLoading('dark bush', xoff, 0);
-    await this.modelAndProgressLoading('fence 4 sticks', xoff, 0);
-    await this.modelAndProgressLoading('stone combined 1', xoff, 0);
-
-    await this.modelAndProgressLoading('gmail', xoff, 0);
-    await this.modelAndProgressLoading('github', xoff, 0);
-    await this.modelAndProgressLoading('linkedin', xoff, 0);
-    await this.modelAndProgressLoading('playstore', xoff, 0);
-
-    app.placeContactLinksFun();
-
-    this.assets['Gudea_Regular'] = await this.fontLoader.loadAsync(
-      './fonts/Gudea_Regular.json'
-    );
-
-    this.assets['Chela One_Regular'] = await this.fontLoader.loadAsync(
-      './fonts/Chela One_Regular.json'
-    );
-
-    this.assets['gamestart'] = await this.audioLoader.loadAsync(
-      'sounds/game start.mp3'
-    );
-    this.assets['backgroundmusic'] = await this.audioLoader.loadAsync(
-      'sounds/background 2.mp3'
-    );
-
-    await this.modelAndProgressLoading('left sign post', xoff, 0);
-    await this.modelAndProgressLoading('android icon', xoff, 0);
-    await this.modelAndProgressLoading('project landscape2', xoff, 0);
-    await this.modelAndProgressLoading('screen and keyboard', xoff, 0);
-    await this.modelAndProgressLoading('mouse', xoff, 0);
-    await this.modelAndProgressLoading('cursor', xoff, 0);
-    await this.modelAndProgressLoading('shop', xoff, 0);
-    await this.modelAndProgressLoading('cannon', xoff, 0);
-    await this.modelAndProgressLoading('teleporter', xoff, 0);
-    await this.modelAndProgressLoading('bitcoin', xoff, 0);
-    await this.modelAndProgressLoading('blockchain', xoff, 0);
-    await this.modelAndProgressLoading('experience button', xoff, 0);
-
-    app.placeProjectsFun();
-    app.placeExperienceFun();
-
-    await this.modelAndProgressLoading('trophy', xoff, 0);
-    await this.modelAndProgressLoading('archery skills', xoff, 0);
-
-    app.placeAchievementsFun();
+    for (const group of LOADING_SEQUENCE) {
+      if (group.glbs) {
+        await Promise.all(
+          group.glbs.map((name) => this.modelAndProgressLoading(name, xoff, 0)),
+        );
+      }
+      if (group.fonts) {
+        for (const font of group.fonts) {
+          this.assets[font] = await this.fontLoader.loadAsync(
+            `./fonts/${font}.json`,
+          );
+        }
+      }
+      if (group.sounds) {
+        for (const [name, path] of Object.entries(group.sounds)) {
+          this.assets[name] = await this.audioLoader.loadAsync(path);
+        }
+      }
+      if (group.place) group.place(this.app);
+    }
 
     this.progress[1] = true;
     this.disappearLoading();
