@@ -12,6 +12,8 @@ import Player from './Player';
 import CameraRig from './CameraRig';
 import InputManager from './InputManager';
 import AudioManager from './AudioManager';
+import PostProcessing from './PostProcessing';
+import createGradientMaterial from './GradientMaterial';
 
 const TIMESTEP = 1 / 60;
 
@@ -24,6 +26,7 @@ class App {
   audio;
   player;
   input;
+  postProcessing;
 
   // loading state
   bodiesWhileLoading = [];
@@ -50,6 +53,11 @@ class App {
 
     this.setUpGraphics();
     this.cameraRig = new CameraRig(this);
+    this.postProcessing = new PostProcessing(
+      this.renderer,
+      this.scene,
+      this.cameraRig.camera,
+    );
     this.audio = new AudioManager(this.cameraRig.camera);
     this.setupPhysicsWorld();
     this.createGround();
@@ -139,11 +147,16 @@ class App {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.body.appendChild(this.renderer.domElement);
 
-    const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820);
+    // Kept low: MeshToonMaterial only routes direct (directional) light
+    // through the warm/cool gradient ramp - ambient/hemisphere light adds
+    // on top of that uncapped, so a bright ambient washes out the gradient
+    // shading and reads as flat/overbright regardless of directional
+    // intensity.
+    const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.35);
     this.scene.add(ambientLight);
 
     // the only shadow-casting light in the scene
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
     directionalLight.position.set(-45, 50, 60);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true;
@@ -157,7 +170,7 @@ class App {
     directionalLight.shadow.camera.near = 10;
     directionalLight.shadow.camera.far = 250;
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.3);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight2.position.set(0, -20, 10);
     directionalLight2.target.position.set(0, 0, 0);
     this.scene.add(directionalLight2);
@@ -173,7 +186,7 @@ class App {
 
   createGround() {
     const planeGeo = new THREE.BoxGeometry(1000, 1000, 0.5);
-    const planeMat = new THREE.MeshStandardMaterial({
+    const planeMat = createGradientMaterial({
       color: 0x70ac29,
       side: THREE.DoubleSide,
     });
@@ -197,6 +210,7 @@ class App {
     this.cameraRig.camera.aspect = window.innerWidth / window.innerHeight;
     this.cameraRig.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.postProcessing.setSize(window.innerWidth, window.innerHeight);
   }
 
   animate() {
@@ -219,7 +233,7 @@ class App {
     this.placeAchievementsClass?.update();
 
     TWEEN.update();
-    this.renderer.render(this.scene, this.cameraRig.camera);
+    this.postProcessing.render();
     requestAnimationFrame(() => this.animate());
   }
 
@@ -266,7 +280,7 @@ class App {
       this.animationLoaded = true;
     }
 
-    this.renderer.render(this.scene, this.cameraRig.camera);
+    this.postProcessing.render();
     requestAnimationFrame(() => this.loadingAnimation());
   }
 

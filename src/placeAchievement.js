@@ -84,7 +84,7 @@ class PlaceAchievements extends SceneSection {
     );
     this.world.addBody(flashLightBody);
 
-    const spotLight = new THREE.SpotLight(0xffff, 250);
+    const spotLight = new THREE.SpotLight(0xffffff, 55);
     spotLight.position.set(0, 1, 0);
     spotLight.target.position.set(0, 13, 0);
     spotLight.angle = 0.6;

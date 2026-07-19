@@ -2,6 +2,7 @@ import * as CANNON from 'cannon-es';
 import gltfLoader from './gltfLoader';
 import ThrusterFlame from './ThrusterFlame';
 import BulletManager from './Bullet';
+import createGradientMaterial from './GradientMaterial';
 
 // Hover raycast offsets, relative to the UFO body.
 const FLOAT_RAY_FROM = new CANNON.Vec3(0, 0, -0.6);
@@ -82,6 +83,18 @@ class Player {
     this.ufomesh.castShadow = true;
     this.ufomesh.children.forEach((child) => {
       child.castShadow = true;
+    });
+    this.ufomesh.traverse((child) => {
+      if (!child.isMesh || !child.material) return;
+      const toGradient = (mat) =>
+        createGradientMaterial({
+          color: mat.color,
+          transparent: mat.transparent,
+          opacity: mat.opacity,
+        });
+      child.material = Array.isArray(child.material)
+        ? child.material.map(toGradient)
+        : toGradient(child.material);
     });
 
     const arrowLoaded = await gltfLoader.loadAsync('assets/cursor.glb');

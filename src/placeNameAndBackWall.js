@@ -317,7 +317,7 @@ class PlaceNameAndBackWall extends SceneSection {
     );
     this.world.addBody(flashLightBody);
 
-    const spotLight = new THREE.SpotLight(0xffff, 325);
+    const spotLight = new THREE.SpotLight(0xffffff, 70);
     spotLight.position.set(0, 1, 0);
     spotLight.target.position.set(0, 13, 0);
     spotLight.angle = 0.6;
@@ -337,7 +337,7 @@ class PlaceNameAndBackWall extends SceneSection {
     );
     this.world.addBody(flashLightBody2);
 
-    const spotLight2 = new THREE.SpotLight(0xffff, 325);
+    const spotLight2 = new THREE.SpotLight(0xffffff, 70);
     spotLight2.position.set(0, 1, 0);
     spotLight2.target.position.set(0, 13, 0);
     spotLight2.angle = 0.6;

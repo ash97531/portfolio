@@ -8,7 +8,7 @@ class CameraRig {
   app;
   camera;
   orbit;
-  ufotoplight = new THREE.SpotLight(0xfdfa72, 550);
+  ufotoplight = new THREE.SpotLight(0xfdfa72, 250);
 
   camZoomY = 0;
   camZoomZ = 0;
