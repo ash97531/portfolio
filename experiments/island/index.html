@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Little Island</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #9fd6e8;
+      }
+      #hint {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        font: 13px/1.4 system-ui, sans-serif;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.28);
+        padding: 6px 12px;
+        border-radius: 20px;
+        pointer-events: none;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="hint">drag to look around &middot; scroll to zoom</div>
+    <script src="bundle.js" defer></script>
+  </body>
+</html>
